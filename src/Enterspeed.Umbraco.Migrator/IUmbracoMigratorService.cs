@@ -1,6 +1,6 @@
 ﻿namespace Enterspeed.Umbraco.Migrator
 {
-    public interface IUmbracoDataService
+    public interface IUmbracoMigratorService
     {
     }
 }
