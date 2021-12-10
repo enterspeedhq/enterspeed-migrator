@@ -5,16 +5,22 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
 {
     internal class SchemaImporter : ISchemaImporter
     {
-        private readonly IApiConnector _apiConnector;
+        private readonly IApiService _apiService;
 
-        public SchemaImporter(IApiConnector apiConnector)
+        public SchemaImporter(IApiService apiService)
         {
-            _apiConnector = apiConnector;
+            _apiService = apiService;
         }
 
-        public IEnumerable<Schema> ImportSchemas()
+        public async Task<IEnumerable<Schema>> ImportSchemas(IEnumerable<string> handles)
         {
-            _apiConnector
+            var data = await _apiService.GetAllByHandles(handles);
+            BuildSchemas();
+            throw new NotImplementedException();
+        }
+
+        private IEnumerable<Schema> BuildSchemas()
+        {
             throw new NotImplementedException();
         }
     }

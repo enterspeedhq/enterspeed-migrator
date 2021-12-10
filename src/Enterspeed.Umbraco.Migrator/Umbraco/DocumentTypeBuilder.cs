@@ -30,7 +30,7 @@ namespace Enterspeed.Umbraco.Migrator.Umbraco
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Something went wrong when building schemas")kd;
+                _logger.LogError(e, "Something went wrong when building schemas");
                 throw;
             }
         }
