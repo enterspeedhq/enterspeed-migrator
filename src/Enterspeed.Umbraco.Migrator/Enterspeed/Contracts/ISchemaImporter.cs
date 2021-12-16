@@ -2,8 +2,8 @@
 
 namespace Enterspeed.Umbraco.Migrator.Enterspeed.Contracts
 {
-    internal interface ISchemaImporter
+    public interface ISchemaImporter
     {
-        Task<IEnumerable<Schema>> ImportSchemas(IEnumerable<string> handles);
+        Task<IEnumerable<Schema>> ImportSchemasAsync(IEnumerable<string> handles);
     }
 }

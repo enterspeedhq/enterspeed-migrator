@@ -14,7 +14,8 @@ namespace Umbraco91.Migrator
             builder.Services.AddTransient<IUmbracoMigratorService, UmbracoMigratorService>();
             builder.Services.AddSingleton(new EnterspeedConfiguration
             {
-                ApiKey = builder.Config.GetSection("Enterspeeed").GetValue<string>("ApiKey").ToString()
+                ApiKey = builder.Config.GetSection("Enterspeeed").GetValue<string>("ApiKey"),
+                Handles = builder.Config.GetSection("Handles").GetValue<List<string>>("Handles")
             });
         }
     }

@@ -1,9 +1,10 @@
-﻿using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
+﻿using Enterspeed.Delivery.Sdk.Api.Models;
+using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
 using Enterspeed.Umbraco.Migrator.Models;
 
 namespace Enterspeed.Umbraco.Migrator.Enterspeed
 {
-    internal class SchemaImporter : ISchemaImporter
+    public class SchemaImporter : ISchemaImporter
     {
         private readonly IApiService _apiService;
 
@@ -12,15 +13,16 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
             _apiService = apiService;
         }
 
-        public async Task<IEnumerable<Schema>> ImportSchemas(IEnumerable<string> handles)
+        public async Task<IEnumerable<Schema>> ImportSchemasAsync(IEnumerable<string> handles)
         {
-            var data = await _apiService.GetAllByHandles(handles);
-            BuildSchemas();
-            throw new NotImplementedException();
+            var response = await _apiService.GetAllByHandles(handles);
+            return BuildSchemas(response);
         }
 
-        private IEnumerable<Schema> BuildSchemas()
+        private IEnumerable<Schema> BuildSchemas(DeliveryApiResponse deliveryApiResponse)
         {
+            var views = deliveryApiResponse.Response.Views;
+
             throw new NotImplementedException();
         }
     }

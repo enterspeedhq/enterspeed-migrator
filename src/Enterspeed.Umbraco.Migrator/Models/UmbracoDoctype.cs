@@ -2,9 +2,8 @@
 {
     public class UmbracoDoctype
     {
-        internal UmbracoDoctype(Schema schema)
+        public UmbracoDoctype(Schema schema)
         {
-
         }
     }
 }

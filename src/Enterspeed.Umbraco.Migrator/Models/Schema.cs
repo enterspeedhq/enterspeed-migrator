@@ -1,6 +1,6 @@
 ﻿namespace Enterspeed.Umbraco.Migrator.Models
 {
-    internal class Schema
+    public class Schema
     {
     }
 }
