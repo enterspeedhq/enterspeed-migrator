@@ -1,28 +1,59 @@
-﻿using Enterspeed.Delivery.Sdk.Api.Models;
+﻿using System.Security;
+using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
 using Enterspeed.Umbraco.Migrator.Models;
+using Enterspeed.Umbraco.Migrator.Settings;
 
 namespace Enterspeed.Umbraco.Migrator.Enterspeed
 {
     public class SchemaImporter : ISchemaImporter
     {
         private readonly IApiService _apiService;
+        private readonly EnterspeedConfiguration _enterspeedConfiguration;
 
-        public SchemaImporter(IApiService apiService)
+        public SchemaImporter(IApiService apiService, EnterspeedConfiguration enterspeedConfiguration)
         {
             _apiService = apiService;
+            _enterspeedConfiguration = enterspeedConfiguration;
         }
 
-        public async Task<IEnumerable<Schema>> ImportSchemasAsync(IEnumerable<string> handles)
+        public async Task<IEnumerable<Schema>> ImportSchemasAsync()
         {
-            var response = await _apiService.GetAllByHandles(handles);
-            return BuildSchemas(response);
+            var pages = await _apiService.GetAllPagesAsync();
+            var dataSourceUrls = new List<string>();
+
+            foreach (var handle in _enterspeedConfiguration.NavigationHandles)
+            {
+                if (pages.Response.Views.TryGetValue(handle.Key, out var nh))
+                {
+                    var navigationHandle = nh as Dictionary<string, object>;
+                    if (navigationHandle != null && navigationHandle.TryGetValue(handle.Value, out var ngi))
+                    {
+                        var navigationHandleItems = ngi as Dictionary<string, object>;
+                        foreach (var navigationHandleItem in navigationHandleItems?.Values?.Cast<Dictionary<string, object>>())
+                        {
+                            if (navigationHandleItem.TryGetValue("view", out var view))
+                            {
+                                var castedView = view as Dictionary<string, object>;
+                                if (castedView.TryGetValue("children", out var children))
+                                {
+                                    var castedChildren = children as List<object>;
+                                    foreach (var child in castedChildren)
+                                    {
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return new List<Schema>();
         }
 
         private IEnumerable<Schema> BuildSchemas(DeliveryApiResponse deliveryApiResponse)
         {
             var views = deliveryApiResponse.Response.Views;
-
             throw new NotImplementedException();
         }
     }

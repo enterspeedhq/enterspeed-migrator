@@ -2,7 +2,7 @@
 {
     public class EnterspeedConfiguration
     {
-        public string ApiKey { get; set; }
-        public List<string> Handles {get;set;}
+        public string ApiKey { get; init; }
+        public IDictionary<string, string> NavigationHandles { get; init; }
     }
 }

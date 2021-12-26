@@ -16,13 +16,24 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
             _enterspeedConfiguration = enterspeedConfiguration;
         }
 
-        public async Task<DeliveryApiResponse> GetAllByHandles(IEnumerable<string> handles)
+        public async Task<DeliveryApiResponse> GetAllPagesAsync()
         {
             return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) =>
             {
-                foreach (var handle in handles)
+                foreach (var handle in _enterspeedConfiguration.NavigationHandles)
                 {
-                    s.WithHandle(handle);
+                    s.WithHandle(handle.Key);
+                }
+            });
+        }
+
+        public async Task<DeliveryApiResponse> GetByUrlsAsync(IEnumerable<string> urls)
+        {
+            return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) =>
+            {
+                foreach (var url in urls)
+                {
+                    s.WithUrl(url);
                 }
             });
         }

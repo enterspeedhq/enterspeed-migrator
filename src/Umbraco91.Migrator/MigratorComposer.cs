@@ -12,10 +12,12 @@ namespace Umbraco91.Migrator
         public void Compose(IUmbracoBuilder builder)
         {
             builder.Services.AddTransient<IUmbracoMigratorService, UmbracoMigratorService>();
+
+            var enterspeedSection = builder.Config.GetSection("Enterspeeed");
             builder.Services.AddSingleton(new EnterspeedConfiguration
             {
-                ApiKey = builder.Config.GetSection("Enterspeeed").GetValue<string>("ApiKey"),
-                Handles = builder.Config.GetSection("Handles").GetValue<List<string>>("Handles")
+                ApiKey = enterspeedSection.GetValue<string>("ApiKey"),
+                NavigationHandles = enterspeedSection.GetValue<IDictionary<string, string>>("NavigationHandles")
             });
         }
     }
