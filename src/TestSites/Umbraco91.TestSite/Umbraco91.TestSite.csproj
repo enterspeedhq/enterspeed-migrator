@@ -5,6 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\dashboard.html" />
+      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\Lang\en.xml" />
       <Content Include="App_Plugins\Umbraco9.Migrator.Package\package.manifest">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>Always</CopyToPublishDirectory>

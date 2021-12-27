@@ -6,7 +6,7 @@ namespace Umbraco9.Migrator.Package
     public class EnterspeedMigratorDashboard : IDashboard
     {
         public string Alias => "EnterspeedMigrator";
-        public string View => "/App_Plugins/Umbraco91.Migrator.Package/dashboard.html";
+        public string View => "/App_Plugins/Umbraco9.Migrator.Package/dashboard/dashboard.html";
 
         public string[] Sections => new[]
         {
