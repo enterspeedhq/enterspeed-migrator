@@ -1,10 +1,11 @@
-﻿using Enterspeed.Umbraco.Migrator;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Enterspeed.Umbraco.Migrator;
 using Enterspeed.Umbraco.Migrator.Enterspeed;
 using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
-using Enterspeed.Umbraco.Migrator.Settings;
 using Enterspeed.Umbraco.Migrator.Umbraco.Contracts;
 
-namespace Umbraco91.Migrator
+namespace Umbraco9.Migrator
 {
     public class UmbracoMigratorService : IUmbracoMigratorService
     {

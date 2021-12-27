@@ -1,4 +1,7 @@
-﻿using System.Security;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
 using Enterspeed.Umbraco.Migrator.Models;
@@ -30,17 +33,16 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
                     if (navigationHandle != null && navigationHandle.TryGetValue(handle.Value, out var ngi))
                     {
                         var navigationHandleItems = ngi as Dictionary<string, object>;
-                        foreach (var navigationHandleItem in navigationHandleItems?.Values?.Cast<Dictionary<string, object>>())
+                        foreach (var navigationHandleItem in navigationHandleItems?.Values
+                            ?.Cast<Dictionary<string, object>>())
                         {
                             if (navigationHandleItem.TryGetValue("view", out var view))
                             {
-                                var castedView = view as Dictionary<string, object>;
-                                if (castedView.TryGetValue("children", out var children))
+                                if (view is Dictionary<string, object> castedView && castedView.TryGetValue("children", out var children))
                                 {
                                     var castedChildren = children as List<object>;
                                     foreach (var child in castedChildren)
                                     {
-
                                     }
                                 }
                             }
@@ -48,6 +50,7 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
                     }
                 }
             }
+
             return new List<Schema>();
         }
 

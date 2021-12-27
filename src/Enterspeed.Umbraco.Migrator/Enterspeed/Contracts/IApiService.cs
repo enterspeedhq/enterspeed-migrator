@@ -1,4 +1,6 @@
-﻿using Enterspeed.Delivery.Sdk.Api.Models;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Enterspeed.Delivery.Sdk.Api.Models;
 
 namespace Enterspeed.Umbraco.Migrator.Enterspeed.Contracts
 {

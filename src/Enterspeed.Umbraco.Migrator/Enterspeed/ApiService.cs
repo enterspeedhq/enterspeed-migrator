@@ -1,4 +1,6 @@
-﻿using Enterspeed.Delivery.Sdk.Api.Models;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Delivery.Sdk.Api.Services;
 using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
 using Enterspeed.Umbraco.Migrator.Settings;
@@ -10,7 +12,8 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
         private readonly IEnterspeedDeliveryService _enterspeedDeliveryService;
         private readonly EnterspeedConfiguration _enterspeedConfiguration;
 
-        public ApiService(IEnterspeedDeliveryService enterspeedDeliveryService, EnterspeedConfiguration enterspeedConfiguration)
+        public ApiService(IEnterspeedDeliveryService enterspeedDeliveryService,
+            EnterspeedConfiguration enterspeedConfiguration)
         {
             _enterspeedDeliveryService = enterspeedDeliveryService;
             _enterspeedConfiguration = enterspeedConfiguration;

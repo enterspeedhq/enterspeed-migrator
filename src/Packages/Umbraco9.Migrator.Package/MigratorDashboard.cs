@@ -1,12 +1,13 @@
-﻿using Umbraco.Cms.Core.Dashboards;
-using Umbraco.Cms.Core;
+﻿using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Dashboards;
 
-namespace Umbraco91.Migrator.Package
+namespace Umbraco9.Migrator.Package
 {
     public class MigratorDashboard : IDashboard
     {
         public string Alias => "MigratorDashboard";
         public string View => "/App_Plugins/Umbraco91.Migrator.Package/dashboard.html";
+
         public string[] Sections => new[]
         {
             Constants.Applications.Settings

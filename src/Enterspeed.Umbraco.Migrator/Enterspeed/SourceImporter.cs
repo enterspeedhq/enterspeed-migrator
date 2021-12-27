@@ -1,4 +1,7 @@
-﻿using Enterspeed.Delivery.Sdk.Api.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
 using Enterspeed.Umbraco.Migrator.Settings;
 
@@ -17,7 +20,6 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
 
         public async Task<List<object>> ImportAllDataSourcesAsync(Dictionary<string, object> views)
         {
-            var listOfSources = new List<object>();
             throw new NotImplementedException();
         }
     }

@@ -1,7 +1,7 @@
 ﻿using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 
-namespace Umbraco91.Migrator.Package
+namespace Umbraco9.Migrator.Package
 {
     public class PackageComposer : IComposer
     {

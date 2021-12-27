@@ -1,4 +1,7 @@
-﻿namespace Enterspeed.Umbraco.Migrator.Enterspeed.Contracts
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Enterspeed.Umbraco.Migrator.Enterspeed.Contracts
 {
     public interface ISourceImporter
     {

@@ -1,4 +1,6 @@
-﻿namespace Enterspeed.Umbraco.Migrator.Settings
+﻿using System.Collections.Generic;
+
+namespace Enterspeed.Umbraco.Migrator.Settings
 {
     public class EnterspeedConfiguration
     {
