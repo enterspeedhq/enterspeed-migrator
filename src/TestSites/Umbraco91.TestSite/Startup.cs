@@ -45,7 +45,6 @@ namespace Umbraco91.TestSite
                 .AddComposers()
                 .Build();
 #pragma warning restore IDE0022 // Use expression body for methods
-
         }
 
         /// <summary>
