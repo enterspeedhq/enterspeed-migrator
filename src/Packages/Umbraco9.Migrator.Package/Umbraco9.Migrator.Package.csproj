@@ -26,4 +26,8 @@
             <PackagePath>buildTransitive</PackagePath>
         </None>
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Migrators\Umbraco9.Migrator\Umbraco9.Migrator.csproj" />
+    </ItemGroup>
 </Project>
