@@ -6,6 +6,6 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed.Contracts
 {
     public interface ISchemaImporter
     {
-        Task<IEnumerable<DocumentTypes>> ImportSchemasAsync();
+        Task<DocumentTypes> ImportSchemasAsync();
     }
 }

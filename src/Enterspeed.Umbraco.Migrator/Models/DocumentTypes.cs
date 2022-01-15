@@ -1,9 +1,18 @@
-﻿namespace Enterspeed.Umbraco.Migrator.Models
+﻿using System.Collections.Generic;
+
+namespace Enterspeed.Umbraco.Migrator.Models
 {
     public class DocumentTypes
     {
-        public DocumentType Pages { get; set; }
-        public DocumentType Elements { get; set; }
-        public DocumentType Compositions { get; set; }
+        public DocumentTypes()
+        {
+            Pages = new List<DocumentType>();
+            Elements = new List<DocumentType>();
+            Compositions = new List<DocumentType>();
+        }
+
+        public List<DocumentType> Pages { get; }
+        public List<DocumentType> Elements { get; }
+        public List<DocumentType> Compositions { get; }
     }
 }
