@@ -1,7 +1,5 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Enterspeed.Umbraco.Migrator;
-using Enterspeed.Umbraco.Migrator.Enterspeed;
 using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
 using Enterspeed.Umbraco.Migrator.Umbraco.Contracts;
 
@@ -12,7 +10,7 @@ namespace Umbraco9.Migrator
         private readonly ISchemaImporter _schemaImporter;
         private readonly IDocumentTypeBuilder _documentTypeBuilder;
 
-        public UmbracoMigratorService(SchemaImporter schemaImporter,
+        public UmbracoMigratorService(ISchemaImporter schemaImporter,
             IDocumentTypeBuilder documentTypeBuilder)
         {
             _schemaImporter = schemaImporter;

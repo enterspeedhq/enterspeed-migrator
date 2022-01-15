@@ -25,7 +25,7 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
             {
                 foreach (var handle in _enterspeedConfiguration.NavigationHandles)
                 {
-                    s.WithHandle(handle.Key);
+                    s.WithHandle(handle.Name);
                 }
             });
         }

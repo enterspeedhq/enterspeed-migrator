@@ -23,18 +23,17 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
         public async Task<IEnumerable<Schema>> ImportSchemasAsync()
         {
             var pages = await _apiService.GetAllPagesAsync();
-            var dataSourceUrls = new List<string>();
 
             foreach (var handle in _enterspeedConfiguration.NavigationHandles)
             {
-                if (pages.Response.Views.TryGetValue(handle.Key, out var nh))
+                if (pages.Response.Views.TryGetValue(handle.Name, out var nhn))
                 {
-                    var navigationHandle = nh as Dictionary<string, object>;
-                    if (navigationHandle != null && navigationHandle.TryGetValue(handle.Value, out var ngi))
+                    var navigationHandleName = nhn as Dictionary<string, object>;
+                    if (navigationHandleName != null && navigationHandleName.TryGetValue(handle.NavigationItem, out var ngi))
                     {
                         var navigationHandleItems = ngi as Dictionary<string, object>;
                         foreach (var navigationHandleItem in navigationHandleItems?.Values
-                            ?.Cast<Dictionary<string, object>>())
+                                     ?.Cast<Dictionary<string, object>>())
                         {
                             if (navigationHandleItem.TryGetValue("view", out var view))
                             {
