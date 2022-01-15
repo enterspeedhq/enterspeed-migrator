@@ -2,7 +2,7 @@
 {
     public class UmbracoDoctype
     {
-        public UmbracoDoctype(Schema schema)
+        public UmbracoDoctype(DocumentTypes documentTypes)
         {
         }
     }

@@ -6,7 +6,7 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed.Contracts
 {
     public interface IApiService
     {
-        Task<DeliveryApiResponse> GetAllPagesAsync();
+        Task<EnterspeedResponse> GetAllPagesAsync();
         Task<DeliveryApiResponse> GetByUrlsAsync(IEnumerable<string> urls);
     }
 }

@@ -6,6 +6,6 @@ namespace Enterspeed.Umbraco.Migrator.Umbraco.Contracts
 {
     public interface IDocumentTypeBuilder
     {
-        Task<IEnumerable<UmbracoDoctype>> BuildDoctypesAsync(List<Schema> schemas);
+        Task<IEnumerable<UmbracoDoctype>> BuildDoctypesAsync(List<DocumentTypes> schemas);
     }
 }

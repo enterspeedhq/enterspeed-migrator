@@ -1,4 +1,4 @@
-function dashboardMigratorController(notificationService, migratorResource) {
+function dashboardMigratorController(notificationsService, migratorResource) {
     let vm = this;
     vm.title = "title";
 

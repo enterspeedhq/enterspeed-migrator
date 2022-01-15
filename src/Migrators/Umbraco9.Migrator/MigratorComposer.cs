@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;   
+﻿using System.Collections.Generic;
 using Enterspeed.Umbraco.Migrator;
 using Enterspeed.Umbraco.Migrator.Settings;
 using Enterspeed.Umbraco.Migrator.Umbraco.Contracts;
@@ -13,10 +13,11 @@ namespace Umbraco9.Migrator
     {
         public void Compose(IUmbracoBuilder builder)
         {
+            var enterspeedSection = builder.Config.GetSection("Enterspeed");
             var enterspeedConfiguration = new EnterspeedConfiguration
             {
-                ApiKey = builder.Config.GetSection("Enterspeed").GetValue<string>("ApiKey"),
-                NavigationHandles = builder.Config.GetSection("Enterspeed:NavigationHandles").Get<List<NavigationHandle>>()
+                ApiKey = enterspeedSection.GetValue<string>("ApiKey"),
+                NavigationHandle = enterspeedSection.GetValue<string>("NavigationHandle")
             };
 
             builder.Services.AddSingleton(enterspeedConfiguration);

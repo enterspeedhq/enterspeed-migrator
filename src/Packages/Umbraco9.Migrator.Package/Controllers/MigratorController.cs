@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Enterspeed.Umbraco.Migrator;
 using Enterspeed.Umbraco.Migrator.Umbraco.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Umbraco.Cms.Web.BackOffice.Controllers;
@@ -18,7 +17,7 @@ namespace Umbraco9.Migrator.Package.Controllers
         [HttpPost]
         public async Task<IActionResult> ImportDocumentTypes()
         {
-            
+            await _migratorService.BuildUmbracoDataAsync();
             return Ok("");
         }
     }

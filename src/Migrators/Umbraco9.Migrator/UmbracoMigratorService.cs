@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
 using Enterspeed.Umbraco.Migrator.Umbraco.Contracts;
 
@@ -20,7 +19,7 @@ namespace Umbraco9.Migrator
         public async Task BuildUmbracoDataAsync()
         {
             var schemas = await _schemaImporter.ImportSchemasAsync();
-            var docTypes = await _documentTypeBuilder.BuildDoctypesAsync(schemas.ToList());
+            // var docTypes = await _documentTypeBuilder.BuildDoctypesAsync(schemas.ToList());
         }
     }
 }

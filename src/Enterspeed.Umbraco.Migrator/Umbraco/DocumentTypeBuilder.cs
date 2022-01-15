@@ -24,7 +24,7 @@ namespace Enterspeed.Umbraco.Migrator.Umbraco
             _logger = logger;
         }
 
-        public async Task<IEnumerable<UmbracoDoctype>> BuildDoctypesAsync(List<Schema> schemas)
+        public async Task<IEnumerable<UmbracoDoctype>> BuildDoctypesAsync(List<DocumentTypes> schemas)
         {
             try
             {

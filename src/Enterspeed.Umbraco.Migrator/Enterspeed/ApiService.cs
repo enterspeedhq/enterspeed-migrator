@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Delivery.Sdk.Api.Services;
@@ -19,15 +20,14 @@ namespace Enterspeed.Umbraco.Migrator.Enterspeed
             _enterspeedConfiguration = enterspeedConfiguration;
         }
 
-        public async Task<DeliveryApiResponse> GetAllPagesAsync()
+        public async Task<EnterspeedResponse> GetAllPagesAsync()
         {
-            return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) =>
-            {
-                foreach (var handle in _enterspeedConfiguration.NavigationHandles)
-                {
-                    s.WithHandle(handle.Name);
-                }
-            });
+            var data = await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey,
+                (s) => { s.WithHandle(_enterspeedConfiguration.NavigationHandle); });
+
+            var json = JsonSerializer.Serialize(data.Response);
+            var response = JsonSerializer.Deserialize<EnterspeedResponse>(json);
+            return response;
         }
 
         public async Task<DeliveryApiResponse> GetByUrlsAsync(IEnumerable<string> urls)
