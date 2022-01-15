@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Enterspeed.Umbraco.Migrator.ValueTypes;
 
 namespace Enterspeed.Umbraco.Migrator.Models
 {

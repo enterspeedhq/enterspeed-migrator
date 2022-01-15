@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Delivery.Sdk.Api.Services;
 using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
+using Enterspeed.Umbraco.Migrator.Models;
 using Enterspeed.Umbraco.Migrator.Settings;
 
 namespace Enterspeed.Umbraco.Migrator.Enterspeed
