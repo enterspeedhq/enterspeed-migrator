@@ -14,4 +14,10 @@
       <ProjectReference Include="..\..\Enterspeed.Migrator\Enterspeed.Migrator.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Umbraco\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Umbraco\" />
+    </ItemGroup>
 </Project>

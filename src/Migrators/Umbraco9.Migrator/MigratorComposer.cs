@@ -1,10 +1,11 @@
 ﻿using Enterspeed.Migrator;
-using Enterspeed.Migrator.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Enterspeed.Migrator.Settings;
+using Umbraco9.Migrator.Umbraco.Contracts;
+using Umbraco9.Migrator.Umbraco;
 
 namespace Umbraco9.Migrator
 {
@@ -21,6 +22,8 @@ namespace Umbraco9.Migrator
 
             builder.Services.AddSingleton(enterspeedConfiguration);
             builder.Services.AddTransient<IUmbracoMigratorService, UmbracoMigratorService>();
+            builder.Services.AddTransient<IContentBuilder, ContentBuilder>();
+            builder.Services.AddTransient<IDocumentTypeBuilder, DocumentTypeBuilder>();
             builder.Services.RegisterEnterspeedServices();
         }
     }

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Enterspeed.Migrator.Models;
 
-namespace Enterspeed.Migrator.Contracts
+namespace Umbraco9.Migrator.Umbraco.Contracts
 {
     public interface IDocumentTypeBuilder
     {

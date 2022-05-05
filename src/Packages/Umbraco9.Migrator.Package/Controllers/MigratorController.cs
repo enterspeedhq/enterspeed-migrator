@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Enterspeed.Migrator.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Umbraco.Cms.Web.BackOffice.Controllers;
+using Umbraco9.Migrator.Umbraco.Contracts;
 
 namespace Umbraco9.Migrator.Package.Controllers
 {
@@ -18,6 +18,7 @@ namespace Umbraco9.Migrator.Package.Controllers
         public async Task<IActionResult> ImportDocumentTypes()
         {
             await _migratorService.BuildUmbracoDataAsync();
+            throw new System.Exception("painfull exception");
             return Ok("");
         }
     }

@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Settings;
-using Enterspeed.Migrator.Contracts;
 using Microsoft.Extensions.Logging;
+using Umbraco9.Migrator.Umbraco.Contracts;
 
-namespace Enterspeed.Migrator.Umbraco
+namespace Umbraco9.Migrator.Umbraco
 {
     public class DocumentTypeBuilder : IDocumentTypeBuilder
     {
