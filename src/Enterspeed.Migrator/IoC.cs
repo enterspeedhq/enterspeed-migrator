@@ -8,7 +8,7 @@ using Enterspeed.Delivery.Sdk.Domain.SystemTextJson;
 using Enterspeed.Migrator.Enterspeed;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Umbraco;
-using Enterspeed.Migrator.Umbraco.Contracts;
+using Enterspeed.Migrator.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
 

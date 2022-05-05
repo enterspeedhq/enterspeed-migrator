@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using Enterspeed.Umbraco.Migrator.Enterspeed.Contracts;
-using Enterspeed.Umbraco.Migrator.Umbraco.Contracts;
+using Enterspeed.Migrator.Contracts;
+using Enterspeed.Migrator.Enterspeed.Contracts;
 
 namespace Umbraco9.Migrator
 {

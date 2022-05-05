@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Enterspeed.Umbraco.Migrator.Umbraco.Contracts;
+using Enterspeed.Migrator.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Umbraco.Cms.Web.BackOffice.Controllers;
 

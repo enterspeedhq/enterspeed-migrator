@@ -2,16 +2,16 @@
 
     <PropertyGroup>
         <ImplicitUsings>disable</ImplicitUsings>
-        <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+        <TargetFrameworks>net6.0</TargetFrameworks>
         <LangVersion>9.0</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Umbraco.Cms.Core" Version="9.1.2"/>
+        <PackageReference Include="Umbraco.Cms.Core" Version="9.1.2" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Enterspeed.Umbraco.Migrator\Enterspeed.Umbraco.Migrator.csproj"/>
+      <ProjectReference Include="..\..\Enterspeed.Migrator\Enterspeed.Migrator.csproj" />
     </ItemGroup>
 
 </Project>

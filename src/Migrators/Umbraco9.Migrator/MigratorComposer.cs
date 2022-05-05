@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using Enterspeed.Umbraco.Migrator;
-using Enterspeed.Umbraco.Migrator.Settings;
-using Enterspeed.Umbraco.Migrator.Umbraco.Contracts;
+﻿using Enterspeed.Migrator;
+using Enterspeed.Migrator.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
+using Enterspeed.Migrator.Settings;
 
 namespace Umbraco9.Migrator
 {

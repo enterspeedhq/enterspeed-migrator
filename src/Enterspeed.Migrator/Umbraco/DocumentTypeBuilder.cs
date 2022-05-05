@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Settings;
-using Enterspeed.Migrator.Umbraco.Contracts;
+using Enterspeed.Migrator.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace Enterspeed.Migrator.Umbraco
