@@ -6,6 +6,6 @@ namespace Enterspeed.Migrator.Enterspeed.Contracts
 {
     public interface ISchemaImporter
     {
-        Task<DocumentTypes> ImportSchemasAsync();
+        Task<EntityTypes> ImportSchemasAsync();
     }
 }
