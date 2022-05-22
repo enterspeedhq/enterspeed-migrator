@@ -1,2 +1,2 @@
-# enterspeed-umbraco-migrator
-Migrator that that takes Enterspeed data and converts it into Umbraco doctypes and content
+# enterspeed-migrator
+Migrator that that takes Enterspeed data and converts it various CMS's
