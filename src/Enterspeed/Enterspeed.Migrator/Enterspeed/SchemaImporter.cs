@@ -78,16 +78,19 @@ namespace Enterspeed.Migrator.Enterspeed
         private EntityTypes GetEntityTypes(List<DeliveryApiResponse> apiResponses)
         {
             var entityTypes = new EntityTypes();
-            foreach (var response in apiResponses)
+            foreach (var apiResponse in apiResponses)
             {
-                var baseProperties = GetBasePageProperties(response);
-                if (entityTypes.Pages.All(p => p.Alias != baseProperties.Alias))
+                if (apiResponse.Response != null)
                 {
-                    entityTypes.Pages.Add(new EntityType
+                    var baseProperties = GetBasePageProperties(apiResponse);
+                    if (entityTypes.Pages.All(p => p.Alias != baseProperties.Alias))
                     {
-                        Alias = baseProperties.Alias,
-                        Name = baseProperties.Name
-                    });
+                        entityTypes.Pages.Add(new EntityType
+                        {
+                            Alias = baseProperties.Alias,
+                            Name = baseProperties.Name
+                        });
+                    }
                 }
             }
 
