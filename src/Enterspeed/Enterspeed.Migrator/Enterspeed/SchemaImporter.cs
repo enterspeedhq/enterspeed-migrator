@@ -68,8 +68,7 @@ namespace Enterspeed.Migrator.Enterspeed
         {
             if (!response.Response.Route.TryGetValue("pageDocType", out object pageDocType))
             {
-                throw new NullReferenceException("pageDocType not found on schema for " +
-                                                 JsonSerializer.Serialize(pageDocType));
+                throw new NullReferenceException("pageDocType not found on schema for " + JsonSerializer.Serialize(pageDocType));
             }
 
             if (pageDocType is not Dictionary<string, object> pageDocTypeDict ||
@@ -78,8 +77,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 throw new NullReferenceException("pageDocType view property not found on schema " + JsonSerializer.Serialize(pageDocType));
             }
 
-            if (view is not Dictionary<string, object> viewDict ||
-                !viewDict.TryGetValue("documentType", out object docType))
+            if (view is not Dictionary<string, object> viewDict || !viewDict.TryGetValue("documentType", out object docType))
             {
                 throw new NullReferenceException("document type property not found on schema " + JsonSerializer.Serialize(pageDocType));
             }
@@ -100,7 +98,11 @@ namespace Enterspeed.Migrator.Enterspeed
 
         private void AddUrl(Child child, List<string> urls)
         {
-            if (child.View == null) return;
+            if (child.View == null)
+            {
+                return;
+            }
+
             urls.Add(child.View.Self?.View?.Url);
 
             if (child.View.Children == null || !child.View.Children.Any()) return;

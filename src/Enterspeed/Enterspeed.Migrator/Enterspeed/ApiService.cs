@@ -5,6 +5,7 @@ using Enterspeed.Delivery.Sdk.Api.Services;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Settings;
+using Microsoft.Extensions.Options;
 
 namespace Enterspeed.Migrator.Enterspeed
 {
@@ -14,10 +15,10 @@ namespace Enterspeed.Migrator.Enterspeed
         private readonly EnterspeedConfiguration _enterspeedConfiguration;
 
         public ApiService(IEnterspeedDeliveryService enterspeedDeliveryService,
-            EnterspeedConfiguration enterspeedConfiguration)
+            IOptions<EnterspeedConfiguration> enterspeedConfiguration)
         {
             _enterspeedDeliveryService = enterspeedDeliveryService;
-            _enterspeedConfiguration = enterspeedConfiguration;
+            _enterspeedConfiguration = enterspeedConfiguration?.Value;
         }
 
         public async Task<EnterspeedResponse> GetNavigationAsync()
@@ -26,8 +27,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 (s) => { s.WithHandle(_enterspeedConfiguration.NavigationHandle); });
 
             var json = JsonSerializer.Serialize(data.Response);
-            var response = JsonSerializer.Deserialize<EnterspeedResponse>(json);
-            return response;
+            return JsonSerializer.Deserialize<EnterspeedResponse>(json);
         }
 
         public async Task<DeliveryApiResponse> GetByUrlsAsync(string url)

@@ -17,10 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco9.Migrator", "Migrat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco91.TestSite", "TestSites\Umbraco91.TestSite\Umbraco91.TestSite.csproj", "{643D1E62-2E71-4897-89B2-9B1D52184B22}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Enterspeed.Migrator", "Enterspeed.Migrator\Enterspeed.Migrator.csproj", "{4989ACDA-48BB-4E0F-A49B-553D1C3B98AE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enterspeed.Migrator.UI", "Enterspeed.Migrator.UI\Enterspeed.Migrator.UI.csproj", "{C9C2C31B-08A4-4B7F-9CCA-CD201347FF9A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,14 +35,6 @@ Global
 		{643D1E62-2E71-4897-89B2-9B1D52184B22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{643D1E62-2E71-4897-89B2-9B1D52184B22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{643D1E62-2E71-4897-89B2-9B1D52184B22}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4989ACDA-48BB-4E0F-A49B-553D1C3B98AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4989ACDA-48BB-4E0F-A49B-553D1C3B98AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4989ACDA-48BB-4E0F-A49B-553D1C3B98AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4989ACDA-48BB-4E0F-A49B-553D1C3B98AE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C9C2C31B-08A4-4B7F-9CCA-CD201347FF9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9C2C31B-08A4-4B7F-9CCA-CD201347FF9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9C2C31B-08A4-4B7F-9CCA-CD201347FF9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9C2C31B-08A4-4B7F-9CCA-CD201347FF9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,8 +43,6 @@ Global
 		{C177952F-027C-4C86-8C74-C0AD445E8A3E} = {577CE0AD-7557-454F-8342-1E931669EA5E}
 		{8ECAD522-D44C-49AE-9233-D8217EA9C5C7} = {8D064D52-AD5D-47C0-8359-260453DF1454}
 		{643D1E62-2E71-4897-89B2-9B1D52184B22} = {61AB5A64-BD98-4B21-8704-B2616934F28C}
-		{4989ACDA-48BB-4E0F-A49B-553D1C3B98AE} = {9D45C286-6A5D-4395-8D9E-5AE9CCDDD7BC}
-		{C9C2C31B-08A4-4B7F-9CCA-CD201347FF9A} = {9D45C286-6A5D-4395-8D9E-5AE9CCDDD7BC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {762D8133-E3CA-4676-A26B-75A8CF4C330E}

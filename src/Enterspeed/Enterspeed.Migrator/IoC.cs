@@ -7,6 +7,8 @@ using Enterspeed.Delivery.Sdk.Domain.Services;
 using Enterspeed.Delivery.Sdk.Domain.SystemTextJson;
 using Enterspeed.Migrator.Enterspeed;
 using Enterspeed.Migrator.Enterspeed.Contracts;
+using Enterspeed.Migrator.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -14,7 +16,7 @@ namespace Enterspeed.Migrator
 {
     public static class IoC
     {
-        public static void RegisterEnterspeedServices(this IServiceCollection serviceCollection)
+        public static void RegisterEnterspeedServices(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection.AddTransient<IApiService, ApiService>();
             serviceCollection.AddTransient<ISchemaImporter, SchemaImporter>();
@@ -24,8 +26,10 @@ namespace Enterspeed.Migrator
             serviceCollection.AddTransient<EnterspeedDeliveryConnection>();
             serviceCollection.AddSingleton(new EnterspeedDeliveryConfiguration());
             serviceCollection.AddTransient<IJsonSerializer, SystemTextJsonSerializer>();
-        }
+            serviceCollection.AddOptions();
 
-        public static void 
+            serviceCollection.Configure<EnterspeedConfiguration>(setting =>
+                configuration.GetSection(EnterspeedConfiguration.ConfigurationKey).Bind(setting));
+        }
     }
 }
