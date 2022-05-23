@@ -83,14 +83,14 @@ namespace Enterspeed.Migrator.Enterspeed
                 if (apiResponse.Response != null)
                 {
                     var baseProperties = GetMetaDataProperties(apiResponse);
-                    if (entityTypes.Pages.All(p => p.Meta.Alias != baseProperties.Alias))
+                    if (entityTypes.Pages.All(p => p.Meta.SourceEntityAlias != baseProperties.SourceEntityAlias))
                     {
                         entityTypes.Pages.Add(new EntityType
                         {
                             Meta = new EntityTypeMeta()
                             {
-                                Alias = baseProperties.Alias,
-                                Name = baseProperties.Name
+                                SourceEntityAlias = baseProperties.SourceEntityAlias,
+                                SourceEntityName = baseProperties.SourceEntityName
                             }
                         });
                     }
@@ -127,16 +127,16 @@ namespace Enterspeed.Migrator.Enterspeed
 
             // Get page metadata property and map values
             if (@type is not Dictionary<string, object> typeDict ||
-                !typeDict.TryGetValue("alias", out var alias) ||
-                !typeDict.TryGetValue("name", out var name))
+                !typeDict.TryGetValue("sourceEntityAlias", out var alias) ||
+                !typeDict.TryGetValue("sourceEntityName", out var name))
             {
                 throw new NullReferenceException($"Page types alias or name property not found on schema {JsonSerializer.Serialize(pageType)}");
             }
 
             return new EntityTypeMeta
             {
-                Alias = alias.ToString(),
-                Name = name.ToString()
+                SourceEntityAlias = alias.ToString(),
+                SourceEntityName = name.ToString()
             };
         }
 
@@ -147,7 +147,11 @@ namespace Enterspeed.Migrator.Enterspeed
         /// <returns>Returns a list of urls for the routes</returns>
         private List<string> GetUrls(EnterspeedResponse enterspeedResponse)
         {
-            var urls = new List<string>();
+            var urls = new List<string>
+            {
+                enterspeedResponse.Views.Navigation.Self?.View?.Url
+            };
+
             foreach (var child in enterspeedResponse.Views.Navigation.Children)
             {
                 urls.Add(child.View?.Self?.View?.Url);

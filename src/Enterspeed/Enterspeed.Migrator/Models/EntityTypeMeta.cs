@@ -2,7 +2,7 @@
 {
     public class EntityTypeMeta
     {
-        public string Name { get; set; }
-        public string Alias { get; set; }
+        public string SourceEntityName { get; set; }
+        public string SourceEntityAlias { get; set; }
     }
 }
