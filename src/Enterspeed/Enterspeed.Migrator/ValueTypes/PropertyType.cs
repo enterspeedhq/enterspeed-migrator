@@ -1,6 +1,6 @@
 ﻿namespace Enterspeed.Migrator.ValueTypes
 {
-    public class UmbracoSection : IPropertyType
+    public class PropertyType : IPropertyType
     {
         public string Name { get; set; }
         public string Alias { get; set; }

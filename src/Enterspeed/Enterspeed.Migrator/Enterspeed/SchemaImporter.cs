@@ -82,13 +82,16 @@ namespace Enterspeed.Migrator.Enterspeed
             {
                 if (apiResponse.Response != null)
                 {
-                    var baseProperties = GetBasePageProperties(apiResponse);
-                    if (entityTypes.Pages.All(p => p.Alias != baseProperties.Alias))
+                    var baseProperties = GetMetaDataProperties(apiResponse);
+                    if (entityTypes.Pages.All(p => p.Meta.Alias != baseProperties.Alias))
                     {
                         entityTypes.Pages.Add(new EntityType
                         {
-                            Alias = baseProperties.Alias,
-                            Name = baseProperties.Name
+                            Meta = new EntityTypeMeta()
+                            {
+                                Alias = baseProperties.Alias,
+                                Name = baseProperties.Name
+                            }
                         });
                     }
                 }
@@ -103,11 +106,11 @@ namespace Enterspeed.Migrator.Enterspeed
         /// <param name="response"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        private EntityTypeProperties GetBasePageProperties(DeliveryApiResponse response)
+        private EntityTypeMeta GetMetaDataProperties(DeliveryApiResponse response)
         {
-            if (!response.Response.Route.TryGetValue(_configuration.EntityTypeKey, out var pageType))
+            if (!response.Response.Route.TryGetValue(_configuration.MigrationMetaDataKey, out var pageType))
             {
-                throw new NullReferenceException($"{_configuration.EntityTypeKey} not found on the schema for {JsonSerializer.Serialize(response.Response.Route)}");
+                throw new NullReferenceException($"{_configuration.MigrationMetaDataKey} not found on the schema for {JsonSerializer.Serialize(response.Response.Route)}");
             }
 
             // Getting views
@@ -116,13 +119,13 @@ namespace Enterspeed.Migrator.Enterspeed
                 throw new NullReferenceException($"Page types view property not found on schema {JsonSerializer.Serialize(pageType)}");
             }
 
-            // Getting page type property value
-            if (view is not Dictionary<string, object> viewDict || !viewDict.TryGetValue("value", out var @type))
+            // Getting page meta data property value
+            if (view is not Dictionary<string, object> viewDict || !viewDict.TryGetValue("metaData", out var @type))
             {
                 throw new NullReferenceException($"Page types value property not found on schema {JsonSerializer.Serialize(pageType)}");
             }
 
-            // Get page type values and map to type properties
+            // Get page metadata property and map values
             if (@type is not Dictionary<string, object> typeDict ||
                 !typeDict.TryGetValue("alias", out var alias) ||
                 !typeDict.TryGetValue("name", out var name))
@@ -130,7 +133,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 throw new NullReferenceException($"Page types alias or name property not found on schema {JsonSerializer.Serialize(pageType)}");
             }
 
-            return new EntityTypeProperties
+            return new EntityTypeMeta
             {
                 Alias = alias.ToString(),
                 Name = name.ToString()

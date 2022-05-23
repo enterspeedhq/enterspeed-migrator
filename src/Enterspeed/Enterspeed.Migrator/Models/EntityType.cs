@@ -5,8 +5,7 @@ namespace Enterspeed.Migrator.Models
 {
     public class EntityType
     {
-        public string Name { get; set; }    
-        public string Alias { get; set; }
+        public EntityTypeMeta Meta { get; set; }
         public List<IPropertyType> Properties { get; set; }
     }
 }
