@@ -5,34 +5,92 @@ using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Settings;
+using Microsoft.Extensions.Options;
 
 namespace Enterspeed.Migrator.Enterspeed
 {
     public class ElementsResolver : IElementsResolver
     {
         private readonly EnterspeedConfiguration _configuration;
+        private readonly IPropertyResolver _propertyResolver;
 
-        public ElementsResolver(EnterspeedConfiguration configuration)
+        public ElementsResolver(IOptions<EnterspeedConfiguration> configuration, IPropertyResolver propertyResolver)
         {
-            _configuration = configuration;
+            _configuration = configuration?.Value;
+            _propertyResolver = propertyResolver;
         }
 
-        /// <summary>
-        /// Gets meta data objects for elements
-        /// </summary>
-        /// <param name="deliveryApiResponse"></param>
-        /// <returns></returns>
-        /// <exception cref="NullReferenceException"></exception>
-        public List<EntityTypeMeta> GetMetaDataForElements(DeliveryApiResponse deliveryApiResponse)
+        public List<EntityType> GetAllElementsForPage(DeliveryApiResponse deliveryApiResponse)
         {
-            var metadataProperties = new List<EntityTypeMeta>();
+            var entityTypes = new List<EntityType>();
 
             var route = deliveryApiResponse.Response.Route;
+            var elements = GetElementObjectArray(route);
 
-            // Check that renderings exists
-            if (!deliveryApiResponse.Response.Route.TryGetValue("renderings", out var renderings))
+            foreach (var element in elements)
             {
-                throw new NullReferenceException($"renderings property not found in deliveryApiResponse {JsonSerializer.Serialize(deliveryApiResponse.Response.Route)}");
+                var dataViewDict = GetDataViewDict(element);
+                if (dataViewDict != null)
+                {
+                    var entityType = new EntityType
+                    {
+                        Meta = GetMetaDataForElement(dataViewDict)
+                    };
+
+                    foreach (var key in dataViewDict.Keys)
+                    {
+                        var property = _propertyResolver.Resolve(key, dataViewDict);
+                        if (property != null)
+                            entityType.Properties.Add(property);
+                    }
+
+                    entityTypes.Add(entityType);
+                }
+            }
+
+            return entityTypes;
+        }
+
+
+        private EntityTypeMeta GetMetaDataForElement(Dictionary<string, object> dataViewDict)
+        {
+            if (!dataViewDict.TryGetValue(_configuration.MigrationComponentMetaData,
+                    out var componentMetaData)) return null;
+
+            if (componentMetaData is not Dictionary<string, object> componentMetaDataDict || !componentMetaDataDict.TryGetValue("view", out var metaDataViewValue)) return null;
+
+            if (metaDataViewValue is not Dictionary<string, object> metaDataViewDict) return null;
+
+            metaDataViewDict.TryGetValue("metaData", out var metaData);
+
+            if (metaData is not Dictionary<string, object> metaDataDict) return null;
+
+            var metaDataProperty = new EntityTypeMeta();
+            var keys = metaDataDict.Keys;
+
+            foreach (var key in keys)
+            {
+                switch (key)
+                {
+                    case "sourceEntityAlias":
+                        metaDataProperty.SourceEntityAlias = metaDataDict[key].ToString();
+                        break;
+                    case "sourceEntityName":
+                        metaDataProperty.SourceEntityName = metaDataDict[key].ToString();
+                        break;
+                }
+            }
+
+
+            return metaDataProperty;
+        }
+
+        private List<object> GetElementObjectArray(Dictionary<string, object> route)
+        {
+            // Check that renderings exists
+            if (!route.TryGetValue("renderings", out var renderings))
+            {
+                throw new NullReferenceException($"renderings property not found in deliveryApiResponse {JsonSerializer.Serialize(route)}");
             }
 
             // Check that renderings is dictionary and view exists
@@ -47,50 +105,16 @@ namespace Enterspeed.Migrator.Enterspeed
                 throw new NullReferenceException($"Items property not found in deliveryApiResponse {JsonSerializer.Serialize(route)}");
             }
 
-            // Check that view is dictionary and items exists
-            if (items is not List<object> itemsList)
-            {
-                throw new NullReferenceException($"Data property not found in deliveryApiResponse  {JsonSerializer.Serialize(route)}");
-            }
-
-            foreach (var item in itemsList)
-            {
-                if (item is not Dictionary<string, object> itemDict || !itemDict.TryGetValue("data", out var data)) continue;
-
-                if (data is not Dictionary<string, object> dataDictionary || !dataDictionary.TryGetValue("view", out var dataView)) continue;
-
-                if (dataView is not Dictionary<string, object> dataViewDict || !dataViewDict.TryGetValue(_configuration.MigrationComponentMetaData,
-                        out var componentMetaData)) continue;
-
-                if (componentMetaData is not Dictionary<string, object> componentMetaDataDict || !componentMetaDataDict.TryGetValue("view", out var metaDataViewValue)) continue;
-
-                if (metaDataViewValue is not Dictionary<string, object> metaDataViewDict) continue;
-
-                metaDataViewDict.TryGetValue("metaData", out var metaData);
-
-                if (metaData is not Dictionary<string, object> metaDataDict) continue;
-
-                var metaDataProperty = new EntityTypeMeta();
-                var keys = metaDataDict.Keys;
-
-                foreach (var key in keys)
-                {
-                    switch (key)
-                    {
-                        case "sourceEntityAlias":
-                            metaDataProperty.SourceEntityAlias = metaDataDict[key].ToString();
-                            break;
-                        case "sourceEntityName":
-                            metaDataProperty.SourceEntityName = metaDataDict[key].ToString();
-                            break;
-                    }
-                }
-
-                metadataProperties.Add(metaDataProperty);
-            }
-
-            return metadataProperties;
+            return items as List<object>;
         }
 
+        private Dictionary<string, object> GetDataViewDict(object element)
+        {
+            if (element is not Dictionary<string, object> elementDict || !elementDict.TryGetValue("data", out var data)) return null;
+            if (data is not Dictionary<string, object> dataDictionary || !dataDictionary.TryGetValue("view", out var dataView)) return null;
+            if (dataView is not Dictionary<string, object> viewDict) return null;
+
+            return viewDict;
+        }
     }
 }

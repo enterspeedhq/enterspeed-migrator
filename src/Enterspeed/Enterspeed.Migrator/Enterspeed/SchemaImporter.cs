@@ -90,15 +90,26 @@ namespace Enterspeed.Migrator.Enterspeed
                         });
                     }
 
-                    var metaDataForElements = _elementsResolver.GetMetaDataForElements(apiResponse);
-                    foreach (var metaDataForElement in metaDataForElements)
+                    var elementsOnPage = _elementsResolver.GetAllElementsForPage(apiResponse);
+                    foreach (var element in elementsOnPage)
                     {
-                        if (entityTypes.Elements.All(e => e.Meta.SourceEntityAlias != metaDataForElement.SourceEntityAlias))
+                        if (element != null && element.Meta != null)
                         {
-                            entityTypes.Elements.Add(new EntityType()
+                            var existingElement = entityTypes.Elements.FirstOrDefault(p => p?.Meta?.SourceEntityAlias == element.Meta?.SourceEntityAlias);
+                            if (existingElement != null && element.Properties != null)
                             {
-                                Meta = metaDataForElement
-                            });
+                                foreach (var property in element.Properties)
+                                {
+                                    if (!existingElement.Properties.Contains(property))
+                                    {
+                                        existingElement.Properties.Add(property);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                entityTypes.Elements.Add(element);
+                            }
                         }
                     }
                 }

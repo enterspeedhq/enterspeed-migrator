@@ -5,6 +5,8 @@ using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Settings;
+using Enterspeed.Migrator.ValueTypes;
+using Microsoft.Extensions.Options;
 
 namespace Enterspeed.Migrator.Enterspeed
 {
@@ -12,9 +14,14 @@ namespace Enterspeed.Migrator.Enterspeed
     {
         private readonly EnterspeedConfiguration _configuration;
 
-        public PagesResolver(EnterspeedConfiguration configuration)
+        public PagesResolver(IOptions<EnterspeedConfiguration> configuration)
         {
-            _configuration = configuration;
+            _configuration = configuration?.Value;
+        }
+
+        public List<IPropertyType> GetAllPropertyTypesForPage()
+        {
+            return new List<IPropertyType>();
         }
 
         /// <summary>
