@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Settings;
+using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -34,7 +39,7 @@ namespace Enterspeed.Migrator.Enterspeed
             // Get all routes by navigation handle
             var enterspeedResponse = await _apiService.GetNavigationAsync();
 
-            // Get all urls from the handle response
+            // Get all urls from the handle deliveryApiResponse
             var urls = GetUrls(enterspeedResponse);
 
             // Create page responses
@@ -52,7 +57,7 @@ namespace Enterspeed.Migrator.Enterspeed
         }
 
         /// <summary>
-        /// Iterates trough all the pages and maps to a delivery api response object.
+        /// Iterates trough all the pages and maps to a delivery api deliveryApiResponse object.
         /// </summary>
         /// <param name="urls"></param>
         /// <returns>List of DeliveryApiResponse</returns>
@@ -82,17 +87,25 @@ namespace Enterspeed.Migrator.Enterspeed
             {
                 if (apiResponse.Response != null)
                 {
-                    var baseProperties = GetMetaDataProperties(apiResponse);
-                    if (entityTypes.Pages.All(p => p.Meta.SourceEntityAlias != baseProperties.SourceEntityAlias))
+                    var metaDataForPage = GetMetaDataPropertiesForPage(apiResponse);
+                    if (entityTypes.Pages.All(p => p.Meta.SourceEntityAlias != metaDataForPage.SourceEntityAlias))
                     {
                         entityTypes.Pages.Add(new EntityType
                         {
-                            Meta = new EntityTypeMeta()
-                            {
-                                SourceEntityAlias = baseProperties.SourceEntityAlias,
-                                SourceEntityName = baseProperties.SourceEntityName
-                            }
+                            Meta = metaDataForPage
                         });
+                    }
+
+                    var metaDataForElements = GetMetaDataPropertiesForElements(apiResponse);
+                    foreach (var metaDataForElement in metaDataForElements)
+                    {
+                        if (entityTypes.Elements.All(e => e.Meta.SourceEntityAlias != metaDataForElement.SourceEntityAlias))
+                        {
+                            entityTypes.Elements.Add(new EntityType()
+                            {
+                                Meta = metaDataForElement
+                            });
+                        }
                     }
                 }
             }
@@ -101,43 +114,111 @@ namespace Enterspeed.Migrator.Enterspeed
         }
 
         /// <summary>
-        /// Finds all base properties on pages and maps these to 
+        /// Finds all pages
         /// </summary>
-        /// <param name="response"></param>
+        /// <param name="deliveryApiResponse"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        private EntityTypeMeta GetMetaDataProperties(DeliveryApiResponse response)
+        private EntityTypeMeta GetMetaDataPropertiesForPage(DeliveryApiResponse deliveryApiResponse)
         {
-            if (!response.Response.Route.TryGetValue(_configuration.MigrationMetaDataKey, out var pageType))
+            var route = deliveryApiResponse.Response.Route;
+
+            if (!deliveryApiResponse.Response.Route.TryGetValue(_configuration.MigrationPageMetaData, out var migrationPageMetaData))
             {
-                throw new NullReferenceException($"{_configuration.MigrationMetaDataKey} not found on the schema for {JsonSerializer.Serialize(response.Response.Route)}");
+                throw new NullReferenceException($"{_configuration.MigrationPageMetaData} not found on the schema for {JsonSerializer.Serialize(route)}");
             }
 
             // Getting views
-            if (pageType is not Dictionary<string, object> pageTypeDict || !pageTypeDict.TryGetValue("view", out var view))
+            if (migrationPageMetaData is not Dictionary<string, object> migrationPageMetaDataDict || !migrationPageMetaDataDict.TryGetValue("view", out var view))
             {
-                throw new NullReferenceException($"Page types view property not found on schema {JsonSerializer.Serialize(pageType)}");
+                throw new NullReferenceException($"View property not found in route {JsonSerializer.Serialize(route)}");
             }
 
             // Getting page meta data property value
-            if (view is not Dictionary<string, object> viewDict || !viewDict.TryGetValue("metaData", out var @type))
+            if (view is not Dictionary<string, object> viewDict || !viewDict.TryGetValue("metaData", out var metaData))
             {
-                throw new NullReferenceException($"Page types value property not found on schema {JsonSerializer.Serialize(pageType)}");
+                throw new NullReferenceException($"MetaData property not found in route {JsonSerializer.Serialize(route)}");
             }
 
             // Get page metadata property and map values
-            if (@type is not Dictionary<string, object> typeDict ||
-                !typeDict.TryGetValue("sourceEntityAlias", out var alias) ||
-                !typeDict.TryGetValue("sourceEntityName", out var name))
+            if (metaData is not Dictionary<string, object> metaDataDict ||
+                !metaDataDict.TryGetValue("sourceEntityAlias", out var alias) ||
+                !metaDataDict.TryGetValue("sourceEntityName", out var name))
             {
-                throw new NullReferenceException($"Page types alias or name property not found on schema {JsonSerializer.Serialize(pageType)}");
+                throw new NullReferenceException($"Meta data values could not be mapped {JsonSerializer.Serialize(route)}");
             }
 
-            return new EntityTypeMeta
+            return new EntityTypeMeta(alias.ToString(), name.ToString());
+        }
+
+
+        private List<EntityTypeMeta> GetMetaDataPropertiesForElements(DeliveryApiResponse deliveryApiResponse)
+        {
+            var metadataProperties = new List<EntityTypeMeta>();
+
+            var route = deliveryApiResponse.Response.Route;
+
+            // Check that renderings exists
+            if (!deliveryApiResponse.Response.Route.TryGetValue("renderings", out var renderings))
             {
-                SourceEntityAlias = alias.ToString(),
-                SourceEntityName = name.ToString()
-            };
+                throw new NullReferenceException($"renderings property not found in deliveryApiResponse {JsonSerializer.Serialize(deliveryApiResponse.Response.Route)}");
+            }
+
+            // Check that renderings is dictionary and view exists
+            if (renderings is not Dictionary<string, object> renderingsDict || !renderingsDict.TryGetValue("view", out var view))
+            {
+                throw new NullReferenceException($"View property not found in deliveryApiResponse {JsonSerializer.Serialize(route)}");
+            }
+
+            // Check that view is dictionary and items exists
+            if (view is not Dictionary<string, object> viewDict || !viewDict.TryGetValue("items", out var items))
+            {
+                throw new NullReferenceException($"Items property not found in deliveryApiResponse {JsonSerializer.Serialize(route)}");
+            }
+
+            // Check that view is dictionary and items exists
+            if (items is not List<object> itemsList)
+            {
+                throw new NullReferenceException($"Data property not found in deliveryApiResponse  {JsonSerializer.Serialize(route)}");
+            }
+
+            foreach (var item in itemsList)
+            {
+                if (item is not Dictionary<string, object> itemDict || !itemDict.TryGetValue("data", out var data)) continue;
+
+                if (data is not Dictionary<string, object> dataDictionary || !dataDictionary.TryGetValue("view", out var dataView)) continue;
+
+                if (dataView is not Dictionary<string, object> dataViewDict || !dataViewDict.TryGetValue(_configuration.MigrationComponentMetaData,
+                        out var componentMetaData)) continue;
+
+                if (componentMetaData is not Dictionary<string, object> componentMetaDataDict || !componentMetaDataDict.TryGetValue("view", out var metaDataViewValue)) continue;
+
+                if (metaDataViewValue is not Dictionary<string, object> metaDataViewDict) continue;
+
+                metaDataViewDict.TryGetValue("metaData", out var metaData);
+
+                if (metaData is not Dictionary<string, object> metaDataDict) continue;
+
+                var metaDataProperty = new EntityTypeMeta();
+                var keys = metaDataDict.Keys;
+
+                foreach (var key in keys)
+                {
+                    switch (key)
+                    {
+                        case "sourceEntityAlias":
+                            metaDataProperty.SourceEntityAlias = metaDataDict[key].ToString();
+                            break;
+                        case "sourceEntityName":
+                            metaDataProperty.SourceEntityName = metaDataDict[key].ToString();
+                            break;
+                    }
+                }
+
+                metadataProperties.Add(metaDataProperty);
+            }
+
+            return metadataProperties;
         }
 
         /// <summary>

@@ -5,6 +5,7 @@
         public static string ConfigurationKey => "EnterspeedConfiguration";
         public string ApiKey { get; init; }
         public string NavigationHandle { get; set; }
-        public string MigrationMetaDataKey { get; set; }
+        public string MigrationPageMetaData { get; set; }
+        public string MigrationComponentMetaData { get; set; }
     }
 }
