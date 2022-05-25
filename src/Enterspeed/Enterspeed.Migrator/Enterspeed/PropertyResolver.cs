@@ -20,7 +20,7 @@ namespace Enterspeed.Migrator.Enterspeed
                         Value = property?.ToString(),
                         Alias = key,
                         Name = key,
-                        Type = propertyMeta?["type"].ToString()
+                        Type = propertyMeta?["dataType"].ToString()
                     };
                 }
             }
