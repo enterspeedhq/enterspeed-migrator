@@ -54,12 +54,13 @@ namespace Enterspeed.Migrator.Enterspeed
             // Get page metadata property and map values
             if (metaData is not Dictionary<string, object> metaDataDict ||
                 !metaDataDict.TryGetValue("sourceEntityAlias", out var alias) ||
-                !metaDataDict.TryGetValue("sourceEntityName", out var name))
+                !metaDataDict.TryGetValue("sourceEntityName", out var name) ||
+                !metaDataDict.TryGetValue("contentName", out var contentName))
             {
                 throw new NullReferenceException($"Meta data values could not be mapped {JsonSerializer.Serialize(route)}");
             }
 
-            return new EntityTypeMeta(alias.ToString(), name.ToString());
+            return new EntityTypeMeta(alias.ToString(), name.ToString(), contentName.ToString());
         }
     }
 }

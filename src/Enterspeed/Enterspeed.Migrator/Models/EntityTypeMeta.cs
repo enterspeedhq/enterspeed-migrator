@@ -7,13 +7,15 @@
 
         }
 
-        public EntityTypeMeta(string sourceEntityAlias, string sourceEntityName)
+        public EntityTypeMeta(string sourceEntityAlias, string sourceEntityName, string contentName)
         {
             SourceEntityAlias = sourceEntityAlias;
             SourceEntityName = sourceEntityName;
+            ContentName = contentName;
         }
 
         public string SourceEntityName { get; set; }
         public string SourceEntityAlias { get; set; }
+        public string ContentName { get; set; }
     }
 }

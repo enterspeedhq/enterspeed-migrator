@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Enterspeed.Contracts;
@@ -34,21 +35,11 @@ namespace Enterspeed.Migrator.Enterspeed
             // Get all routes by navigation handle
             var enterspeedResponse = await _apiService.GetNavigationAsync();
 
-            // Get all urls from the handle deliveryApiResponse
-            var urls = UrlHelper.GetUrls(enterspeedResponse);
-
             // Create page responses
-            var apiResponses = await GetPageResponses(urls);
+            var apiResponses = await GetPageResponses(enterspeedResponse);
 
-            try
-            {
-                return GetEntityTypes(apiResponses);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Something went wrong when migrating schemas");
-                throw;
-            }
+            return GetEntityTypes(apiResponses);
+
         }
 
         /// <summary>
@@ -56,67 +47,98 @@ namespace Enterspeed.Migrator.Enterspeed
         /// </summary>
         /// <param name="urls"></param>
         /// <returns>List of DeliveryApiResponse</returns>
-        private async Task<List<DeliveryApiResponse>> GetPageResponses(List<string> urls)
+        private async Task<PageResponse> GetPageResponses(EnterspeedResponse enterspeedResponse)
         {
-            var responses = new List<DeliveryApiResponse>();
-
-            // Get all page responses
-            foreach (var url in urls)
+            var pageResponse = new PageResponse
             {
-                var response = await _apiService.GetByUrlsAsync(url);
-                responses.Add(response);
+                DeliveryApiResponse = await _apiService.GetByUrlsAsync(enterspeedResponse.Views.Navigation.Self.View.Url)
+            };
+
+            var children = await MapResponseAsync(enterspeedResponse.Views.Navigation?.Children);
+            pageResponse.Children.AddRange(children);
+
+            return pageResponse;
+        }
+
+        private async Task<List<PageResponse>> MapResponseAsync(List<Child> children)
+        {
+            var pageResponses = new List<PageResponse>();
+            foreach (var child in children)
+            {
+                var response = await _apiService.GetByUrlsAsync(child.View.Self.View.Url);
+                var pageResponse = new PageResponse
+                {
+                    DeliveryApiResponse = response
+                };
+
+                if (child.View.Children != null && child.View.Children.Any())
+                {
+                    pageResponse.Children.AddRange(await MapResponseAsync(child.View.Children));
+                }
+
+                pageResponses.Add(pageResponse);
+
             }
 
-            return responses;
+            return pageResponses;
         }
+
 
         /// <summary>
         /// Iterates trough the api responses and maps data to all properties on entity types
         /// </summary>
-        /// <param name="apiResponses"></param>
+        /// <param name="pageResponse"></param>
         /// <returns>List of entity types </returns>
-        private EntityTypes GetEntityTypes(List<DeliveryApiResponse> apiResponses)
+        private EntityTypes GetEntityTypes(PageResponse pageResponse)
         {
             var entityTypes = new EntityTypes();
-            foreach (var apiResponse in apiResponses)
-            {
-                if (apiResponse.Response != null)
-                {
-                    var metaDataForPage = _pagesResolver.GetMetaDataForPage(apiResponse);
-                    if (entityTypes.Pages.All(p => p.Meta.SourceEntityAlias != metaDataForPage.SourceEntityAlias))
-                    {
-                        entityTypes.Pages.Add(new EntityType
-                        {
-                            Meta = metaDataForPage
-                        });
-                    }
+            GetEntityType(pageResponse, entityTypes);
 
-                    var elementsOnPage = _elementsResolver.GetAllElementsForPage(apiResponse);
-                    foreach (var element in elementsOnPage)
+            foreach (var apiResponse in pageResponse.Children)
+            {
+                GetEntityType(apiResponse, entityTypes);
+            }
+
+            return entityTypes;
+        }
+
+        private void GetEntityType(PageResponse apiResponse, EntityTypes entityTypes)
+        {
+            if (apiResponse.DeliveryApiResponse != null)
+            {
+                var metaDataForPage = _pagesResolver.GetMetaDataForPage(apiResponse.DeliveryApiResponse);
+                if (entityTypes.Pages.All(p => p.Meta.SourceEntityAlias != metaDataForPage.SourceEntityAlias))
+                {
+                    entityTypes.Pages.Add(new EntityType
                     {
-                        if (element != null && element.Meta != null)
+                        Meta = metaDataForPage
+                    });
+                }
+
+                var elementsOnPage = _elementsResolver.GetAllElementsForPage(apiResponse.DeliveryApiResponse);
+                foreach (var element in elementsOnPage)
+                {
+                    if (element != null && element.Meta != null)
+                    {
+                        var existingElement = entityTypes.Components.FirstOrDefault(p =>
+                            p?.Meta?.SourceEntityAlias == element.Meta?.SourceEntityAlias);
+                        if (existingElement != null && element.Properties != null)
                         {
-                            var existingElement = entityTypes.Components.FirstOrDefault(p => p?.Meta?.SourceEntityAlias == element.Meta?.SourceEntityAlias);
-                            if (existingElement != null && element.Properties != null)
+                            foreach (var property in element.Properties)
                             {
-                                foreach (var property in element.Properties)
+                                if (existingElement.Properties.All(p => p.Alias != property.Alias))
                                 {
-                                    if (existingElement.Properties.All(p => p.Alias != property.Alias))
-                                    {
-                                        existingElement.Properties.Add(property);
-                                    }
+                                    existingElement.Properties.Add(property);
                                 }
                             }
-                            else
-                            {
-                                entityTypes.Components.Add(element);
-                            }
+                        }
+                        else
+                        {
+                            entityTypes.Components.Add(element);
                         }
                     }
                 }
             }
-
-            return entityTypes;
         }
     }
 }

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Enterspeed.Contracts;
-using Enterspeed.Migrator.Helpers;
 using Enterspeed.Migrator.Models;
 using Microsoft.Extensions.Logging;
 
@@ -29,62 +27,85 @@ namespace Enterspeed.Migrator.Enterspeed
             // Get all routes by navigation handle
             var enterspeedResponse = await _apiService.GetNavigationAsync();
 
-            // Get all urls from the handle deliveryApiResponse
-            var urls = UrlHelper.GetUrls(enterspeedResponse);
-
             // Create page responses
-            var apiResponses = await GetPageResponses(urls);
+            var apiResponses = await GetPageResponses(enterspeedResponse);
 
-            try
-            {
-                return GetEntityTypes(apiResponses);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Something went wrong when importing data");
-                throw;
-            }
+            return GetEntityTypes(apiResponses);
         }
 
-        private async Task<List<DeliveryApiResponse>> GetPageResponses(List<string> urls)
+        private async Task<PageResponse> GetPageResponses(EnterspeedResponse enterspeedResponse)
         {
-            var responses = new List<DeliveryApiResponse>();
-
-            // Get all page responses
-            foreach (var url in urls)
+            var pageResponse = new PageResponse
             {
-                var response = await _apiService.GetByUrlsAsync(url);
-                responses.Add(response);
-            }
+                DeliveryApiResponse = await _apiService.GetByUrlsAsync(enterspeedResponse.Views.Navigation.Self.View.Url)
+            };
 
-            return responses;
+            var children = await MapResponseAsync(enterspeedResponse.Views.Navigation?.Children);
+            pageResponse.Children.AddRange(children);
+
+            return pageResponse;
         }
 
-        private List<PageEntityType> GetEntityTypes(List<DeliveryApiResponse> apiResponses)
+        private async Task<List<PageResponse>> MapResponseAsync(List<Child> children)
         {
-            var entityTypes = new List<PageEntityType>();
-            foreach (var apiResponse in apiResponses)
+            var pageResponses = new List<PageResponse>();
+            foreach (var child in children)
             {
-                if (apiResponse.Response != null)
+                var response = await _apiService.GetByUrlsAsync(child.View.Self.View.Url);
+                var pageResponse = new PageResponse
                 {
-                    var metaDataForPage = _pagesResolver.GetMetaDataForPage(apiResponse);
-                    var page = (new PageEntityType()
-                    {
-                        Meta = metaDataForPage,
-                        Components = new List<EntityType>()
-                    });
+                    DeliveryApiResponse = response
+                };
 
-                    var elementsOnPage = _elementsResolver.GetAllElementsForPage(apiResponse);
-                    foreach (var element in elementsOnPage)
-                    {
-                        page.Components.Add(element);
-                    }
-
-                    entityTypes.Add(page);
+                if (child.View.Children != null && child.View.Children.Any())
+                {
+                    pageResponse.Children.AddRange(await MapResponseAsync(child.View.Children));
                 }
+
+                pageResponses.Add(pageResponse);
+
             }
 
-            return entityTypes;
+            return pageResponses;
+        }
+
+        private List<PageEntityType> GetEntityTypes(PageResponse pageResponse)
+        {
+            return MapPages(pageResponse);
+        }
+
+
+        private List<PageEntityType> MapPages(PageResponse pageResponse)
+        {
+            var pageEntityTypes = new List<PageEntityType>();
+            var pageEntityType = MapPageEntityType(pageResponse);
+
+            foreach (var response in pageResponse.Children)
+            {
+                pageEntityType.Children.AddRange(MapPages(response));
+            }
+
+            pageEntityTypes.Add(pageEntityType);
+            return pageEntityTypes;
+        }
+
+
+        private PageEntityType MapPageEntityType(PageResponse pageResponse)
+        {
+            var metaDataForPage = _pagesResolver.GetMetaDataForPage(pageResponse.DeliveryApiResponse);
+            var page = (new PageEntityType()
+            {
+                Meta = metaDataForPage,
+                Components = new List<EntityType>()
+            });
+
+            var elementsOnPage = _elementsResolver.GetAllElementsForPage(pageResponse.DeliveryApiResponse);
+            foreach (var element in elementsOnPage)
+            {
+                page.Components.Add(element);
+            }
+
+            return page;
         }
     }
 }

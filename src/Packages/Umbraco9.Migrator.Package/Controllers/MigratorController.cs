@@ -18,7 +18,6 @@ namespace Umbraco9.Migrator.Package.Controllers
         public async Task<IActionResult> ImportDocumentTypes()
         {
             await _migratorService.ImportDocumentTypesAsync();
-            throw new System.Exception("painfull exception");
             return Ok("");
         }
 
@@ -26,7 +25,6 @@ namespace Umbraco9.Migrator.Package.Controllers
         public async Task<IActionResult> ImportData()
         {
              await _migratorService.ImportDataAsync();
-            throw new System.Exception("painfull exception");
             return Ok("");
         }
     }
