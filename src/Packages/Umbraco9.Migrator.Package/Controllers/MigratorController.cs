@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Umbraco.Cms.Web.BackOffice.Controllers;
+using Umbraco9.Migrator.Builders.Contracts;
 using Umbraco9.Migrator.Umbraco.Contracts;
 
 namespace Umbraco9.Migrator.Package.Controllers

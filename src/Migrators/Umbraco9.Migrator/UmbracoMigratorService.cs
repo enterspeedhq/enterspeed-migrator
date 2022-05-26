@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Umbraco9.Migrator.Builders.Contracts;
-using Umbraco9.Migrator.Umbraco.Contracts;
 
 namespace Umbraco9.Migrator
 {
@@ -21,7 +20,7 @@ namespace Umbraco9.Migrator
         {
             var entityTypes = await _schemaImporter.ImportSchemasAsync();
             _documentTypeBuilder.BuildPageDocTypes(entityTypes);
-
+            _documentTypeBuilder.CreateElementTypes(entityTypes);
         }
     }
 }
