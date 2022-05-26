@@ -95,12 +95,12 @@ namespace Enterspeed.Migrator.Enterspeed
                     {
                         if (element != null && element.Meta != null)
                         {
-                            var existingElement = entityTypes.Elements.FirstOrDefault(p => p?.Meta?.SourceEntityAlias == element.Meta?.SourceEntityAlias);
+                            var existingElement = entityTypes.Components.FirstOrDefault(p => p?.Meta?.SourceEntityAlias == element.Meta?.SourceEntityAlias);
                             if (existingElement != null && element.Properties != null)
                             {
                                 foreach (var property in element.Properties)
                                 {
-                                    if (!existingElement.Properties.Contains(property))
+                                    if (existingElement.Properties.All(p => p.Alias != property.Alias))
                                     {
                                         existingElement.Properties.Add(property);
                                     }
@@ -108,7 +108,7 @@ namespace Enterspeed.Migrator.Enterspeed
                             }
                             else
                             {
-                                entityTypes.Elements.Add(element);
+                                entityTypes.Components.Add(element);
                             }
                         }
                     }

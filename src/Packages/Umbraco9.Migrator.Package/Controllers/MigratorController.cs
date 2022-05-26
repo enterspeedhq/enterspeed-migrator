@@ -17,7 +17,7 @@ namespace Umbraco9.Migrator.Package.Controllers
         [HttpPost]
         public async Task<IActionResult> ImportDocumentTypes()
         {
-            await _migratorService.BuildUmbracoDataAsync();
+            await _migratorService.ImportDocumentTypesAsync();
             throw new System.Exception("painfull exception");
             return Ok("");
         }

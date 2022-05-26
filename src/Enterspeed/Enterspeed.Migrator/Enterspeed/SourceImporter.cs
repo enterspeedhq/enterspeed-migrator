@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Settings;
+using Microsoft.Extensions.Options;
 
 namespace Enterspeed.Migrator.Enterspeed
 {
@@ -11,10 +12,10 @@ namespace Enterspeed.Migrator.Enterspeed
         private readonly IApiService _apiService;
         private readonly EnterspeedConfiguration _enterspeedConfiguration;
 
-        public SourceImporter(IApiService apiService, EnterspeedConfiguration enterspeedConfiguration)
+        public SourceImporter(IApiService apiService, IOptions<EnterspeedConfiguration> enterspeedConfiguration)
         {
             _apiService = apiService;
-            _enterspeedConfiguration = enterspeedConfiguration;
+            _enterspeedConfiguration = enterspeedConfiguration?.Value;
         }
 
         public async Task<List<object>> ImportAllDataSourcesAsync(Dictionary<string, object> views)
