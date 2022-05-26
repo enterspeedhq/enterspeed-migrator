@@ -5,10 +5,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\dashboard.controller.js" />
-      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\dashboard.html" />
-      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\Lang\en.xml" />
-      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\migrator.resource.js" />
+      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\dashboard.controller.js">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </Content>
+      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\dashboard.html">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </Content>
+      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\Lang\en.xml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </Content>
+      <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\migrator.resource.js">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </Content>
       <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\migrator.ressource.js" />
       <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\MigratorDashboardController.js" />
       <Content Include="App_Plugins\Umbraco9.Migrator.Package\Dashboard\Ressourrces\migrator.ressource.js" />

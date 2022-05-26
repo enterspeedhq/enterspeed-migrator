@@ -3,6 +3,9 @@
         return {
             importDocumentTypes() {
                 return $http.post("/umbraco/backoffice/api/Migrator/ImportDocumentTypes");
-            }
+            },
+            importData() {
+                return $http.post("/umbraco/backoffice/api/Migrator/ImportData");
+            },
         }
     })

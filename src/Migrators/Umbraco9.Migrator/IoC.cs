@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Umbraco9.Migrator.Umbraco.Contracts;
 using Umbraco9.Migrator.Builders;
 using Umbraco9.Migrator.Builders.Contracts;
 

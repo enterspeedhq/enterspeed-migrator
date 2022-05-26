@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Enterspeed.Contracts;
+using Enterspeed.Migrator.Helpers;
 using Enterspeed.Migrator.Models;
 using Microsoft.Extensions.Logging;
 
@@ -34,7 +35,7 @@ namespace Enterspeed.Migrator.Enterspeed
             var enterspeedResponse = await _apiService.GetNavigationAsync();
 
             // Get all urls from the handle deliveryApiResponse
-            var urls = GetUrls(enterspeedResponse);
+            var urls = UrlHelper.GetUrls(enterspeedResponse);
 
             // Create page responses
             var apiResponses = await GetPageResponses(urls);
@@ -116,44 +117,6 @@ namespace Enterspeed.Migrator.Enterspeed
             }
 
             return entityTypes;
-        }
-
-        /// <summary>
-        /// Iterates trough all navigation items for the handle that handles routes
-        /// </summary>
-        /// <param name="enterspeedResponse"></param>
-        /// <returns>Returns a list of urls for the routes</returns>
-        private List<string> GetUrls(EnterspeedResponse enterspeedResponse)
-        {
-            var urls = new List<string>
-            {
-                enterspeedResponse.Views.Navigation.Self?.View?.Url
-            };
-
-            foreach (var child in enterspeedResponse.Views.Navigation.Children)
-            {
-                urls.Add(child.View?.Self?.View?.Url);
-                if (child.View?.Children != null)
-                {
-                    foreach (var subChild in child.View.Children)
-                    {
-                        AddUrl(subChild, urls);
-                    }
-                }
-            }
-
-            return urls;
-        }
-
-        private void AddUrl(Child child, ICollection<string> urls)
-        {
-            urls.Add(child.View.Self?.View?.Url);
-
-            if (child.View.Children == null || !child.View.Children.Any()) return;
-            foreach (var subChild in child.View.Children)
-            {
-                AddUrl(subChild, urls);
-            }
         }
     }
 }

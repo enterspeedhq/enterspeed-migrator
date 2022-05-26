@@ -8,12 +8,16 @@ namespace Umbraco9.Migrator
     {
         private readonly ISchemaImporter _schemaImporter;
         private readonly IDocumentTypeBuilder _documentTypeBuilder;
+        private readonly ISourceImporter _sourceImporter;
+        private readonly IContentBuilder _contentBuilder;
 
         public UmbracoMigratorService(ISchemaImporter schemaImporter,
-            IDocumentTypeBuilder documentTypeBuilder)
+            IDocumentTypeBuilder documentTypeBuilder, ISourceImporter sourceImporter, IContentBuilder contentBuilder)
         {
             _schemaImporter = schemaImporter;
             _documentTypeBuilder = documentTypeBuilder;
+            _sourceImporter = sourceImporter;
+            _contentBuilder = contentBuilder;
         }
 
         public async Task ImportDocumentTypesAsync()
@@ -21,6 +25,12 @@ namespace Umbraco9.Migrator
             var entityTypes = await _schemaImporter.ImportSchemasAsync();
             _documentTypeBuilder.BuildPageDocTypes(entityTypes);
             _documentTypeBuilder.CreateElementTypes(entityTypes);
+        }
+
+        public async Task ImportDataAsync()
+        {
+            var data = await _sourceImporter.ImportDataAsync();
+            _contentBuilder.BuildContentPages(data);
         }
     }
 }
