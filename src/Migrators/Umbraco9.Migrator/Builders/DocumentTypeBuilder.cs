@@ -94,8 +94,8 @@ namespace Umbraco9.Migrator.Builders
                 newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper,
                     _dataTypes.FirstOrDefault(d => d.Name == BlockListName))
                 {
-                    Name = "Content",
-                    Alias = "content",
+                    Name = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstUpperInvariant(),
+                    Alias = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstLowerInvariant()
                 }, "pageContent");
 
                 _contentTypeService.Save(newPageDocumentType);

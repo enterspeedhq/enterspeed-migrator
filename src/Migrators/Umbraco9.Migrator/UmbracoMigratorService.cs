@@ -15,7 +15,8 @@ namespace Umbraco9.Migrator
         private readonly ILogger<UmbracoMigratorService> _logger;
 
         public UmbracoMigratorService(ISchemaImporter schemaImporter,
-            IDocumentTypeBuilder documentTypeBuilder, ISourceImporter sourceImporter, IContentBuilder contentBuilder, ILogger<UmbracoMigratorService> logger)
+            IDocumentTypeBuilder documentTypeBuilder, ISourceImporter sourceImporter, IContentBuilder contentBuilder,
+            ILogger<UmbracoMigratorService> logger)
         {
             _schemaImporter = schemaImporter;
             _documentTypeBuilder = documentTypeBuilder;
@@ -37,7 +38,6 @@ namespace Umbraco9.Migrator
                 _logger.LogError(e, "something went wrong when building document types");
                 throw;
             }
-
         }
 
         public async Task ImportDataAsync()
