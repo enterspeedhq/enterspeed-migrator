@@ -1,48 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Enterspeed.Migrator.Models;
-using Enterspeed.Migrator.Settings;
+﻿using Enterspeed.Migrator.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
+using Umbraco.Extensions;
 using Umbraco9.Migrator.Builders.Contracts;
-using Umbraco9.Migrator.Extensions;
+using Umbraco9.Migrator.Settings;
 
 namespace Umbraco9.Migrator.Builders
 {
     public class DocumentTypeBuilder : IDocumentTypeBuilder
     {
-        private readonly EnterspeedConfiguration _enterspeedConfiguration;
         private readonly ILogger<DocumentTypeBuilder> _logger;
         private readonly IContentTypeService _contentTypeService;
         private readonly IShortStringHelper _shortStringHelper;
         private readonly IDataTypeService _dataTypeService;
+        private readonly IConfigurationEditorJsonSerializer _configurationEditorJsonSerializer;
+        private readonly IEnumerable<IDataType> _dataTypes;
         private readonly List<ContentTypeSort> _contentTypes;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
-        private readonly IConfigurationEditorJsonSerializer _configurationEditorJsonSerializer;
+        private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
         private ContentType _root;
         const string PagesContainerName = "Migrated Page Types";
         const string ElementsContainerName = "Migrated Elements";
         private const string BlockListName = "BlockList.Custom";
-        private readonly IEnumerable<IDataType> _dataTypes;
 
 
-        public DocumentTypeBuilder(ILogger<DocumentTypeBuilder> logger, IOptions<EnterspeedConfiguration> enterspeedConfiguration, IContentTypeService contentTypeService, IShortStringHelper shortStringHelper,
-            IDataTypeService dataTypeService, BlockListPropertyEditor blockListPropertyEditor, IConfigurationEditorJsonSerializer configurationEditorJsonSerializer)
+        public DocumentTypeBuilder(ILogger<DocumentTypeBuilder> logger, IContentTypeService contentTypeService, IShortStringHelper shortStringHelper,
+            IDataTypeService dataTypeService, BlockListPropertyEditor blockListPropertyEditor, IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
+            IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration)
         {
-            _enterspeedConfiguration = enterspeedConfiguration?.Value;
             _logger = logger;
             _contentTypeService = contentTypeService;
             _shortStringHelper = shortStringHelper;
             _dataTypeService = dataTypeService;
             _blockListPropertyEditor = blockListPropertyEditor;
             _configurationEditorJsonSerializer = configurationEditorJsonSerializer;
+            _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
             _dataTypes = _dataTypeService.GetAll();
             _contentTypes = new List<ContentTypeSort>();
         }
@@ -56,14 +57,7 @@ namespace Umbraco9.Migrator.Builders
 
                 var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer)
                 {
-                    Name = BlockListName,
-                    Configuration = new BlockListConfiguration()
-                    {
-                        Blocks = new List<BlockListConfiguration.BlockConfiguration>()
-                        {
-
-                        }.ToArray()
-                    }
+                    Name = BlockListName
                 };
 
                 _dataTypeService.Save(dataType);
@@ -91,17 +85,18 @@ namespace Umbraco9.Migrator.Builders
             {
                 var newPageDocumentType = new ContentType(_shortStringHelper, container.Result.Entity.Id)
                 {
-                    Alias = page.Meta.SourceEntityAlias.FirstCharToLower(),
-                    Name = page.Meta.SourceEntityName.FirstCharToUpper(),
-                    AllowedAsRoot = string.Equals(page.Meta.SourceEntityAlias, _enterspeedConfiguration.RootPageType, StringComparison.InvariantCultureIgnoreCase)
+                    Alias = page.Meta.SourceEntityAlias.ToFirstLowerInvariant(),
+                    Name = page.Meta.SourceEntityName.ToFirstUpperInvariant(),
+                    AllowedAsRoot = string.Equals(page.Meta.SourceEntityAlias, _umbracoMigrationConfiguration.RootDocType, StringComparison.InvariantCultureIgnoreCase)
                 };
 
-                newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, _dataTypes.FirstOrDefault(d =>
-                    d.Name == BlockListName))
+                newPageDocumentType.AddPropertyGroup("pageContent", "Page Content");
+                newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper,
+                    _dataTypes.FirstOrDefault(d => d.Name == BlockListName))
                 {
                     Name = "Content",
-                    Alias = "content"
-                });
+                    Alias = "content",
+                }, "pageContent");
 
                 _contentTypeService.Save(newPageDocumentType);
 
@@ -135,8 +130,8 @@ namespace Umbraco9.Migrator.Builders
                 {
                     var newComponentDocumentType = new ContentType(_shortStringHelper, container.Result.Entity.Id)
                     {
-                        Alias = component.Meta.SourceEntityAlias.FirstCharToLower(),
-                        Name = component.Meta.SourceEntityName.FirstCharToUpper(),
+                        Alias = component.Meta.SourceEntityAlias.ToFirstLowerInvariant(),
+                        Name = component.Meta.SourceEntityName.ToFirstUpperInvariant(),
                         IsElement = true
                     };
 
@@ -170,7 +165,8 @@ namespace Umbraco9.Migrator.Builders
                                 d.Name.ToLower() == "textstring");
                             break;
                         case "textarea":
-                            dataType = dataTypeDefinitions.FirstOrDefault(d => d.Name.ToLower() == "textarea");
+                            dataType = dataTypeDefinitions.FirstOrDefault(d =>
+                                d.Name.ToLower() == "textarea");
                             break;
                         case "rte":
                             dataType = dataTypeDefinitions.FirstOrDefault(d =>
@@ -194,11 +190,14 @@ namespace Umbraco9.Migrator.Builders
                     }
 
                     if (dataType != null)
+                    {
+                        newComponentDocumentType.AddPropertyGroup("componentData", "Component Data");
                         newComponentDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
                         {
-                            Name = property.Name.FirstCharToUpper(),
-                            Alias = property.Alias.FirstCharToLower(),
-                        });
+                            Name = property.Name.ToFirstUpperInvariant(),
+                            Alias = property.Alias.ToFirstLowerInvariant(),
+                        }, "componentData", "Component Data");
+                    }
                 }
             }
         }
@@ -208,19 +207,14 @@ namespace Umbraco9.Migrator.Builders
             var blockListType = _dataTypeService.GetDataType(BlockListName);
             var elementTypes = _contentTypeService.GetAll().Where(c => c.IsElement);
 
-            var blocks = new List<BlockListConfiguration.BlockConfiguration>();
-            foreach (var block in elementTypes)
-            {
-                blocks.Add(new BlockListConfiguration.BlockConfiguration()
-                {
-                    ContentElementTypeKey = block.Key,
-                    Label = block.Name
-                });
-            }
-
             blockListType.Configuration = new BlockListConfiguration()
             {
-                Blocks = blocks.ToArray()
+                Blocks = elementTypes.Select(block =>
+                    new BlockListConfiguration.BlockConfiguration()
+                    {
+                        ContentElementTypeKey = block.Key,
+                        Label = block.Name
+                    }).ToArray()
             };
 
             _dataTypeService.Save(blockListType);

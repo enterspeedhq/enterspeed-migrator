@@ -9,7 +9,7 @@ namespace Umbraco9.Migrator.Package
         public void Compose(IUmbracoBuilder builder)
         {
             builder.Services.RegisterEnterspeedServices(builder.Config);
-            builder.Services.RegisterUmbraco9MigratorService();
+            builder.Services.RegisterUmbraco9MigratorService(builder.Config);
             builder.Dashboards().Add<EnterspeedMigratorDashboard>();
         }
     }

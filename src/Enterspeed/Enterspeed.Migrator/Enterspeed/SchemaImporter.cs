@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Enterspeed.Contracts;
-using Enterspeed.Migrator.Helpers;
 using Enterspeed.Migrator.Models;
 using Microsoft.Extensions.Logging;
 
@@ -14,14 +10,12 @@ namespace Enterspeed.Migrator.Enterspeed
     public class SchemaImporter : ISchemaImporter
     {
         private readonly IApiService _apiService;
-        private readonly ILogger<SchemaImporter> _logger;
         private readonly IElementsResolver _elementsResolver;
         private readonly IPagesResolver _pagesResolver;
 
         public SchemaImporter(IApiService apiService, ILogger<SchemaImporter> logger, IElementsResolver elementsResolver, IPagesResolver pagesResolver)
         {
             _apiService = apiService;
-            _logger = logger;
             _elementsResolver = elementsResolver;
             _pagesResolver = pagesResolver;
         }
