@@ -174,7 +174,7 @@ namespace Umbraco9.Migrator.Builders
                             break;
                         case "image":
                             dataType = dataTypeDefinitions.FirstOrDefault(d =>
-                                d.Name.ToLower() == "media picker");
+                                d.Name.ToLower() == "textstring");
                             break;
                         case "boolean":
                             dataType = dataTypeDefinitions.FirstOrDefault(d =>
@@ -182,7 +182,7 @@ namespace Umbraco9.Migrator.Builders
                             break;
                         case "link":
                             dataType = dataTypeDefinitions.FirstOrDefault(d =>
-                                d.Name.ToLower() == "multi url picker");
+                                d.Name.ToLower() == "textstring");
                             break;
                         default:
                             dataType = null;

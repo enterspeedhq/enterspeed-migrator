@@ -9,6 +9,7 @@ namespace Enterspeed.Migrator.Models
         {
             Properties = new List<IPropertyType>();
         }
+        
         public EntityTypeMeta Meta { get; set; }
         public List<IPropertyType> Properties { get; set; }
     }

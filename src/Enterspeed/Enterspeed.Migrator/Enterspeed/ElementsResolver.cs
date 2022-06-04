@@ -51,7 +51,6 @@ namespace Enterspeed.Migrator.Enterspeed
             return entityTypes;
         }
 
-
         private EntityTypeMeta GetMetaDataForElement(Dictionary<string, object> dataViewDict)
         {
             if (!dataViewDict.TryGetValue(_configuration.MigrationComponentMetaData,

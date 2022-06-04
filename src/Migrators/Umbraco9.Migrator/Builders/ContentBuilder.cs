@@ -57,49 +57,37 @@ namespace Umbraco9.Migrator.Builders
 
         private Blocklist PopulateBlockList(PageEntityType pageEntityType)
         {
-            var blockListData = new List<Dictionary<string, string>>();
+            var blockListData = new List<Dictionary<string, object>>();
             var dictionaryUdi = new List<Dictionary<string, string>>();
-            var settingsList = new List<Dictionary<string, string>>();
 
             foreach (var element in pageEntityType.Components)
             {
                 if (element.Properties == null || element.Meta == null) continue;
 
-                var dataToAdd = new Dictionary<string, string>();
+                var dataToAdd = new Dictionary<string, object>();
                 foreach (var property in element.Properties)
                 {
                     dataToAdd.Add(property.Alias.ToFirstLowerInvariant(), property.Value);
                 }
 
                 var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
-                var settingsUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
+                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, element.Meta.SourceEntityAlias,
+                    StringComparison.InvariantCultureIgnoreCase));
 
                 dataToAdd.Add("udi", contentUdi);
+                dataToAdd.Add("contentTypeKey", contentType.Key.ToString());
                 blockListData.Add(dataToAdd);
 
                 dictionaryUdi.Add(new Dictionary<string, string> {
                     { "contentUdi", contentUdi },
-                    { "settingsUdi", settingsUdi }
-                });
-
-                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, element.Meta.SourceEntityAlias,
-                    StringComparison.InvariantCultureIgnoreCase));
-
-                settingsList.Add(new Dictionary<string, string>
-                {
-                    //in this case the settings is set to use the contentTypeKey as the content - Person document type
-                    {"contentTypeKey", contentType.Key.ToString()},
-                    {"udi", settingsUdi},
-                    //role is our setting for this blocklist - not a property for the actual content
-                    {"role", "content editor"}
                 });
             }
 
             return new Blocklist
             {
-                layout = new BlockListUdi(dictionaryUdi, settingsList),
+                layout = new BlockListUdi(dictionaryUdi),
                 contentData = blockListData,
-                settingsData = settingsList
+                settingsData = new List<Dictionary<string, string>>()
             };
         }
     }

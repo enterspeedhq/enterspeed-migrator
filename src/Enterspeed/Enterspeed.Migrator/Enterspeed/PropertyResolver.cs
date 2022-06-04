@@ -17,11 +17,11 @@ namespace Enterspeed.Migrator.Enterspeed
                     var propertyMeta = view[metaKey] as Dictionary<string, object>;
                     return new PropertyType()
                     {
-                        Value = property?.ToString(),
+                        Value = property,
                         Alias = key,
                         Name = key,
                         Type = propertyMeta?["dataType"].ToString(),
-                        Source = propertyMeta?["source"].ToString(),
+                        Source = propertyMeta?["source"].ToString()
                     };
                 }
             }
