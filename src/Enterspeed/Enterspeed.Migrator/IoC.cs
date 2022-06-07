@@ -31,8 +31,7 @@ namespace Enterspeed.Migrator
             serviceCollection.AddTransient<IJsonSerializer, SystemTextJsonSerializer>();
             serviceCollection.AddOptions();
 
-            serviceCollection.Configure<EnterspeedConfiguration>(setting =>
-                configuration.GetSection(EnterspeedConfiguration.ConfigurationKey).Bind(setting));
+            serviceCollection.Configure<EnterspeedConfiguration>(setting => configuration.GetSection(EnterspeedConfiguration.ConfigurationKey).Bind(setting));
         }
     }
 }

@@ -28,6 +28,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Migrators\Umbraco9.Migrator\Umbraco9.Migrator.csproj" />
+      <ProjectReference Include="..\Umbraco9.Migrator\Umbraco9.Migrator.csproj" />
     </ItemGroup>
 </Project>

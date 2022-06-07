@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Enterspeed\Enterspeed.Migrator\Enterspeed.Migrator.csproj" />
+      <ProjectReference Include="..\..\..\Enterspeed\Enterspeed.Migrator\Enterspeed.Migrator.csproj" />
     </ItemGroup>
 
     <ItemGroup>
