@@ -56,7 +56,8 @@ namespace Enterspeed.Migrator.Enterspeed
             if (!dataViewDict.TryGetValue(_configuration.MigrationComponentMetaData,
                     out var componentMetaData)) return null;
 
-            if (componentMetaData is not Dictionary<string, object> componentMetaDataDict || !componentMetaDataDict.TryGetValue("view", out var metaDataViewValue)) return null;
+            if (componentMetaData is not Dictionary<string, object> componentMetaDataDict ||
+                !componentMetaDataDict.TryGetValue("view", out var metaDataViewValue)) return null;
 
             if (metaDataViewValue is not Dictionary<string, object> metaDataViewDict) return null;
 
@@ -79,7 +80,6 @@ namespace Enterspeed.Migrator.Enterspeed
                         break;
                 }
             }
-
 
             return metaDataProperty;
         }

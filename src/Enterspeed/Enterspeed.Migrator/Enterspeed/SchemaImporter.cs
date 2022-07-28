@@ -3,7 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
-using Microsoft.Extensions.Logging;
+using Enterspeed.Migrator.Settings;
+using Microsoft.Extensions.Options;
 
 namespace Enterspeed.Migrator.Enterspeed
 {
@@ -12,12 +13,17 @@ namespace Enterspeed.Migrator.Enterspeed
         private readonly IApiService _apiService;
         private readonly IElementsResolver _elementsResolver;
         private readonly IPagesResolver _pagesResolver;
+        private readonly EnterspeedConfiguration _enterspeedConfiguration;
 
-        public SchemaImporter(IApiService apiService, ILogger<SchemaImporter> logger, IElementsResolver elementsResolver, IPagesResolver pagesResolver)
+        public SchemaImporter(IApiService apiService,
+            IElementsResolver elementsResolver,
+            IPagesResolver pagesResolver,
+            IOptions<EnterspeedConfiguration> enterspeedConfiguration)
         {
             _apiService = apiService;
             _elementsResolver = elementsResolver;
             _pagesResolver = pagesResolver;
+            _enterspeedConfiguration = enterspeedConfiguration?.Value;
         }
 
         /// <summary>
@@ -33,7 +39,6 @@ namespace Enterspeed.Migrator.Enterspeed
             var apiResponses = await GetPageResponses(enterspeedResponse);
 
             return GetEntityTypes(apiResponses);
-
         }
 
         /// <summary>
@@ -43,9 +48,16 @@ namespace Enterspeed.Migrator.Enterspeed
         /// <returns>List of DeliveryApiResponse</returns>
         private async Task<PageResponse> GetPageResponses(EnterspeedResponse enterspeedResponse)
         {
+            var url = string.Empty;
+
+            foreach (var pageUrl in _enterspeedConfiguration.PageUrls)
+            {
+                url = enterspeedResponse.Views.Navigation.Self.View.Url.Replace(pageUrl, "");
+            }
+
             var pageResponse = new PageResponse
             {
-                DeliveryApiResponse = await _apiService.GetByUrlsAsync(enterspeedResponse.Views.Navigation.Self.View.Url)
+                DeliveryApiResponse = await _apiService.GetByUrlsAsync(url)
             };
 
             var children = await MapResponseAsync(enterspeedResponse.Views.Navigation?.Children);
@@ -59,19 +71,19 @@ namespace Enterspeed.Migrator.Enterspeed
             var pageResponses = new List<PageResponse>();
             foreach (var child in children)
             {
-                var response = await _apiService.GetByUrlsAsync(child.View.Self.View.Url);
+                var response = await _apiService.GetByUrlsAsync(child?.View?.Self?.View?.Url);
                 var pageResponse = new PageResponse
                 {
                     DeliveryApiResponse = response
                 };
 
-                if (child.View.Children != null && child.View.Children.Any())
+                if (child?.View?.Children != null && child.View.Children.Any())
                 {
-                    pageResponse.Children.AddRange(await MapResponseAsync(child.View.Children));
+                    var mappedResponses = await MapResponseAsync(child.View.Children);
+                    pageResponse.Children.AddRange(mappedResponses);
                 }
 
                 pageResponses.Add(pageResponse);
-
             }
 
             return pageResponses;

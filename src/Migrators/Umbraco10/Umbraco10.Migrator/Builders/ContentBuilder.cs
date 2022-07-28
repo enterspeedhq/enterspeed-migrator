@@ -20,7 +20,9 @@ namespace Umbraco10.Migrator.Builders
         private readonly IEnumerable<IContentType> _contentTypes;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
 
-        public ContentBuilder(IContentTypeService contentTypeService, IContentService contentService, IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration)
+        public ContentBuilder(IContentTypeService contentTypeService,
+            IContentService contentService,
+            IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration)
         {
             _contentService = contentService;
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
@@ -32,11 +34,13 @@ namespace Umbraco10.Migrator.Builders
             foreach (var pageEntityType in pageEntityTypes)
             {
                 var isRoot = pageEntityType.Meta.SourceEntityAlias.Contains(_umbracoMigrationConfiguration.RootDocType);
-                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, pageEntityType.Meta.SourceEntityAlias, StringComparison.InvariantCultureIgnoreCase));
+                var contentType = _contentTypes.FirstOrDefault(c =>
+                    string.Equals(c.Alias, pageEntityType.Meta.SourceEntityAlias, StringComparison.InvariantCultureIgnoreCase));
 
                 if (parent == null && !isRoot) continue;
 
-                var contentToCreate = _contentService.Create(pageEntityType.Meta.ContentName, isRoot ? -1 : parent.Id, contentType);
+                var contentToCreate = _contentService.Create(pageEntityType.Meta.ContentName, isRoot ? -1 : parent.Id,
+                    contentType);
 
                 foreach (var property in pageEntityType.Properties)
                 {
@@ -71,14 +75,17 @@ namespace Umbraco10.Migrator.Builders
                 }
 
                 var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
-                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, element.Meta.SourceEntityAlias,
-                    StringComparison.InvariantCultureIgnoreCase));
+                var contentType = _contentTypes.FirstOrDefault(c =>
+                    string.Equals(c.Alias,
+                        element.Meta.SourceEntityAlias,
+                        StringComparison.InvariantCultureIgnoreCase));
 
                 dataToAdd.Add("udi", contentUdi);
                 dataToAdd.Add("contentTypeKey", contentType.Key.ToString());
                 blockListData.Add(dataToAdd);
 
-                dictionaryUdi.Add(new Dictionary<string, string> {
+                dictionaryUdi.Add(new Dictionary<string, string>
+                {
                     { "contentUdi", contentUdi },
                 });
             }

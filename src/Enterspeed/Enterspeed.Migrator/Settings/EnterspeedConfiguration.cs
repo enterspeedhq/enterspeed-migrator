@@ -7,5 +7,7 @@
         public string NavigationHandle { get; set; }
         public string MigrationPageMetaData { get; set; }
         public string MigrationComponentMetaData { get; set; }
+        public string[] ComponentPropertyTypeKeys { get; set; }
+        public string[] PageUrls { get; set; }
     }
 }

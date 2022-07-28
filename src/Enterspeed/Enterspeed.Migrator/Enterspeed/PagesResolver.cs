@@ -33,34 +33,19 @@ namespace Enterspeed.Migrator.Enterspeed
         public EntityTypeMeta GetMetaDataForPage(DeliveryApiResponse deliveryApiResponse)
         {
             var route = deliveryApiResponse.Response.Route;
-
             if (!deliveryApiResponse.Response.Route.TryGetValue(_configuration.MigrationPageMetaData, out var migrationPageMetaData))
             {
                 throw new NullReferenceException($"{_configuration.MigrationPageMetaData} not found on the schema for {JsonSerializer.Serialize(route)}");
             }
 
-            // Getting views
-            if (migrationPageMetaData is not Dictionary<string, object> migrationPageMetaDataDict || !migrationPageMetaDataDict.TryGetValue("view", out var view))
+            var serialized = JsonSerializer.Serialize(migrationPageMetaData);
+            var parsedMetaData = JsonSerializer.Deserialize<EntityTypeMeta>(serialized);
+            if (parsedMetaData != null)
             {
-                throw new NullReferenceException($"View property not found in route {JsonSerializer.Serialize(route)}");
+                return parsedMetaData;
             }
 
-            // Getting page meta data property value
-            if (view is not Dictionary<string, object> viewDict || !viewDict.TryGetValue("metaData", out var metaData))
-            {
-                throw new NullReferenceException($"MetaData property not found in route {JsonSerializer.Serialize(route)}");
-            }
-
-            // Get page metadata property and map values
-            if (metaData is not Dictionary<string, object> metaDataDict ||
-                !metaDataDict.TryGetValue("sourceEntityAlias", out var alias) ||
-                !metaDataDict.TryGetValue("sourceEntityName", out var name) ||
-                !metaDataDict.TryGetValue("contentName", out var contentName))
-            {
-                throw new NullReferenceException($"Meta data values could not be mapped {JsonSerializer.Serialize(route)}");
-            }
-
-            return new EntityTypeMeta(alias.ToString(), name.ToString(), contentName.ToString());
+            throw new NullReferenceException("Something went wrong when trying to return metadata ");
         }
     }
 }
