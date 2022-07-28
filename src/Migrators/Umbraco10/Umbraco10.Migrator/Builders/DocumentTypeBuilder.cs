@@ -32,7 +32,6 @@ namespace Umbraco10.Migrator.Builders
         const string ElementsContainerName = "Migrated Elements";
         private const string BlockListName = "BlockList.Custom";
 
-
         public DocumentTypeBuilder(ILogger<DocumentTypeBuilder> logger, IContentTypeService contentTypeService, IShortStringHelper shortStringHelper,
             IDataTypeService dataTypeService, BlockListPropertyEditor blockListPropertyEditor, IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
             IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration)
