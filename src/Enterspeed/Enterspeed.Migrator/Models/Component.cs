@@ -3,9 +3,9 @@ using Enterspeed.Migrator.ValueTypes;
 
 namespace Enterspeed.Migrator.Models
 {
-    public class EntityType
+    public class Component
     {
-        public EntityType()
+        public Component()
         {
             Properties = new List<IPropertyType>();
         }

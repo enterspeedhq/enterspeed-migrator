@@ -2,20 +2,19 @@
 using System.Collections.Generic;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Models;
-using Enterspeed.Migrator.ValueTypes;
 
 namespace Enterspeed.Migrator.Enterspeed.Contracts
 {
     public interface IPagesResolver
     {
+        List<PageEntityType> Resolve(PageResponse pageResponse);
+
         /// <summary>
         /// Gets meta data objects for pages
         /// </summary>
-        /// <param name="deliveryApiResponse"></param>
+        /// <param name="pageResponse"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        EntityTypeMeta GetMetaDataForPage(DeliveryApiResponse deliveryApiResponse);
-
-        List<IPropertyType> GetAllPropertyTypesForPage();
+        EntityTypeMeta GetMetaDataForPage(DeliveryApiResponse pageResponse);
     }
 }

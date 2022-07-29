@@ -13,7 +13,7 @@ namespace Enterspeed.Migrator.Models
 
         public EntityTypeMeta Meta { get; set; }
         public List<IPropertyType> Properties { get; set; }
-        public List<EntityType> Components { get; set; }
+        public List<Component> Components { get; set; }
         public List<PageEntityType> Children { get; set; }
     }
 }

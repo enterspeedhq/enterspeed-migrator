@@ -78,7 +78,7 @@ namespace Umbraco9.Migrator.Builders
             }
         }
 
-        private void CreatePageDocType(EntityType page, Attempt<OperationResult<OperationResultType, EntityContainer>> container, int sortOrder)
+        private void CreatePageDocType(Component page, Attempt<OperationResult<OperationResultType, EntityContainer>> container, int sortOrder)
         {
             var contentTypes = _contentTypeService.GetAllContentTypeAliases();
             if (!contentTypes.Any(c => c.Equals(page.Meta.SourceEntityAlias)))
@@ -150,7 +150,7 @@ namespace Umbraco9.Migrator.Builders
             return container;
         }
 
-        private void AddPropertyTypes(EntityType component, ContentType newComponentDocumentType)
+        private void AddPropertyTypes(Component component, ContentType newComponentDocumentType)
         {
             var dataTypeDefinitions = _dataTypes;
             if (dataTypeDefinitions != null && dataTypeDefinitions.Any())

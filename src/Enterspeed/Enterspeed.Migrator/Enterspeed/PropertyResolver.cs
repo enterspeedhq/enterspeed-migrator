@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Text.Json;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.ValueTypes;
 
@@ -6,27 +6,15 @@ namespace Enterspeed.Migrator.Enterspeed
 {
     public class PropertyResolver : IPropertyResolver
     {
-        public IPropertyType Resolve(string key, Dictionary<string, object> view)
+        public IPropertyType Resolve(JsonProperty jsonProperty)
         {
-            if (!key.Contains("meta"))
+            return new PropertyType()
             {
-                var metaKey = key + "_meta";
-                var property = view[key];
-                if (view.ContainsKey(metaKey))
-                {
-                    var propertyMeta = view[metaKey] as Dictionary<string, object>;
-                    return new PropertyType()
-                    {
-                        Value = property,
-                        Alias = key,
-                        Name = key,
-                        Type = propertyMeta?["dataType"].ToString(),
-                        Source = propertyMeta?["source"].ToString()
-                    };
-                }
-            }
-
-            return null;
+                Value = jsonProperty.Value,
+                Alias = jsonProperty.Name,
+                Name = jsonProperty.Name,
+                Type = jsonProperty.GetType().Name,
+            };
         }
     }
 }

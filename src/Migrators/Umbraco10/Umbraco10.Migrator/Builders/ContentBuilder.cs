@@ -49,6 +49,7 @@ namespace Umbraco10.Migrator.Builders
 
                 var blockList = PopulateBlockList(pageEntityType);
                 var blockListSerialized = JsonConvert.SerializeObject(blockList);
+
                 contentToCreate.SetValue(_umbracoMigrationConfiguration.ContentPropertyAlias, blockListSerialized);
                 _contentService.Save(contentToCreate);
 

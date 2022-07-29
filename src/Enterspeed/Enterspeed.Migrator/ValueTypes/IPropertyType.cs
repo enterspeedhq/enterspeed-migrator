@@ -1,4 +1,6 @@
-﻿namespace Enterspeed.Migrator.ValueTypes
+﻿using System.Collections.Generic;
+
+namespace Enterspeed.Migrator.ValueTypes
 {
     public interface IPropertyType
     {
@@ -6,5 +8,6 @@
         string Alias { get; set; }
         string Type { get; set; }
         object Value { get; set; }
+        public List<IPropertyType> ChildProperties { get; set; }
     }
 }

@@ -10,15 +10,13 @@ namespace Enterspeed.Migrator.Enterspeed
     public class SourceImporter : ISourceImporter
     {
         private readonly IApiService _apiService;
-        private readonly IElementsResolver _elementsResolver;
         private readonly IPagesResolver _pagesResolver;
         private readonly ILogger<SourceImporter> _logger;
 
-        public SourceImporter(IApiService apiService, IPagesResolver pagesResolver, IElementsResolver elementsResolver, ILogger<SourceImporter> logger)
+        public SourceImporter(IApiService apiService, IPagesResolver pagesResolver, ILogger<SourceImporter> logger)
         {
             _apiService = apiService;
             _pagesResolver = pagesResolver;
-            _elementsResolver = elementsResolver;
             _logger = logger;
         }
 
@@ -63,7 +61,6 @@ namespace Enterspeed.Migrator.Enterspeed
                 }
 
                 pageResponses.Add(pageResponse);
-
             }
 
             return pageResponses;
@@ -96,14 +93,14 @@ namespace Enterspeed.Migrator.Enterspeed
             var page = (new PageEntityType()
             {
                 Meta = metaDataForPage,
-                Components = new List<EntityType>()
+                Components = new List<Component>()
             });
 
-            var elementsOnPage = _elementsResolver.GetAllElementsForPage(pageResponse.DeliveryApiResponse);
-            foreach (var element in elementsOnPage)
-            {
-                page.Components.Add(element);
-            }
+            // var elementsOnPage = _elementsResolver.GetAllDataForPage(pageResponse.DeliveryApiResponse);
+            // foreach (var element in elementsOnPage)
+            // {
+            //     page.Components.Add(element);
+            // }
 
             return page;
         }

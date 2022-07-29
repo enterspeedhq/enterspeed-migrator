@@ -6,11 +6,11 @@ namespace Enterspeed.Migrator.Models
     {
         public EntityTypes()
         {
-            Pages = new List<EntityType>();
-            Components = new List<EntityType>();
+            Pages = new List<Component>();
+            Components = new List<Component>();
         }
 
-        public List<EntityType> Pages { get; }
-        public List<EntityType> Components { get; }
+        public List<Component> Pages { get; }
+        public List<Component> Components { get; }
     }
 }
