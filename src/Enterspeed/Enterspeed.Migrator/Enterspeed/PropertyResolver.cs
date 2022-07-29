@@ -13,7 +13,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 Value = jsonProperty.Value,
                 Alias = jsonProperty.Name,
                 Name = jsonProperty.Name,
-                Type = jsonProperty.GetType().Name,
+                Type = jsonProperty.Value.ValueKind.ToString()
             };
         }
     }

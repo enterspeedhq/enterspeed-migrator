@@ -28,12 +28,13 @@ namespace Umbraco10.Migrator.Builders
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
         private ContentType _root;
-        const string PagesContainerName = "Migrated Page Types";
-        const string ElementsContainerName = "Migrated Elements";
+        private const string PagesContainerName = "Migrated Page Types";
+        private const string ComponentsContainerName = "Migrated Components";
         private const string BlockListName = "BlockList.Custom";
 
         public DocumentTypeBuilder(ILogger<DocumentTypeBuilder> logger, IContentTypeService contentTypeService, IShortStringHelper shortStringHelper,
-            IDataTypeService dataTypeService, BlockListPropertyEditor blockListPropertyEditor, IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
+            IDataTypeService dataTypeService, BlockListPropertyEditor blockListPropertyEditor,
+            IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
             IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration)
         {
             _logger = logger;
@@ -47,7 +48,7 @@ namespace Umbraco10.Migrator.Builders
             _contentTypes = new List<ContentTypeSort>();
         }
 
-        public void BuildPageDocTypes(EntityTypes entityTypes)
+        public void BuildPageDocTypes(Schemas schemas)
         {
             try
             {
@@ -61,7 +62,7 @@ namespace Umbraco10.Migrator.Builders
 
                 _dataTypeService.Save(dataType);
 
-                foreach (var page in entityTypes.Pages)
+                foreach (var page in schemas.Pages)
                 {
                     CreatePageDocType(page, container, sortOrder);
                     sortOrder++;
@@ -77,21 +78,21 @@ namespace Umbraco10.Migrator.Builders
             }
         }
 
-        private void CreatePageDocType(Component page, Attempt<OperationResult<OperationResultType, EntityContainer>> container, int sortOrder)
+        private void CreatePageDocType(Schema page, Attempt<OperationResult<OperationResultType, EntityContainer>> container, int sortOrder)
         {
             var contentTypes = _contentTypeService.GetAllContentTypeAliases();
-            if (!contentTypes.Any(c => c.Equals(page.Meta.SourceEntityAlias)))
+            if (!contentTypes.Any(c => c.Equals(page.MetaSchema.SourceEntityAlias)))
             {
                 var newPageDocumentType = new ContentType(_shortStringHelper, container.Result.Entity.Id)
                 {
-                    Alias = page.Meta.SourceEntityAlias.ToFirstLowerInvariant(),
-                    Name = page.Meta.SourceEntityName.ToFirstUpperInvariant(),
-                    AllowedAsRoot = string.Equals(page.Meta.SourceEntityAlias, _umbracoMigrationConfiguration.RootDocType, StringComparison.InvariantCultureIgnoreCase)
+                    Alias = page.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
+                    Name = page.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
+                    AllowedAsRoot = string.Equals(page.MetaSchema.SourceEntityAlias, _umbracoMigrationConfiguration.RootDocType,
+                        StringComparison.InvariantCultureIgnoreCase)
                 };
 
                 newPageDocumentType.AddPropertyGroup("pageContent", "Page Content");
-                newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper,
-                    _dataTypes.FirstOrDefault(d => d.Name == BlockListName))
+                newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, _dataTypes.FirstOrDefault(d => d.Name == BlockListName))
                 {
                     Name = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstUpperInvariant(),
                     Alias = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstLowerInvariant()
@@ -117,20 +118,19 @@ namespace Umbraco10.Migrator.Builders
             return container;
         }
 
-        public void CreateElementTypes(EntityTypes entityTypes)
+        public void CreateComponents(Schemas schemas)
         {
             var container = CreateElementsContainer();
             var contentTypes = _contentTypeService.GetAllContentTypeAliases();
 
-
-            foreach (var component in entityTypes.Components)
+            foreach (var component in schemas.Components)
             {
-                if (!contentTypes.Any(c => c.Equals(component.Meta.SourceEntityAlias)))
+                if (!contentTypes.Any(c => c.Equals(component.MetaSchema.SourceEntityAlias)))
                 {
                     var newComponentDocumentType = new ContentType(_shortStringHelper, container.Result.Entity.Id)
                     {
-                        Alias = component.Meta.SourceEntityAlias.ToFirstLowerInvariant(),
-                        Name = component.Meta.SourceEntityName.ToFirstUpperInvariant(),
+                        Alias = component.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
+                        Name = component.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
                         IsElement = true
                     };
 
@@ -140,21 +140,22 @@ namespace Umbraco10.Migrator.Builders
                 }
             }
 
-            AddElementsToBlockList();
+            AddComponentsToBlockList();
         }
+
         private Attempt<OperationResult<OperationResultType, EntityContainer>> CreateElementsContainer()
         {
-            var container = _contentTypeService.CreateContainer(-1, Guid.NewGuid(), ElementsContainerName);
+            var container = _contentTypeService.CreateContainer(-1, Guid.NewGuid(), ComponentsContainerName);
             _contentTypeService.SaveContainer(container.Result.Entity);
             return container;
         }
 
-        private void AddPropertyTypes(Component component, ContentType newComponentDocumentType)
+        private void AddPropertyTypes(Schema schema, ContentType newComponentDocumentType)
         {
             var dataTypeDefinitions = _dataTypes;
             if (dataTypeDefinitions != null && dataTypeDefinitions.Any())
             {
-                foreach (var property in component.Properties)
+                foreach (var property in schema.Properties)
                 {
                     IDataType dataType;
                     switch (property.Type.ToLowerInvariant())
@@ -201,7 +202,7 @@ namespace Umbraco10.Migrator.Builders
             }
         }
 
-        private void AddElementsToBlockList()
+        private void AddComponentsToBlockList()
         {
             var blockListType = _dataTypeService.GetDataType(BlockListName);
             var elementTypes = _contentTypeService.GetAll().Where(c => c.IsElement);

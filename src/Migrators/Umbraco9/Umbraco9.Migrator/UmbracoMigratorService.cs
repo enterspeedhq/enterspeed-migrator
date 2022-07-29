@@ -8,19 +8,17 @@ namespace Umbraco9.Migrator
 {
     public class UmbracoMigratorService : IUmbracoMigratorService
     {
-        private readonly ISchemaImporter _schemaImporter;
+        private readonly ISchemaBuilder _schemaBuilder;
         private readonly IDocumentTypeBuilder _documentTypeBuilder;
-        private readonly ISourceImporter _sourceImporter;
         private readonly IContentBuilder _contentBuilder;
         private readonly ILogger<UmbracoMigratorService> _logger;
 
-        public UmbracoMigratorService(ISchemaImporter schemaImporter,
-            IDocumentTypeBuilder documentTypeBuilder, ISourceImporter sourceImporter, IContentBuilder contentBuilder,
+        public UmbracoMigratorService(ISchemaBuilder schemaBuilder,
+            IDocumentTypeBuilder documentTypeBuilder,IContentBuilder contentBuilder,
             ILogger<UmbracoMigratorService> logger)
         {
-            _schemaImporter = schemaImporter;
+            _schemaBuilder = schemaBuilder;
             _documentTypeBuilder = documentTypeBuilder;
-            _sourceImporter = sourceImporter;
             _contentBuilder = contentBuilder;
             _logger = logger;
         }
@@ -29,9 +27,6 @@ namespace Umbraco9.Migrator
         {
             try
             {
-                var entityTypes = await _schemaImporter.ImportSchemasAsync();
-                _documentTypeBuilder.BuildPageDocTypes(entityTypes);
-                _documentTypeBuilder.CreateElementTypes(entityTypes);
             }
             catch (Exception e)
             {
@@ -44,8 +39,6 @@ namespace Umbraco9.Migrator
         {
             try
             {
-                var data = await _sourceImporter.ImportDataAsync();
-                _contentBuilder.BuildContentPages(data);
             }
             catch (Exception e)
             {

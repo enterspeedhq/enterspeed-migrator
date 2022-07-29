@@ -3,14 +3,17 @@ using Enterspeed.Migrator.ValueTypes;
 
 namespace Enterspeed.Migrator.Models
 {
-    public class Component
+    public class PageData
     {
-        public Component()
+        public PageData()
         {
             Properties = new List<IPropertyType>();
+            Children = new List<PageData>();
         }
-        
-        public EntityTypeMeta Meta { get; set; }
+
+        public MetaSchema MetaSchema { get; set; }
         public List<IPropertyType> Properties { get; set; }
+        public List<Schema> Components { get; set; }
+        public List<PageData> Children { get; set; }
     }
 }

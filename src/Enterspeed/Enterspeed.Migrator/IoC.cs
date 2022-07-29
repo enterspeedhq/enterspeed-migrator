@@ -19,8 +19,7 @@ namespace Enterspeed.Migrator
         public static void RegisterEnterspeedServices(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection.AddTransient<IApiService, ApiService>();
-            serviceCollection.AddTransient<ISchemaImporter, SchemaImporter>();
-            serviceCollection.AddTransient<ISourceImporter, SourceImporter>();
+            serviceCollection.AddTransient<ISchemaBuilder, SchemaBuilder>();
             serviceCollection.AddTransient<IEnterspeedDeliveryService, EnterspeedDeliveryService>();
             serviceCollection.AddTransient<IEnterspeedConfigurationProvider, InMemoryConfigurationProvider>();
             serviceCollection.AddTransient<IPropertyResolver, PropertyResolver>();
