@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Delivery.Sdk.Api.Services;
 using Enterspeed.Migrator.Enterspeed.Contracts;
-using Enterspeed.Migrator.Models;
+using Enterspeed.Migrator.Models.Response;
 using Enterspeed.Migrator.Settings;
 using Microsoft.Extensions.Options;
 

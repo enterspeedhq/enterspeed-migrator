@@ -5,6 +5,7 @@ using System.Text.Json;
 using Enterspeed.Delivery.Sdk.Api.Models;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
+using Enterspeed.Migrator.Models.Response;
 using Enterspeed.Migrator.Settings;
 using Enterspeed.Migrator.ValueTypes;
 using Microsoft.Extensions.Options;
@@ -29,8 +30,7 @@ namespace Enterspeed.Migrator.Enterspeed
         /// </summary>
         /// <param name="deliveryApiResponse"></param>
         /// <returns></returns>
-        /// <exception cref="NullReferenceException"></exception>
-        public EntityTypeMeta GetMetaDataForPage(DeliveryApiResponse deliveryApiResponse)
+        public MetaSchema GetMetaData(DeliveryApiResponse deliveryApiResponse)
         {
             var route = deliveryApiResponse.Response.Route;
             if (!deliveryApiResponse.Response.Route.TryGetValue(_configuration.MigrationPageMetaData, out var migrationPageMetaData))
@@ -39,7 +39,7 @@ namespace Enterspeed.Migrator.Enterspeed
             }
 
             var serialized = JsonSerializer.Serialize(migrationPageMetaData);
-            var parsedMetaData = JsonSerializer.Deserialize<EntityTypeMeta>(serialized);
+            var parsedMetaData = JsonSerializer.Deserialize<MetaSchema>(serialized);
             if (parsedMetaData != null)
             {
                 return parsedMetaData;
@@ -48,9 +48,9 @@ namespace Enterspeed.Migrator.Enterspeed
             throw new NullReferenceException("Something went wrong when trying to return metadata ");
         }
 
-        public List<PageEntityType> ResolveFromRoot(PageResponse pageResponse)
+        public List<PageData> ResolveFromRoot(PageResponse pageResponse)
         {
-            var pageEntityTypes = new List<PageEntityType>();
+            var pageEntityTypes = new List<PageData>();
             if (pageResponse.DeliveryApiResponse?.Response != null)
             {
                 var page = GetPageData(pageResponse.DeliveryApiResponse?.Response);
@@ -83,45 +83,45 @@ namespace Enterspeed.Migrator.Enterspeed
             return null;
         }
 
-        public PageEntityType GetPageData(DeliveryResponse deliveryResponse)
+        public PageData GetPageData(DeliveryResponse deliveryResponse)
         {
             var route = deliveryResponse.Route;
             var routeSerialized = JsonSerializer.SerializeToElement(route);
 
-            var pageEntityType = new PageEntityType();
-            MapPageEntityType(pageEntityType, routeSerialized);
+            var pageEntityType = new PageData();
+            MapPageData(pageEntityType, routeSerialized);
 
             return pageEntityType;
         }
 
-        private void MapPageEntityType(PageEntityType pageEntityType, JsonElement route, IPropertyType parentProperty = null)
+        private void MapPageData(PageData pageData, JsonElement route, IPropertyType parentProperty = null)
         {
             if (route.ValueKind != JsonValueKind.Null)
             {
                 foreach (var jsonProperty in route.EnumerateObject())
                 {
-                    MapPageEntityType(pageEntityType, jsonProperty, parentProperty);
+                    MapPageData(pageData, jsonProperty, parentProperty);
                 }
             }
         }
 
-        private void MapPageEntityType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void MapPageData(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
             switch (jsonProperty.Value.ValueKind)
             {
                 case JsonValueKind.Object:
-                    CreateObjectType(pageEntityType, jsonProperty, parentProperty);
+                    CreateObjectType(pageData, jsonProperty, parentProperty);
                     break;
                 case JsonValueKind.Array:
-                    CreateArrayType(pageEntityType, jsonProperty, parentProperty);
+                    CreateArrayType(pageData, jsonProperty, parentProperty);
                     break;
                 default:
-                    CreateSimpleType(pageEntityType, jsonProperty, parentProperty);
+                    CreateSimpleType(pageData, jsonProperty, parentProperty);
                     break;
             }
         }
 
-        private void CreateArrayType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
             if (jsonProperty.Value.ValueKind == JsonValueKind.Array && jsonProperty.Value.GetArrayLength() > 0)
             {
@@ -134,14 +134,14 @@ namespace Enterspeed.Migrator.Enterspeed
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    MapPageEntityType(pageEntityType, element, newParent);
+                    MapPageData(pageData, element, newParent);
                 }
 
-                pageEntityType.Properties.Add(newParent);
+                pageData.Properties.Add(newParent);
             }
         }
 
-        private void CreateObjectType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
             // If is a complex type 
             if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
@@ -157,15 +157,15 @@ namespace Enterspeed.Migrator.Enterspeed
 
                     foreach (var childProperty in listOfProperties)
                     {
-                        MapPageEntityType(pageEntityType, childProperty, newParent);
+                        MapPageData(pageData, childProperty, newParent);
                     }
 
-                    pageEntityType.Properties.Add(newParent);
+                    pageData.Properties.Add(newParent);
                 }
             }
         }
 
-        private void CreateSimpleType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
             var property = _propertyResolver.Resolve(jsonProperty);
             if (parentProperty != null)
@@ -174,7 +174,7 @@ namespace Enterspeed.Migrator.Enterspeed
             }
             else
             {
-                pageEntityType.Properties.Add(property);
+                pageData.Properties.Add(property);
             }
         }
     }

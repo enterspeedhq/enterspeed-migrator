@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Enterspeed.Migrator.Models
 {
-    public class EntityTypeMeta
+    public class MetaSchema
     {
         [JsonPropertyName("sourceEntityAlias")]
         public string SourceEntityAlias { get; set; }

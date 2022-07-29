@@ -1,9 +1,7 @@
-﻿// Root myDeserializedClass = JsonSerializer.Deserialize<Root>(myJsonResponse);
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Enterspeed.Migrator.Models
+namespace Enterspeed.Migrator.Models.Response
 {
     public class Meta
     {

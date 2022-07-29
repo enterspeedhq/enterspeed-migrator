@@ -27,16 +27,16 @@ namespace Umbraco9.Migrator.Builders
             _contentTypes = contentTypeService.GetAll();
         }
 
-        public void BuildContentPages(List<PageEntityType> pageEntityTypes, IContent parent = null)
+        public void BuildContentPages(List<PageData> pageEntityTypes, IContent parent = null)
         {
             foreach (var pageEntityType in pageEntityTypes)
             {
-                var isRoot = pageEntityType.Meta.SourceEntityAlias.Contains(_umbracoMigrationConfiguration.RootDocType);
-                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, pageEntityType.Meta.SourceEntityAlias, StringComparison.InvariantCultureIgnoreCase));
+                var isRoot = pageEntityType.MetaSchema.SourceEntityAlias.Contains(_umbracoMigrationConfiguration.RootDocType);
+                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, pageEntityType.MetaSchema.SourceEntityAlias, StringComparison.InvariantCultureIgnoreCase));
 
                 if (parent == null && !isRoot) continue;
 
-                var contentToCreate = _contentService.Create(pageEntityType.Meta.ContentName, isRoot ? -1 : parent.Id, contentType);
+                var contentToCreate = _contentService.Create(pageEntityType.MetaSchema.ContentName, isRoot ? -1 : parent.Id, contentType);
 
                 foreach (var property in pageEntityType.Properties)
                 {
@@ -55,14 +55,14 @@ namespace Umbraco9.Migrator.Builders
             }
         }
 
-        private Blocklist PopulateBlockList(PageEntityType pageEntityType)
+        private Blocklist PopulateBlockList(PageData pageData)
         {
             var blockListData = new List<Dictionary<string, object>>();
             var dictionaryUdi = new List<Dictionary<string, string>>();
 
-            foreach (var element in pageEntityType.Components)
+            foreach (var element in pageData.Components)
             {
-                if (element.Properties == null || element.Meta == null) continue;
+                if (element.Properties == null || element.MetaSchema == null) continue;
 
                 var dataToAdd = new Dictionary<string, object>();
                 foreach (var property in element.Properties)
@@ -71,7 +71,7 @@ namespace Umbraco9.Migrator.Builders
                 }
 
                 var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
-                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, element.Meta.SourceEntityAlias,
+                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, element.MetaSchema.SourceEntityAlias,
                     StringComparison.InvariantCultureIgnoreCase));
 
                 dataToAdd.Add("udi", contentUdi);

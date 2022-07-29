@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Enterspeed.Delivery.Sdk.Api.Models;
 
-namespace Enterspeed.Migrator.Models
+namespace Enterspeed.Migrator.Models.Response
 {
     public class PageResponse
     {
