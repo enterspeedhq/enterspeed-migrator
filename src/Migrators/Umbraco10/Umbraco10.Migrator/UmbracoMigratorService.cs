@@ -33,10 +33,10 @@ namespace Umbraco10.Migrator
             try
             {
                 var navigation = await _apiService.GetNavigationAsync();
-                
+
                 // Page response is root level node/item
                 var rootLevelResponse = await _apiService.GetPageResponsesAsync(navigation);
-                var pages = _pagesResolver.Resolve(rootLevelResponse);
+                var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse);
             }
             catch (Exception e)
             {

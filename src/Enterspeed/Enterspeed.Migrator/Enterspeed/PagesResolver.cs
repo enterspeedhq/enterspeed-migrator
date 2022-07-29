@@ -48,7 +48,7 @@ namespace Enterspeed.Migrator.Enterspeed
             throw new NullReferenceException("Something went wrong when trying to return metadata ");
         }
 
-        public List<PageEntityType> Resolve(PageResponse pageResponse)
+        public List<PageEntityType> ResolveFromRoot(PageResponse pageResponse)
         {
             var pageEntityTypes = new List<PageEntityType>();
             var page = GetPageData(pageResponse.DeliveryApiResponse?.Response);
@@ -62,7 +62,7 @@ namespace Enterspeed.Migrator.Enterspeed
                     {
                         foreach (var responseChild in deliveryResponse.Children)
                         {
-                            var childEntityTypes = Resolve(responseChild);
+                            var childEntityTypes = ResolveFromRoot(responseChild);
                             page.Children.AddRange(childEntityTypes);
                         }
                     }

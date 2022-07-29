@@ -7,7 +7,7 @@ namespace Enterspeed.Migrator.Enterspeed.Contracts
 {
     public interface IPagesResolver
     {
-        List<PageEntityType> Resolve(PageResponse pageResponse);
+        List<PageEntityType> ResolveFromRoot(PageResponse pageResponse);
 
         /// <summary>
         /// Gets meta data objects for pages
