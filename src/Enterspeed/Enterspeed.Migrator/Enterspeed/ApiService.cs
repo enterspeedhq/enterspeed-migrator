@@ -67,7 +67,14 @@ namespace Enterspeed.Migrator.Enterspeed
             var pageResponses = new List<PageResponse>();
             foreach (var child in children)
             {
-                var response = await GetByUrlsAsync(child?.View?.Self?.View?.Url);
+                var url = string.Empty;
+
+                foreach (var pageUrl in _enterspeedConfiguration.PageUrls)
+                {
+                    url = child?.View?.Self?.View?.Url?.Replace(pageUrl, "");
+                }
+
+                var response = await GetByUrlsAsync(url);
                 var pageResponse = new PageResponse
                 {
                     DeliveryApiResponse = response
@@ -78,7 +85,7 @@ namespace Enterspeed.Migrator.Enterspeed
                     var mappedResponses = await MapResponseAsync(child.View.Children);
                     pageResponse.Children.AddRange(mappedResponses);
                 }
-    
+
                 pageResponses.Add(pageResponse);
             }
 

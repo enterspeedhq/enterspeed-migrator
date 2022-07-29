@@ -51,26 +51,36 @@ namespace Enterspeed.Migrator.Enterspeed
         public List<PageEntityType> ResolveFromRoot(PageResponse pageResponse)
         {
             var pageEntityTypes = new List<PageEntityType>();
-            var page = GetPageData(pageResponse.DeliveryApiResponse?.Response);
-
-            foreach (var deliveryResponse in pageResponse.Children)
+            if (pageResponse.DeliveryApiResponse?.Response != null)
             {
-                if (deliveryResponse != null)
+                var page = GetPageData(pageResponse.DeliveryApiResponse?.Response);
+
+                foreach (var deliveryResponse in pageResponse.Children)
                 {
-                    pageEntityTypes.Add(GetPageData(deliveryResponse?.DeliveryApiResponse.Response));
-                    if (deliveryResponse.Children.Any())
+                    if (deliveryResponse.DeliveryApiResponse.Response != null)
                     {
-                        foreach (var responseChild in deliveryResponse.Children)
+                        var pageEntityType = GetPageData(deliveryResponse.DeliveryApiResponse?.Response);
+                        pageEntityTypes.Add(pageEntityType);
+
+                        if (deliveryResponse.Children.Any())
                         {
-                            var childEntityTypes = ResolveFromRoot(responseChild);
-                            page.Children.AddRange(childEntityTypes);
+                            foreach (var responseChild in deliveryResponse.Children)
+                            {
+                                var childEntityTypes = ResolveFromRoot(responseChild);
+                                if (childEntityTypes != null)
+                                {
+                                    page.Children.AddRange(childEntityTypes);
+                                }
+                            }
                         }
                     }
                 }
+
+                pageEntityTypes.Add(page);
+                return pageEntityTypes;
             }
 
-            pageEntityTypes.Add(page);
-            return pageEntityTypes;
+            return null;
         }
 
         public PageEntityType GetPageData(DeliveryResponse deliveryResponse)
@@ -86,36 +96,34 @@ namespace Enterspeed.Migrator.Enterspeed
 
         private void MapPageEntityType(PageEntityType pageEntityType, JsonElement route, IPropertyType parentProperty = null)
         {
-            foreach (var jsonProperty in route.EnumerateObject())
+            if (route.ValueKind != JsonValueKind.Null)
             {
-                MapPageEntityType(pageEntityType, jsonProperty, parentProperty);
+                foreach (var jsonProperty in route.EnumerateObject())
+                {
+                    MapPageEntityType(pageEntityType, jsonProperty, parentProperty);
+                }
             }
         }
 
         private void MapPageEntityType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
-            // If is list 
-            var listCreated = CreateListProperty(pageEntityType, jsonProperty, parentProperty);
-            if (listCreated)
+            switch (jsonProperty.Value.ValueKind)
             {
-                return;
+                case JsonValueKind.Object:
+                    CreateObjectType(pageEntityType, jsonProperty, parentProperty);
+                    break;
+                case JsonValueKind.Array:
+                    CreateArrayType(pageEntityType, jsonProperty, parentProperty);
+                    break;
+                default:
+                    CreateSimpleType(pageEntityType, jsonProperty, parentProperty);
+                    break;
             }
-
-            // Complex property
-            var complexTypeCreated = CreateComplexType(pageEntityType, jsonProperty, parentProperty);
-            if (complexTypeCreated)
-            {
-                return;
-            }
-
-            // Simple property
-            CreateSimpleProperty(pageEntityType, jsonProperty, parentProperty);
         }
 
-        private bool CreateListProperty(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateArrayType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
-            var created = false;
-            if (jsonProperty.Value.GetArrayLength() > 0)
+            if (jsonProperty.Value.ValueKind == JsonValueKind.Array && jsonProperty.Value.GetArrayLength() > 0)
             {
                 var newParent = _propertyResolver.Resolve(jsonProperty);
                 if (parentProperty != null)
@@ -130,39 +138,34 @@ namespace Enterspeed.Migrator.Enterspeed
                 }
 
                 pageEntityType.Properties.Add(newParent);
-                created = true;
             }
-
-            return created;
         }
 
-        private bool CreateComplexType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateObjectType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
-            var created = false;
-
             // If is a complex type 
-            var listOfProperties = jsonProperty.Value.EnumerateObject();
-            if (listOfProperties.Any())
+            if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
             {
-                var newParent = _propertyResolver.Resolve(jsonProperty);
-                if (parentProperty != null)
+                var listOfProperties = jsonProperty.Value.EnumerateObject();
+                if (listOfProperties.Any())
                 {
-                    parentProperty.ChildProperties.Add(newParent);
-                }
+                    var newParent = _propertyResolver.Resolve(jsonProperty);
+                    if (parentProperty != null)
+                    {
+                        parentProperty.ChildProperties.Add(newParent);
+                    }
 
-                foreach (var childProperty in listOfProperties)
-                {
-                    MapPageEntityType(pageEntityType, childProperty, newParent);
-                }
+                    foreach (var childProperty in listOfProperties)
+                    {
+                        MapPageEntityType(pageEntityType, childProperty, newParent);
+                    }
 
-                pageEntityType.Properties.Add(newParent);
-                created = true;
+                    pageEntityType.Properties.Add(newParent);
+                }
             }
-
-            return created;
         }
 
-        private void CreateSimpleProperty(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateSimpleType(PageEntityType pageEntityType, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
             var property = _propertyResolver.Resolve(jsonProperty);
             if (parentProperty != null)
