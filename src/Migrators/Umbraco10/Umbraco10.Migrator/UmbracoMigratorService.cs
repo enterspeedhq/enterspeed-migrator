@@ -9,21 +9,18 @@ namespace Umbraco10.Migrator
     public class UmbracoMigratorService : IUmbracoMigratorService
     {
         private readonly IPagesResolver _pagesResolver;
-        private readonly IContentBuilder _contentBuilder;
         private readonly IDocumentTypeBuilder _documentTypeBuilder;
         private readonly IApiService _apiService;
         private readonly ILogger<UmbracoMigratorService> _logger;
         private readonly ISchemaBuilder _schemaBuilder;
 
         public UmbracoMigratorService(
-            IContentBuilder contentBuilder,
             ILogger<UmbracoMigratorService> logger,
             IPagesResolver pagesResolver,
             IApiService apiService,
             ISchemaBuilder schemaBuilder,
             IDocumentTypeBuilder documentTypeBuilder)
         {
-            _contentBuilder = contentBuilder;
             _logger = logger;
             _pagesResolver = pagesResolver;
             _apiService = apiService;

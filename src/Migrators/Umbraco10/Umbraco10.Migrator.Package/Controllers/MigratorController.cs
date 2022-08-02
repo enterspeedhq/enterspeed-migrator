@@ -16,7 +16,7 @@ namespace Umbraco10.Migrator.Package.Controllers
         [HttpPost]
         public async Task<IActionResult> ImportDocumentTypes()
         {
-            await _migratorService.ImportDocumentTypesAsync();
+            await _migratorService.ImportDocumentTypesAsync();  
             return Ok("");
         }
 

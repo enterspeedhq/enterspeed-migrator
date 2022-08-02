@@ -32,8 +32,11 @@ namespace Umbraco10.Migrator.Builders
         private const string ComponentsContainerName = "Migrated Components";
         private const string BlockListName = "BlockList.Custom";
 
-        public DocumentTypeBuilder(ILogger<DocumentTypeBuilder> logger, IContentTypeService contentTypeService, IShortStringHelper shortStringHelper,
-            IDataTypeService dataTypeService, BlockListPropertyEditor blockListPropertyEditor,
+        public DocumentTypeBuilder(ILogger<DocumentTypeBuilder> logger,
+            IContentTypeService contentTypeService,
+            IShortStringHelper shortStringHelper,
+            IDataTypeService dataTypeService,
+            BlockListPropertyEditor blockListPropertyEditor,
             IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
             IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration)
         {
@@ -52,9 +55,7 @@ namespace Umbraco10.Migrator.Builders
         {
             try
             {
-                var container = CreatePagesContainer();
-                var sortOrder = 0;
-
+                var pagesFolder = CreatePagesFolder();
                 var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer)
                 {
                     Name = BlockListName
@@ -62,9 +63,10 @@ namespace Umbraco10.Migrator.Builders
 
                 _dataTypeService.Save(dataType);
 
+                var sortOrder = 0;
                 foreach (var page in schemas.Pages)
                 {
-                    CreatePageDocType(page, container, sortOrder);
+                    CreatePageDocType(page, pagesFolder, sortOrder);
                     sortOrder++;
                 }
 
@@ -78,12 +80,12 @@ namespace Umbraco10.Migrator.Builders
             }
         }
 
-        private void CreatePageDocType(Schema page, Attempt<OperationResult<OperationResultType, EntityContainer>> container, int sortOrder)
+        private void CreatePageDocType(Schema page, EntityContainer container, int sortOrder)
         {
             var contentTypes = _contentTypeService.GetAllContentTypeAliases();
             if (!contentTypes.Any(c => c.Equals(page.MetaSchema.SourceEntityAlias)))
             {
-                var newPageDocumentType = new ContentType(_shortStringHelper, container.Result.Entity.Id)
+                var newPageDocumentType = new ContentType(_shortStringHelper, container.Id)
                 {
                     Alias = page.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
                     Name = page.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
@@ -111,11 +113,12 @@ namespace Umbraco10.Migrator.Builders
             }
         }
 
-        private Attempt<OperationResult<OperationResultType, EntityContainer>> CreatePagesContainer()
+        private EntityContainer CreatePagesFolder()
         {
-            var container = _contentTypeService.CreateContainer(-1, Guid.NewGuid(), PagesContainerName);
-            _contentTypeService.SaveContainer(container.Result.Entity);
-            return container;
+            var createContainerAttempt = _contentTypeService.CreateContainer(-1, Guid.NewGuid(), PagesContainerName);
+
+            // If no success we expect that it already exists. So we pull the container based on the ID
+            return !createContainerAttempt.Success ? _contentTypeService.GetContainer(-1) : createContainerAttempt.Result.Entity;
         }
 
         public void CreateComponents(Schemas schemas)
