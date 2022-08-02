@@ -28,8 +28,8 @@ namespace Umbraco10.Migrator.Builders
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
         private ContentType _root;
-        private const string PagesContainerName = "Migrated Page Types";
-        private const string ComponentsContainerName = "Migrated Components";
+        private const string PagesFolderName = "Migrated Page Types";
+        private const string ComponentsFolderName = "Migrated Components";
         private const string BlockListName = "BlockList.Custom";
 
         public DocumentTypeBuilder(ILogger<DocumentTypeBuilder> logger,
@@ -55,7 +55,7 @@ namespace Umbraco10.Migrator.Builders
         {
             try
             {
-                var pagesFolder = CreatePagesFolder();
+                var pagesFolder = GetOrCreateFolder(PagesFolderName);
                 var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer)
                 {
                     Name = BlockListName
@@ -113,24 +113,16 @@ namespace Umbraco10.Migrator.Builders
             }
         }
 
-        private EntityContainer CreatePagesFolder()
-        {
-            var createContainerAttempt = _contentTypeService.CreateContainer(-1, Guid.NewGuid(), PagesContainerName);
-
-            // If no success we expect that it already exists. So we pull the container based on the ID
-            return !createContainerAttempt.Success ? _contentTypeService.GetContainer(-1) : createContainerAttempt.Result.Entity;
-        }
-
         public void CreateComponents(Schemas schemas)
         {
-            var container = CreateElementsContainer();
+            var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
             var contentTypes = _contentTypeService.GetAllContentTypeAliases();
 
             foreach (var component in schemas.Components)
             {
                 if (!contentTypes.Any(c => c.Equals(component.MetaSchema.SourceEntityAlias)))
                 {
-                    var newComponentDocumentType = new ContentType(_shortStringHelper, container.Result.Entity.Id)
+                    var newComponentDocumentType = new ContentType(_shortStringHelper, componentsFolder.Id)
                     {
                         Alias = component.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
                         Name = component.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
@@ -146,11 +138,22 @@ namespace Umbraco10.Migrator.Builders
             AddComponentsToBlockList();
         }
 
-        private Attempt<OperationResult<OperationResultType, EntityContainer>> CreateElementsContainer()
+        private EntityContainer GetOrCreateFolder(string folderName)
         {
-            var container = _contentTypeService.CreateContainer(-1, Guid.NewGuid(), ComponentsContainerName);
-            _contentTypeService.SaveContainer(container.Result.Entity);
-            return container;
+            var createContainerAttempt = _contentTypeService.CreateContainer(-1, Guid.NewGuid(), folderName);
+            if (createContainerAttempt.Success)
+            {
+                var containerSaved = _contentTypeService.SaveContainer(createContainerAttempt.Result.Entity);
+                if (containerSaved.Success)
+                {
+                    return createContainerAttempt.Result.Entity;
+                }
+
+                _logger.LogError(containerSaved.Exception, "Something went wrong when saving folder " + folderName);
+            }
+
+            var existingContainer = _contentTypeService.GetContainers(PagesFolderName, 1).FirstOrDefault();
+            return existingContainer;
         }
 
         private void AddPropertyTypes(Schema schema, ContentType newComponentDocumentType)
