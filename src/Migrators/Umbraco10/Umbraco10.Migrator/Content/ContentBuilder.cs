@@ -6,11 +6,10 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
-using Umbraco10.Migrator.Builders.Contracts;
 using Umbraco10.Migrator.DataTypes;
 using Umbraco10.Migrator.Settings;
 
-namespace Umbraco10.Migrator.Builders
+namespace Umbraco10.Migrator.Content
 {
     public class ContentBuilder : IContentBuilder
     {

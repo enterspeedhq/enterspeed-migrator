@@ -2,7 +2,7 @@
 using Enterspeed.Migrator.Models;
 using Umbraco.Cms.Core.Models;
 
-namespace Umbraco10.Migrator.Builders.Contracts
+namespace Umbraco10.Migrator.Content
 {
     public interface IContentBuilder
     {

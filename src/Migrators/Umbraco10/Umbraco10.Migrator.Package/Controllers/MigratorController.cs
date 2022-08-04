@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Umbraco.Cms.Web.BackOffice.Controllers;
-using Umbraco10.Migrator.Builders.Contracts;
 
 namespace Umbraco10.Migrator.Package.Controllers
 {

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Umbraco10.Migrator.Builders.Contracts
+namespace Umbraco10.Migrator
 {
     public interface IUmbracoMigratorService
     {

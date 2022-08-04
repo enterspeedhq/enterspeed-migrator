@@ -1,21 +1,22 @@
-﻿using Enterspeed.Migrator.Models;
-using Enterspeed.Migrator.Settings;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Enterspeed.Migrator.Models;
+using Enterspeed.Migrator.Settings;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
-using Umbraco10.Migrator.Builders.Contracts;
+using Umbraco10.Migrator.DocumentTypes.Components.Contracts;
 using Umbraco10.Migrator.Settings;
 
-namespace Umbraco10.Migrator.Builders
+namespace Umbraco10.Migrator.DocumentTypes
 {
     public class DocumentTypeBuilder : IDocumentTypeBuilder
     {
@@ -26,9 +27,11 @@ namespace Umbraco10.Migrator.Builders
         private readonly IConfigurationEditorJsonSerializer _configurationEditorJsonSerializer;
         private readonly IEnumerable<IDataType> _dataTypes;
         private readonly EnterspeedConfiguration _enterspeedConfiguration;
+        private readonly IComponentBuilderHandler _componentBuilderHandler;
         private readonly List<ContentTypeSort> _contentTypes;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
+        private readonly List<Enterspeed.Migrator.ValueTypes.PropertyType> _componentProperties;
         private readonly IEnumerable<string> _contentTypeAliasList;
         private ContentType _root;
         private const string PagesFolderName = "Migrated Page Types";
@@ -42,7 +45,8 @@ namespace Umbraco10.Migrator.Builders
             BlockListPropertyEditor blockListPropertyEditor,
             IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
             IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration,
-            EnterspeedConfiguration enterspeedConfiguration)
+            EnterspeedConfiguration enterspeedConfiguration,
+            IComponentBuilderHandler componentBuilderHandler)
         {
             _logger = logger;
             _contentTypeService = contentTypeService;
@@ -54,7 +58,9 @@ namespace Umbraco10.Migrator.Builders
             _dataTypes = _dataTypeService.GetAll();
             _contentTypes = new List<ContentTypeSort>();
             _enterspeedConfiguration = enterspeedConfiguration;
+            _componentBuilderHandler = componentBuilderHandler;
             _contentTypeAliasList = _contentTypeService.GetAllContentTypeAliases();
+            _componentProperties = new List<Enterspeed.Migrator.ValueTypes.PropertyType>();
         }
 
         public void BuildPageDocTypes(Schemas schemas)
@@ -62,18 +68,16 @@ namespace Umbraco10.Migrator.Builders
             try
             {
                 var pagesFolder = GetOrCreateFolder(PagesFolderName);
-                var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer)
-                {
-                    Name = BlockListName
-                };
+                var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
 
-                _dataTypeService.Save(dataType);
-
-                var sortOrder = 0;
-                foreach (var page in schemas.Pages)
+                for (var index = 0; index < schemas.Pages.Count; index++)
                 {
-                    CreatePageDocType(page, pagesFolder, sortOrder);
-                    sortOrder++;
+                    CreatePageDocType(schemas.Pages[index], pagesFolder, index);
+                }
+
+                foreach (var componentProperty in _componentProperties)
+                {
+                    _componentBuilderHandler.BuildComponent(componentProperty, componentsFolder.Id);
                 }
 
                 _root.AllowedContentTypes = _contentTypes;
@@ -86,41 +90,51 @@ namespace Umbraco10.Migrator.Builders
             }
         }
 
-        private void CreatePageDocType(Schema page, EntityContainer container, int sortOrder)
+        private void CreatePageDocType(Schema page, IEntity pagesFolder, int sortOrder)
         {
             if (!_contentTypeAliasList.Any(c => c.Equals(page.MetaSchema.SourceEntityAlias)))
             {
-                var newPageDocumentType = new ContentType(_shortStringHelper, container.Id)
-                {
-                    Alias = page.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
-                    Name = page.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
-                    AllowedAsRoot = string.Equals(page.MetaSchema.SourceEntityAlias, _umbracoMigrationConfiguration.RootDocType,
-                        StringComparison.InvariantCultureIgnoreCase)
-                };
+                var newPageDocumentType = CreateNewPageDocType(page, pagesFolder);
+                AddBaseProperties(newPageDocumentType, sortOrder);
+                AddProperties(page, newPageDocumentType);
 
-                newPageDocumentType.AddPropertyGroup("pageContent", "Page Content");
-                newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, _dataTypes.FirstOrDefault(d => d.Name == BlockListName))
-                {
-                    Name = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstUpperInvariant(),
-                    Alias = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstLowerInvariant()
-                }, "pageContent");
-
-
-                if (newPageDocumentType.AllowedAsRoot)
-                {
-                    _root = newPageDocumentType;
-                }
-                else
-                {
-                    _contentTypes.Add(new ContentTypeSort(newPageDocumentType.Id, sortOrder));
-                }
-
-                AddPropertyTypes(page, newPageDocumentType);
                 _contentTypeService.Save(newPageDocumentType);
             }
         }
 
-        private void AddPropertyTypes(Schema schema, ContentType pageDocumentType)
+        private void AddBaseProperties(ContentType newPageDocumentType, int sortOrder)
+        {
+            newPageDocumentType.AddPropertyGroup("pageContent", "Page Content");
+            newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, _dataTypes.First(d => d.Name == BlockListName))
+            {
+                Name = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstUpperInvariant(),
+                Alias = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstLowerInvariant()
+            }, "pageContent");
+
+            if (newPageDocumentType.AllowedAsRoot)
+            {
+                _root = newPageDocumentType;
+            }
+            else
+            {
+                _contentTypes.Add(new ContentTypeSort(newPageDocumentType.Id, sortOrder));
+            }
+        }
+
+        private ContentType CreateNewPageDocType(Schema page, IEntity pagesFolder)
+        {
+            var newPageDocumentType = new ContentType(_shortStringHelper, pagesFolder.Id)
+            {
+                Alias = page.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
+                Name = page.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
+                AllowedAsRoot = string.Equals(page.MetaSchema.SourceEntityAlias, _umbracoMigrationConfiguration.RootDocType,
+                    StringComparison.InvariantCultureIgnoreCase)
+            };
+
+            return newPageDocumentType;
+        }
+
+        private void AddProperties(Schema schema, IContentTypeBase pageDocumentType)
         {
             if (_dataTypes != null && _dataTypes.Any())
             {
@@ -128,16 +142,18 @@ namespace Umbraco10.Migrator.Builders
                 {
                     if (property.IsComponent(_enterspeedConfiguration))
                     {
+                        // TODO: See if we can do this in a better way
+                        _componentProperties.Add(property);
                     }
                     else
                     {
-                        AddPropertyTypes(property, pageDocumentType);
+                        AddProperties(property, pageDocumentType);
                     }
                 }
             }
         }
 
-        private void AddPropertyTypes(Enterspeed.Migrator.ValueTypes.PropertyType property, ContentType pageDocumentType)
+        private void AddProperties(Enterspeed.Migrator.ValueTypes.PropertyType property, IContentTypeBase pageDocumentType)
         {
             IDataType dataType = null;
 
@@ -154,19 +170,20 @@ namespace Umbraco10.Migrator.Builders
                     // Check if we are a component or simple type of array
                     break;
                 case JsonValueKind.String:
-                    dataType = _dataTypes.FirstOrDefault(d => d.Name.ToLower() == "textstring");
+                    dataType = _dataTypes.FirstOrDefault(d => d.Name?.ToLower() == "textstring");
                     break;
                 case JsonValueKind.Number:
-                    dataType = _dataTypes.FirstOrDefault(d => d.Name.ToLower() == "number");
+                    dataType = _dataTypes.FirstOrDefault(d => d.Name?.ToLower() == "number");
                     break;
                 case JsonValueKind.True:
                 case JsonValueKind.False:
-                    dataType = _dataTypes.FirstOrDefault(d => d.Name.ToLower() == "true/false");
+                    dataType = _dataTypes.FirstOrDefault(d => d.Name?.ToLower() == "true/false");
                     break;
                 case JsonValueKind.Null:
                     _logger.LogError("Property type is null");
                     break;
             }
+
             if (dataType != null)
             {
                 pageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
@@ -175,28 +192,6 @@ namespace Umbraco10.Migrator.Builders
                     Alias = property.Alias.ToFirstLowerInvariant(),
                 }, "content", "Page content");
             }
-        }
-
-        public void AddComponent(Schemas schemas)
-        {
-            var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
-
-            foreach (var component in schemas.Components)
-            {
-                if (!_contentTypeAliasList.Any(c => c.Equals(component.MetaSchema.SourceEntityAlias)))
-                {
-                    var newComponentDocumentType = new ContentType(_shortStringHelper, componentsFolder.Id)
-                    {
-                        Alias = component.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
-                        Name = component.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
-                        IsElement = true
-                    };
-
-                    _contentTypeService.Save(newComponentDocumentType);
-                }
-            }
-
-            AddComponentsToBlockList();
         }
 
         private EntityContainer GetOrCreateFolder(string folderName)
@@ -219,6 +214,13 @@ namespace Umbraco10.Migrator.Builders
 
         private void AddComponentsToBlockList()
         {
+            var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer)
+            {
+                Name = BlockListName
+            };
+
+            _dataTypeService.Save(dataType);
+
             var blockListType = _dataTypeService.GetDataType(BlockListName);
             var elementTypes = _contentTypeService.GetAll().Where(c => c.IsElement);
 

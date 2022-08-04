@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Microsoft.Extensions.Logging;
-using Umbraco10.Migrator.Builders.Contracts;
+using Umbraco10.Migrator.DocumentTypes;
 
 namespace Umbraco10.Migrator
 {
