@@ -108,65 +108,94 @@ namespace Enterspeed.Migrator.Enterspeed
 
         private void MapPageData(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
         {
+            var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p.Contains(jsonProperty.Name));
+            if (isComponent)
+            {
+                parentProperty.ChildProperties.Add(new PropertyType
+                {
+                    Name = "isComponent",
+                    Value = true
+                });
+            }
+
             switch (jsonProperty.Value.ValueKind)
             {
                 case JsonValueKind.Object:
-                    CreateObjectType(pageData, jsonProperty, parentProperty);
+                    CreateObjectType(pageData, jsonProperty, isComponent, parentProperty);
                     break;
                 case JsonValueKind.Array:
-                    CreateArrayType(pageData, jsonProperty, parentProperty);
+                    CreateArrayType(pageData, jsonProperty, isComponent, parentProperty);
                     break;
                 default:
-                    CreateSimpleType(pageData, jsonProperty, parentProperty);
+                    CreateSimpleType(pageData, jsonProperty, isComponent, parentProperty);
                     break;
             }
         }
 
-        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, bool isComponent, IPropertyType parentProperty = null)
         {
             if (jsonProperty.Value.ValueKind == JsonValueKind.Array && jsonProperty.Value.GetArrayLength() > 0)
             {
-                var newParent = _propertyResolver.Resolve(jsonProperty);
+                var currentProperty = _propertyResolver.Resolve(jsonProperty);
                 if (parentProperty != null)
                 {
-                    parentProperty.ChildProperties.Add(newParent);
+                    parentProperty.ChildProperties.Add(currentProperty);
                 }
 
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    MapPageData(pageData, element, newParent);
+                    MapPageData(pageData, element, currentProperty);
                 }
 
-                pageData.Properties.Add(newParent);
+                if (isComponent)
+                {
+                    currentProperty.ChildProperties.Add(new PropertyType
+                    {
+                        Name = "isComponent",
+                        Value = true
+                    });
+                }
+
+                pageData.Properties.Add(currentProperty);
             }
         }
 
-        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, bool isComponent, IPropertyType parentProperty = null)
         {
             // If is a complex type 
             if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
             {
+
                 var listOfProperties = jsonProperty.Value.EnumerateObject();
                 if (listOfProperties.Any())
                 {
-                    var newParent = _propertyResolver.Resolve(jsonProperty);
+                    var currentProperty = _propertyResolver.Resolve(jsonProperty);
                     if (parentProperty != null)
                     {
-                        parentProperty.ChildProperties.Add(newParent);
+                        parentProperty.ChildProperties.Add(currentProperty);
                     }
 
                     foreach (var childProperty in listOfProperties)
                     {
-                        MapPageData(pageData, childProperty, newParent);
+                        MapPageData(pageData, childProperty, currentProperty);
                     }
 
-                    pageData.Properties.Add(newParent);
+                    pageData.Properties.Add(currentProperty);
+
+                    if (isComponent)
+                    {
+                        currentProperty.ChildProperties.Add(new PropertyType
+                        {
+                            Name = "isComponent",
+                            Value = true
+                        });
+                    }
                 }
             }
         }
 
-        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, bool isComponent, IPropertyType parentProperty = null)
         {
             var property = _propertyResolver.Resolve(jsonProperty);
             if (parentProperty != null)

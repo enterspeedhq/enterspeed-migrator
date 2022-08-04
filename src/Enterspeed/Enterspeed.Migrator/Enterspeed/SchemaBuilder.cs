@@ -16,7 +16,7 @@ namespace Enterspeed.Migrator.Enterspeed
             {
                 var alias = data.MetaSchema.SourceEntityAlias;
                 var page = pages.FirstOrDefault(p => p.MetaSchema.SourceEntityAlias == alias);
-                var properties = data.Properties.DistinctBy(p => p.Alias);
+                var properties = data.Properties.Where(p => !string.IsNullOrEmpty(p.Value.ToString())).DistinctBy(p => p.Alias);
 
                 if (page == null)
                 {

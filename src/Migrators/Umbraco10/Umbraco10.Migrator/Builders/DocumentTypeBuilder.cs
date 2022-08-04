@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Enterspeed.Migrator.Models;
+﻿using Enterspeed.Migrator.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Umbraco.Cms.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Serialization;
@@ -100,6 +100,8 @@ namespace Umbraco10.Migrator.Builders
                     Alias = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstLowerInvariant()
                 }, "pageContent");
 
+                AddPropertyTypes(page, newPageDocumentType);
+
                 _contentTypeService.Save(newPageDocumentType);
 
                 if (newPageDocumentType.AllowedAsRoot)
@@ -109,6 +111,53 @@ namespace Umbraco10.Migrator.Builders
                 else
                 {
                     _contentTypes.Add(new ContentTypeSort(newPageDocumentType.Id, sortOrder));
+                }
+            }
+        }
+
+        private void AddPropertyTypes(Schema schema, ContentType pageDocumentType)
+        {
+            var dataTypeDefinitions = _dataTypes;
+            if (dataTypeDefinitions != null && dataTypeDefinitions.Any())
+            {
+                foreach (var property in schema.Properties)
+                {
+                    IDataType dataType = null;
+
+                    var jsonElement = (JsonElement)property.Value;
+                    switch (jsonElement.ValueKind)
+                    {
+                        case JsonValueKind.Undefined:
+                            _logger.LogError("Property type is undefined");
+                            break;
+                        case JsonValueKind.Object:
+                            // Check if we are a component
+                            break;
+                        case JsonValueKind.Array:
+                            // Check if we are a component or simple type of array
+                            break;
+                        case JsonValueKind.String:
+                            dataType = dataTypeDefinitions.FirstOrDefault(d => d.Name.ToLower() == "textstring");
+                            break;
+                        case JsonValueKind.Number:
+                            dataType = dataTypeDefinitions.FirstOrDefault(d => d.Name.ToLower() == "number");
+                            break;
+                        case JsonValueKind.True:
+                        case JsonValueKind.False:
+                            dataType = dataTypeDefinitions.FirstOrDefault(d => d.Name.ToLower() == "true/false");
+                            break;
+                        case JsonValueKind.Null:
+                            _logger.LogError("Property type is null");
+                            break;
+                    }
+                    if (dataType != null)
+                    {
+                        pageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
+                        {
+                            Name = property.Name.ToFirstUpperInvariant(),
+                            Alias = property.Alias.ToFirstLowerInvariant(),
+                        }, "content", "Page content");
+                    }
                 }
             }
         }
@@ -128,8 +177,6 @@ namespace Umbraco10.Migrator.Builders
                         Name = component.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
                         IsElement = true
                     };
-
-                    AddPropertyTypes(component, newComponentDocumentType);
 
                     _contentTypeService.Save(newComponentDocumentType);
                 }
@@ -154,58 +201,6 @@ namespace Umbraco10.Migrator.Builders
 
             var existingContainer = _contentTypeService.GetContainers(PagesFolderName, 1).FirstOrDefault();
             return existingContainer;
-        }
-
-        private void AddPropertyTypes(Schema schema, ContentType newComponentDocumentType)
-        {
-            var dataTypeDefinitions = _dataTypes;
-            if (dataTypeDefinitions != null && dataTypeDefinitions.Any())
-            {
-                foreach (var property in schema.Properties)
-                {
-                    IDataType dataType;
-                    switch (property.Type.ToLowerInvariant())
-                    {
-                        case "text":
-                            dataType = dataTypeDefinitions.FirstOrDefault(d =>
-                                d.Name.ToLower() == "textstring");
-                            break;
-                        case "textarea":
-                            dataType = dataTypeDefinitions.FirstOrDefault(d =>
-                                d.Name.ToLower() == "textarea");
-                            break;
-                        case "rte":
-                            dataType = dataTypeDefinitions.FirstOrDefault(d =>
-                                d.Name.ToLower() == "richtext editor");
-                            break;
-                        case "image":
-                            dataType = dataTypeDefinitions.FirstOrDefault(d =>
-                                d.Name.ToLower() == "textstring");
-                            break;
-                        case "boolean":
-                            dataType = dataTypeDefinitions.FirstOrDefault(d =>
-                                d.Name.ToLower() == "true/false");
-                            break;
-                        case "link":
-                            dataType = dataTypeDefinitions.FirstOrDefault(d =>
-                                d.Name.ToLower() == "textstring");
-                            break;
-                        default:
-                            dataType = null;
-                            break;
-                    }
-
-                    if (dataType != null)
-                    {
-                        newComponentDocumentType.AddPropertyGroup("componentData", "Component Data");
-                        newComponentDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
-                        {
-                            Name = property.Name.ToFirstUpperInvariant(),
-                            Alias = property.Alias.ToFirstLowerInvariant(),
-                        }, "componentData", "Component Data");
-                    }
-                }
-            }
         }
 
         private void AddComponentsToBlockList()
