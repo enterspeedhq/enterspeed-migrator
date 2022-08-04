@@ -1,4 +1,5 @@
 ﻿using Enterspeed.Migrator.Models;
+using Enterspeed.Migrator.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -24,9 +25,11 @@ namespace Umbraco10.Migrator.Builders
         private readonly IDataTypeService _dataTypeService;
         private readonly IConfigurationEditorJsonSerializer _configurationEditorJsonSerializer;
         private readonly IEnumerable<IDataType> _dataTypes;
+        private readonly EnterspeedConfiguration _enterspeedConfiguration;
         private readonly List<ContentTypeSort> _contentTypes;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
+        private readonly IEnumerable<string> _contentTypeAliasList;
         private ContentType _root;
         private const string PagesFolderName = "Migrated Page Types";
         private const string ComponentsFolderName = "Migrated Components";
@@ -38,7 +41,8 @@ namespace Umbraco10.Migrator.Builders
             IDataTypeService dataTypeService,
             BlockListPropertyEditor blockListPropertyEditor,
             IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
-            IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration)
+            IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration,
+            EnterspeedConfiguration enterspeedConfiguration)
         {
             _logger = logger;
             _contentTypeService = contentTypeService;
@@ -49,6 +53,8 @@ namespace Umbraco10.Migrator.Builders
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
             _dataTypes = _dataTypeService.GetAll();
             _contentTypes = new List<ContentTypeSort>();
+            _enterspeedConfiguration = enterspeedConfiguration;
+            _contentTypeAliasList = _contentTypeService.GetAllContentTypeAliases();
         }
 
         public void BuildPageDocTypes(Schemas schemas)
@@ -82,8 +88,7 @@ namespace Umbraco10.Migrator.Builders
 
         private void CreatePageDocType(Schema page, EntityContainer container, int sortOrder)
         {
-            var contentTypes = _contentTypeService.GetAllContentTypeAliases();
-            if (!contentTypes.Any(c => c.Equals(page.MetaSchema.SourceEntityAlias)))
+            if (!_contentTypeAliasList.Any(c => c.Equals(page.MetaSchema.SourceEntityAlias)))
             {
                 var newPageDocumentType = new ContentType(_shortStringHelper, container.Id)
                 {
@@ -100,9 +105,6 @@ namespace Umbraco10.Migrator.Builders
                     Alias = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstLowerInvariant()
                 }, "pageContent");
 
-                AddPropertyTypes(page, newPageDocumentType);
-
-                _contentTypeService.Save(newPageDocumentType);
 
                 if (newPageDocumentType.AllowedAsRoot)
                 {
@@ -112,64 +114,76 @@ namespace Umbraco10.Migrator.Builders
                 {
                     _contentTypes.Add(new ContentTypeSort(newPageDocumentType.Id, sortOrder));
                 }
+
+                AddPropertyTypes(page, newPageDocumentType);
+                _contentTypeService.Save(newPageDocumentType);
             }
         }
 
         private void AddPropertyTypes(Schema schema, ContentType pageDocumentType)
         {
-            var dataTypeDefinitions = _dataTypes;
-            if (dataTypeDefinitions != null && dataTypeDefinitions.Any())
+            if (_dataTypes != null && _dataTypes.Any())
             {
                 foreach (var property in schema.Properties)
                 {
-                    IDataType dataType = null;
-
-                    var jsonElement = (JsonElement)property.Value;
-                    switch (jsonElement.ValueKind)
+                    if (property.IsComponent(_enterspeedConfiguration))
                     {
-                        case JsonValueKind.Undefined:
-                            _logger.LogError("Property type is undefined");
-                            break;
-                        case JsonValueKind.Object:
-                            // Check if we are a component
-                            break;
-                        case JsonValueKind.Array:
-                            // Check if we are a component or simple type of array
-                            break;
-                        case JsonValueKind.String:
-                            dataType = dataTypeDefinitions.FirstOrDefault(d => d.Name.ToLower() == "textstring");
-                            break;
-                        case JsonValueKind.Number:
-                            dataType = dataTypeDefinitions.FirstOrDefault(d => d.Name.ToLower() == "number");
-                            break;
-                        case JsonValueKind.True:
-                        case JsonValueKind.False:
-                            dataType = dataTypeDefinitions.FirstOrDefault(d => d.Name.ToLower() == "true/false");
-                            break;
-                        case JsonValueKind.Null:
-                            _logger.LogError("Property type is null");
-                            break;
                     }
-                    if (dataType != null)
+                    else
                     {
-                        pageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
-                        {
-                            Name = property.Name.ToFirstUpperInvariant(),
-                            Alias = property.Alias.ToFirstLowerInvariant(),
-                        }, "content", "Page content");
+                        AddPropertyTypes(property, pageDocumentType);
                     }
                 }
             }
         }
 
-        public void CreateComponents(Schemas schemas)
+        private void AddPropertyTypes(Enterspeed.Migrator.ValueTypes.PropertyType property, ContentType pageDocumentType)
+        {
+            IDataType dataType = null;
+
+            var jsonElement = (JsonElement)property.Value;
+            switch (jsonElement.ValueKind)
+            {
+                case JsonValueKind.Undefined:
+                    _logger.LogError("Property type is undefined");
+                    break;
+                case JsonValueKind.Object:
+                    // Check if we are a component
+                    break;
+                case JsonValueKind.Array:
+                    // Check if we are a component or simple type of array
+                    break;
+                case JsonValueKind.String:
+                    dataType = _dataTypes.FirstOrDefault(d => d.Name.ToLower() == "textstring");
+                    break;
+                case JsonValueKind.Number:
+                    dataType = _dataTypes.FirstOrDefault(d => d.Name.ToLower() == "number");
+                    break;
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    dataType = _dataTypes.FirstOrDefault(d => d.Name.ToLower() == "true/false");
+                    break;
+                case JsonValueKind.Null:
+                    _logger.LogError("Property type is null");
+                    break;
+            }
+            if (dataType != null)
+            {
+                pageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
+                {
+                    Name = property.Name.ToFirstUpperInvariant(),
+                    Alias = property.Alias.ToFirstLowerInvariant(),
+                }, "content", "Page content");
+            }
+        }
+
+        public void AddComponent(Schemas schemas)
         {
             var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
-            var contentTypes = _contentTypeService.GetAllContentTypeAliases();
 
             foreach (var component in schemas.Components)
             {
-                if (!contentTypes.Any(c => c.Equals(component.MetaSchema.SourceEntityAlias)))
+                if (!_contentTypeAliasList.Any(c => c.Equals(component.MetaSchema.SourceEntityAlias)))
                 {
                     var newComponentDocumentType = new ContentType(_shortStringHelper, componentsFolder.Id)
                     {

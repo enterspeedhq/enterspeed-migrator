@@ -22,7 +22,6 @@ namespace Enterspeed.Migrator
             serviceCollection.AddTransient<ISchemaBuilder, SchemaBuilder>();
             serviceCollection.AddTransient<IEnterspeedDeliveryService, EnterspeedDeliveryService>();
             serviceCollection.AddTransient<IEnterspeedConfigurationProvider, InMemoryConfigurationProvider>();
-            serviceCollection.AddTransient<IPropertyResolver, PropertyResolver>();
             serviceCollection.AddTransient<IPagesResolver, PagesResolver>();
             serviceCollection.AddTransient<EnterspeedDeliveryConnection>();
             serviceCollection.AddSingleton(new EnterspeedDeliveryConfiguration());

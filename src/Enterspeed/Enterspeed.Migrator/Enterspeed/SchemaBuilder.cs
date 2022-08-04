@@ -42,9 +42,5 @@ namespace Enterspeed.Migrator.Enterspeed
             schemas.Pages.AddRange(pages);
             return schemas;
         }
-
-        public void BuildComponents()
-        {
-        }
     }
 }

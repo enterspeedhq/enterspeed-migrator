@@ -60,28 +60,28 @@ namespace Umbraco9.Migrator.Builders
             var blockListData = new List<Dictionary<string, object>>();
             var dictionaryUdi = new List<Dictionary<string, string>>();
 
-            foreach (var element in pageData.Components)
-            {
-                if (element.Properties == null || element.MetaSchema == null) continue;
+            //foreach (var element in pageData.Components)
+            //{
+            //    if (element.Properties == null || element.MetaSchema == null) continue;
 
-                var dataToAdd = new Dictionary<string, object>();
-                foreach (var property in element.Properties)
-                {
-                    dataToAdd.Add(property.Alias.ToFirstLowerInvariant(), property.Value);
-                }
+            //    var dataToAdd = new Dictionary<string, object>();
+            //    foreach (var property in element.Properties)
+            //    {
+            //        dataToAdd.Add(property.Alias.ToFirstLowerInvariant(), property.Value);
+            //    }
 
-                var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
-                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, element.MetaSchema.SourceEntityAlias,
-                    StringComparison.InvariantCultureIgnoreCase));
+            //    var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
+            //    var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, element.MetaSchema.SourceEntityAlias,
+            //        StringComparison.InvariantCultureIgnoreCase));
 
-                dataToAdd.Add("udi", contentUdi);
-                dataToAdd.Add("contentTypeKey", contentType.Key.ToString());
-                blockListData.Add(dataToAdd);
+            //    dataToAdd.Add("udi", contentUdi);
+            //    dataToAdd.Add("contentTypeKey", contentType.Key.ToString());
+            //    blockListData.Add(dataToAdd);
 
-                dictionaryUdi.Add(new Dictionary<string, string> {
-                    { "contentUdi", contentUdi },
-                });
-            }
+            //    dictionaryUdi.Add(new Dictionary<string, string> {
+            //        { "contentUdi", contentUdi },
+            //    });
+            //}
 
             return new Blocklist
             {

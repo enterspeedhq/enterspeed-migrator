@@ -7,10 +7,10 @@ namespace Enterspeed.Migrator.Models
     {
         public Schema()
         {
-            Properties = new List<IPropertyType>();
+            Properties = new List<PropertyType>();
         }
 
         public MetaSchema MetaSchema { get; set; }
-        public List<IPropertyType> Properties { get; set; }
+        public List<PropertyType> Properties { get; set; }
     }
 }

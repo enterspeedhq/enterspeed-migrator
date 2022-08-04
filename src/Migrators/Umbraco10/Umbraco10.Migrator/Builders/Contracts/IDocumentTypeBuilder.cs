@@ -5,6 +5,6 @@ namespace Umbraco10.Migrator.Builders.Contracts
     public interface IDocumentTypeBuilder
     {
         void BuildPageDocTypes(Schemas schemas);
-        void CreateComponents(Schemas schemas);
+        void AddComponent(Schemas schemas);
     }
 }

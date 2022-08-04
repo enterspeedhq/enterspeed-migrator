@@ -15,13 +15,10 @@ namespace Enterspeed.Migrator.Enterspeed
     public class PagesResolver : IPagesResolver
     {
         private readonly EnterspeedConfiguration _configuration;
-        private readonly IPropertyResolver _propertyResolver;
 
         public PagesResolver(
-            IOptions<EnterspeedConfiguration> configuration,
-            IPropertyResolver propertyResolver)
+            IOptions<EnterspeedConfiguration> configuration)
         {
-            _propertyResolver = propertyResolver;
             _configuration = configuration?.Value;
         }
 
@@ -95,7 +92,7 @@ namespace Enterspeed.Migrator.Enterspeed
             return pageEntityType;
         }
 
-        private void MapPageData(PageData pageData, JsonElement route, IPropertyType parentProperty = null)
+        private void MapPageData(PageData pageData, JsonElement route, PropertyType parentProperty = null)
         {
             if (route.ValueKind != JsonValueKind.Null)
             {
@@ -106,7 +103,7 @@ namespace Enterspeed.Migrator.Enterspeed
             }
         }
 
-        private void MapPageData(PageData pageData, JsonProperty jsonProperty, IPropertyType parentProperty = null)
+        private void MapPageData(PageData pageData, JsonProperty jsonProperty, PropertyType parentProperty = null)
         {
             var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p.Contains(jsonProperty.Name));
             if (isComponent)
@@ -114,6 +111,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 parentProperty.ChildProperties.Add(new PropertyType
                 {
                     Name = "isComponent",
+                    Alias = "isComponent",
                     Value = true
                 });
             }
@@ -132,11 +130,11 @@ namespace Enterspeed.Migrator.Enterspeed
             }
         }
 
-        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, bool isComponent, IPropertyType parentProperty = null)
+        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, bool isComponent, PropertyType parentProperty = null)
         {
             if (jsonProperty.Value.ValueKind == JsonValueKind.Array && jsonProperty.Value.GetArrayLength() > 0)
             {
-                var currentProperty = _propertyResolver.Resolve(jsonProperty);
+                var currentProperty = new PropertyType(jsonProperty);
                 if (parentProperty != null)
                 {
                     parentProperty.ChildProperties.Add(currentProperty);
@@ -161,7 +159,7 @@ namespace Enterspeed.Migrator.Enterspeed
             }
         }
 
-        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, bool isComponent, IPropertyType parentProperty = null)
+        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, bool isComponent, PropertyType parentProperty = null)
         {
             // If is a complex type 
             if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
@@ -170,7 +168,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 var listOfProperties = jsonProperty.Value.EnumerateObject();
                 if (listOfProperties.Any())
                 {
-                    var currentProperty = _propertyResolver.Resolve(jsonProperty);
+                    var currentProperty = new PropertyType(jsonProperty);
                     if (parentProperty != null)
                     {
                         parentProperty.ChildProperties.Add(currentProperty);
@@ -195,9 +193,9 @@ namespace Enterspeed.Migrator.Enterspeed
             }
         }
 
-        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, bool isComponent, IPropertyType parentProperty = null)
+        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, bool isComponent, PropertyType parentProperty = null)
         {
-            var property = _propertyResolver.Resolve(jsonProperty);
+            var property = new PropertyType(jsonProperty);
             if (parentProperty != null)
             {
                 parentProperty.ChildProperties.Add(property);
