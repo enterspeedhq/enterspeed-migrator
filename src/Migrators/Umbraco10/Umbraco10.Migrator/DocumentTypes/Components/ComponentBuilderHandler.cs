@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Enterspeed.Migrator.ValueTypes;
 using Microsoft.Extensions.Logging;
-using Umbraco10.Migrator.DocumentTypes.Components.Contracts;
+using Umbraco10.Migrator.DocumentTypes.Components.Builders;
 
 namespace Umbraco10.Migrator.DocumentTypes.Components
 {
@@ -19,17 +19,17 @@ namespace Umbraco10.Migrator.DocumentTypes.Components
             _logger = logger;
         }
 
-        public void BuildComponent(PropertyType propertyType, int parentId)
+        public void BuildComponent(EnterspeedPropertyType componentProperty, int parentId)
         {
-            var name = propertyType.ChildProperties.FirstOrDefault(p => p.Name == "name")?.Value.ToString();
-            var alias = propertyType.ChildProperties.FirstOrDefault(p => p.Name == "alias")?.Value.ToString();
+            var name = componentProperty.ChildProperties.FirstOrDefault(p => p.Name == "name")?.Value.ToString();
+            var alias = componentProperty.ChildProperties.FirstOrDefault(p => p.Name == "alias")?.Value.ToString();
 
             if (string.IsNullOrEmpty(alias)) return;
 
             var componentBuilder = _componentBuilders.FirstOrDefault(p => p.CanBuild(alias));
             if (componentBuilder != null)
             {
-                componentBuilder.Build(propertyType, parentId);
+                componentBuilder.Populate(componentProperty, componentProperty.ChildProperties, parentId).Build();
             }
             else
             {

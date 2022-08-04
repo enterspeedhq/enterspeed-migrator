@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Settings;
+using Enterspeed.Migrator.ValueTypes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Umbraco.Cms.Core.Models;
@@ -13,7 +14,7 @@ using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
-using Umbraco10.Migrator.DocumentTypes.Components.Contracts;
+using Umbraco10.Migrator.DocumentTypes.Components;
 using Umbraco10.Migrator.Settings;
 
 namespace Umbraco10.Migrator.DocumentTypes
@@ -31,7 +32,7 @@ namespace Umbraco10.Migrator.DocumentTypes
         private readonly List<ContentTypeSort> _contentTypes;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
-        private readonly List<Enterspeed.Migrator.ValueTypes.PropertyType> _componentProperties;
+        private readonly List<Enterspeed.Migrator.ValueTypes.EnterspeedPropertyType> _componentProperties;
         private readonly IEnumerable<string> _contentTypeAliasList;
         private ContentType _root;
         private const string PagesFolderName = "Migrated Page Types";
@@ -60,10 +61,10 @@ namespace Umbraco10.Migrator.DocumentTypes
             _enterspeedConfiguration = enterspeedConfiguration;
             _componentBuilderHandler = componentBuilderHandler;
             _contentTypeAliasList = _contentTypeService.GetAllContentTypeAliases();
-            _componentProperties = new List<Enterspeed.Migrator.ValueTypes.PropertyType>();
+            _componentProperties = new List<Enterspeed.Migrator.ValueTypes.EnterspeedPropertyType>();
         }
 
-        public void BuildPageDocTypes(Schemas schemas)
+        public void BuildDocTypes(Schemas schemas)
         {
             try
             {
@@ -75,7 +76,7 @@ namespace Umbraco10.Migrator.DocumentTypes
                     CreatePageDocType(schemas.Pages[index], pagesFolder, index);
                 }
 
-                foreach (var componentProperty in _componentProperties)
+                foreach (var componentProperty in _componentProperties.DistinctBy(p => p.Alias))
                 {
                     _componentBuilderHandler.BuildComponent(componentProperty, componentsFolder.Id);
                 }
@@ -153,11 +154,11 @@ namespace Umbraco10.Migrator.DocumentTypes
             }
         }
 
-        private void AddProperties(Enterspeed.Migrator.ValueTypes.PropertyType property, IContentTypeBase pageDocumentType)
+        private void AddProperties(EnterspeedPropertyType enterspeedProperty, IContentTypeBase pageDocumentType)
         {
             IDataType dataType = null;
 
-            var jsonElement = (JsonElement)property.Value;
+            var jsonElement = (JsonElement)enterspeedProperty.Value;
             switch (jsonElement.ValueKind)
             {
                 case JsonValueKind.Undefined:
@@ -188,8 +189,8 @@ namespace Umbraco10.Migrator.DocumentTypes
             {
                 pageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
                 {
-                    Name = property.Name.ToFirstUpperInvariant(),
-                    Alias = property.Alias.ToFirstLowerInvariant(),
+                    Name = enterspeedProperty.Name.ToFirstUpperInvariant(),
+                    Alias = enterspeedProperty.Alias.ToFirstLowerInvariant(),
                 }, "content", "Page content");
             }
         }

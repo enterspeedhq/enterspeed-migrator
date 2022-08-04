@@ -7,12 +7,12 @@ namespace Enterspeed.Migrator.Models
     {
         public PageData()
         {
-            Properties = new List<PropertyType>();
+            Properties = new List<EnterspeedPropertyType>();
             Children = new List<PageData>();
         }
 
         public MetaSchema MetaSchema { get; set; }
-        public List<PropertyType> Properties { get; set; }
+        public List<EnterspeedPropertyType> Properties { get; set; }
         public List<PageData> Children { get; set; }
     }
 }

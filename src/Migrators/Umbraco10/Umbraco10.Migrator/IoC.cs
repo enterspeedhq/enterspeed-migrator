@@ -2,8 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Umbraco10.Migrator.Content;
 using Umbraco10.Migrator.DocumentTypes;
-using Umbraco10.Migrator.DocumentTypes.Components;
-using Umbraco10.Migrator.DocumentTypes.Components.Contracts;
+using Umbraco10.Migrator.DocumentTypes.Components.Builders;
 using Umbraco10.Migrator.Settings;
 
 namespace Umbraco10.Migrator

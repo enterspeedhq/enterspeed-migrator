@@ -5,18 +5,18 @@ using System.Text.Json;
 
 namespace Enterspeed.Migrator.ValueTypes
 {
-    public class PropertyType
+    public class EnterspeedPropertyType
     {
-        public PropertyType(JsonProperty jsonProperty)
+        public EnterspeedPropertyType(JsonProperty jsonProperty)
         {
             Value = jsonProperty.Value;
             Alias = jsonProperty.Name;
             Name = jsonProperty.Name;
             Type = jsonProperty.Value.ValueKind.ToString();
-            ChildProperties = new List<PropertyType>();
+            ChildProperties = new List<EnterspeedPropertyType>();
         }
 
-        public PropertyType()
+        public EnterspeedPropertyType()
         {
         }
 
@@ -24,7 +24,7 @@ namespace Enterspeed.Migrator.ValueTypes
         public string Alias { get; set; }
         public string @Type { get; set; }
         public object Value { get; set; }
-        public List<PropertyType> ChildProperties { get; set; }
+        public List<EnterspeedPropertyType> ChildProperties { get; set; }
 
         public bool IsComponent(EnterspeedConfiguration enterspeedConfiguration)
         {

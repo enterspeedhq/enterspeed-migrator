@@ -36,7 +36,7 @@ namespace Umbraco10.Migrator
                 var rootLevelResponse = await _apiService.GetPageResponsesAsync(navigation);
                 var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse);
                 var pageSchemas = _schemaBuilder.BuildPageSchemas(pages);
-                _documentTypeBuilder.BuildPageDocTypes(pageSchemas);
+                _documentTypeBuilder.BuildDocTypes(pageSchemas);
             }
             catch (Exception e)
             {

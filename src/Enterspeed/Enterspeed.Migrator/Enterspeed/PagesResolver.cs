@@ -92,23 +92,23 @@ namespace Enterspeed.Migrator.Enterspeed
             return pageEntityType;
         }
 
-        private void MapPageData(PageData pageData, JsonElement route, PropertyType parentProperty = null)
+        private void MapPageData(PageData pageData, JsonElement route, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             if (route.ValueKind != JsonValueKind.Null)
             {
                 foreach (var jsonProperty in route.EnumerateObject())
                 {
-                    MapPageData(pageData, jsonProperty, parentProperty);
+                    MapPageData(pageData, jsonProperty, parentEnterspeedProperty);
                 }
             }
         }
 
-        private void MapPageData(PageData pageData, JsonProperty jsonProperty, PropertyType parentProperty = null)
+        private void MapPageData(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p.Contains(jsonProperty.Name));
             if (isComponent)
             {
-                parentProperty.ChildProperties.Add(new PropertyType
+                parentEnterspeedProperty.ChildProperties.Add(new EnterspeedPropertyType
                 {
                     Name = "isComponent",
                     Alias = "isComponent",
@@ -119,25 +119,25 @@ namespace Enterspeed.Migrator.Enterspeed
             switch (jsonProperty.Value.ValueKind)
             {
                 case JsonValueKind.Object:
-                    CreateObjectType(pageData, jsonProperty, isComponent, parentProperty);
+                    CreateObjectType(pageData, jsonProperty, isComponent, parentEnterspeedProperty);
                     break;
                 case JsonValueKind.Array:
-                    CreateArrayType(pageData, jsonProperty, isComponent, parentProperty);
+                    CreateArrayType(pageData, jsonProperty, isComponent, parentEnterspeedProperty);
                     break;
                 default:
-                    CreateSimpleType(pageData, jsonProperty, isComponent, parentProperty);
+                    CreateSimpleType(pageData, jsonProperty, isComponent, parentEnterspeedProperty);
                     break;
             }
         }
 
-        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, bool isComponent, PropertyType parentProperty = null)
+        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, bool isComponent, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             if (jsonProperty.Value.ValueKind == JsonValueKind.Array && jsonProperty.Value.GetArrayLength() > 0)
             {
-                var currentProperty = new PropertyType(jsonProperty);
-                if (parentProperty != null)
+                var currentProperty = new EnterspeedPropertyType(jsonProperty);
+                if (parentEnterspeedProperty != null)
                 {
-                    parentProperty.ChildProperties.Add(currentProperty);
+                    parentEnterspeedProperty.ChildProperties.Add(currentProperty);
                 }
 
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
@@ -148,7 +148,7 @@ namespace Enterspeed.Migrator.Enterspeed
 
                 if (isComponent)
                 {
-                    currentProperty.ChildProperties.Add(new PropertyType
+                    currentProperty.ChildProperties.Add(new EnterspeedPropertyType
                     {
                         Name = "isComponent",
                         Value = true
@@ -159,7 +159,7 @@ namespace Enterspeed.Migrator.Enterspeed
             }
         }
 
-        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, bool isComponent, PropertyType parentProperty = null)
+        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, bool isComponent, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             // If is a complex type 
             if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
@@ -168,10 +168,10 @@ namespace Enterspeed.Migrator.Enterspeed
                 var listOfProperties = jsonProperty.Value.EnumerateObject();
                 if (listOfProperties.Any())
                 {
-                    var currentProperty = new PropertyType(jsonProperty);
-                    if (parentProperty != null)
+                    var currentProperty = new EnterspeedPropertyType(jsonProperty);
+                    if (parentEnterspeedProperty != null)
                     {
-                        parentProperty.ChildProperties.Add(currentProperty);
+                        parentEnterspeedProperty.ChildProperties.Add(currentProperty);
                     }
 
                     foreach (var childProperty in listOfProperties)
@@ -183,7 +183,7 @@ namespace Enterspeed.Migrator.Enterspeed
 
                     if (isComponent)
                     {
-                        currentProperty.ChildProperties.Add(new PropertyType
+                        currentProperty.ChildProperties.Add(new EnterspeedPropertyType
                         {
                             Name = "isComponent",
                             Value = true
@@ -193,12 +193,12 @@ namespace Enterspeed.Migrator.Enterspeed
             }
         }
 
-        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, bool isComponent, PropertyType parentProperty = null)
+        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, bool isComponent, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
-            var property = new PropertyType(jsonProperty);
-            if (parentProperty != null)
+            var property = new EnterspeedPropertyType(jsonProperty);
+            if (parentEnterspeedProperty != null)
             {
-                parentProperty.ChildProperties.Add(property);
+                parentEnterspeedProperty.ChildProperties.Add(property);
             }
             else
             {
