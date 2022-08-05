@@ -75,6 +75,8 @@ namespace Enterspeed.Migrator.Enterspeed
                 }
 
                 var response = await GetByUrlsAsync(url);
+                if (response.Response == null) continue;
+
                 var pageResponse = new PageResponse
                 {
                     DeliveryApiResponse = response

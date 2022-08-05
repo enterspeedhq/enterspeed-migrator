@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Microsoft.Extensions.Logging;
@@ -34,8 +35,9 @@ namespace Umbraco10.Migrator
             {
                 var navigation = await _apiService.GetNavigationAsync();
                 var rootLevelResponse = await _apiService.GetPageResponsesAsync(navigation);
-                var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse);
+                var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse).Where(p => p.MetaSchema != null).ToList();
                 var pageSchemas = _schemaBuilder.BuildPageSchemas(pages);
+
                 _documentTypeBuilder.BuildDocTypes(pageSchemas);
             }
             catch (Exception e)
@@ -47,16 +49,6 @@ namespace Umbraco10.Migrator
 
         public async Task ImportDataAsync()
         {
-            try
-            {
-                // var data = await _sourceImporter.ImportDataAsync();
-                // _contentBuilder.BuildContentPages(data);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "something went wrong when importing data");
-                throw;
-            }
         }
     }
 }

@@ -29,6 +29,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components
             var componentBuilder = _componentBuilders.FirstOrDefault(p => p.CanBuild(alias));
             if (componentBuilder != null)
             {
+                if (componentBuilder.ComponentExists(componentProperty)) return;
                 componentBuilder.Populate(componentProperty, componentProperty.ChildProperties, parentId).Build();
             }
             else

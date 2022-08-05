@@ -8,6 +8,7 @@ using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Models.Response;
 using Enterspeed.Migrator.Settings;
 using Enterspeed.Migrator.ValueTypes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Enterspeed.Migrator.Enterspeed
@@ -15,10 +16,13 @@ namespace Enterspeed.Migrator.Enterspeed
     public class PagesResolver : IPagesResolver
     {
         private readonly EnterspeedConfiguration _configuration;
+        private readonly ILogger<PagesResolver> _logger;
 
         public PagesResolver(
-            IOptions<EnterspeedConfiguration> configuration)
+            IOptions<EnterspeedConfiguration> configuration,
+            ILogger<PagesResolver> logger)
         {
+            _logger = logger;
             _configuration = configuration?.Value;
         }
 
@@ -30,6 +34,12 @@ namespace Enterspeed.Migrator.Enterspeed
         public MetaSchema GetMetaData(DeliveryResponse deliveryResponse)
         {
             var route = deliveryResponse.Route;
+            if (route == null)
+            {
+                _logger.LogError("Route was not found for");
+                return null;
+            }
+
             if (!deliveryResponse.Route.TryGetValue(_configuration.MigrationPageMetaData, out var migrationPageMetaData))
             {
                 throw new NullReferenceException($"{_configuration.MigrationPageMetaData} not found on the schema for {JsonSerializer.Serialize(route)}");
@@ -164,7 +174,6 @@ namespace Enterspeed.Migrator.Enterspeed
             // If is a complex type 
             if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
             {
-
                 var listOfProperties = jsonProperty.Value.EnumerateObject();
                 if (listOfProperties.Any())
                 {

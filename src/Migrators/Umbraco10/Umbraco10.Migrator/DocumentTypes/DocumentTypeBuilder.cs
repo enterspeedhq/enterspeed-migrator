@@ -46,7 +46,7 @@ namespace Umbraco10.Migrator.DocumentTypes
             BlockListPropertyEditor blockListPropertyEditor,
             IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
             IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration,
-            EnterspeedConfiguration enterspeedConfiguration,
+            IOptions<EnterspeedConfiguration> enterspeedConfiguration,
             IComponentBuilderHandler componentBuilderHandler)
         {
             _logger = logger;
@@ -58,10 +58,10 @@ namespace Umbraco10.Migrator.DocumentTypes
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
             _dataTypes = _dataTypeService.GetAll();
             _contentTypes = new List<ContentTypeSort>();
-            _enterspeedConfiguration = enterspeedConfiguration;
+            _enterspeedConfiguration = enterspeedConfiguration?.Value;
             _componentBuilderHandler = componentBuilderHandler;
             _contentTypeAliasList = _contentTypeService.GetAllContentTypeAliases();
-            _componentProperties = new List<Enterspeed.Migrator.ValueTypes.EnterspeedPropertyType>();
+            _componentProperties = new List<EnterspeedPropertyType>();
         }
 
         public void BuildDocTypes(Schemas schemas)
@@ -71,9 +71,11 @@ namespace Umbraco10.Migrator.DocumentTypes
                 var pagesFolder = GetOrCreateFolder(PagesFolderName);
                 var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
 
-                for (var index = 0; index < schemas.Pages.Count; index++)
+                var sortOrder = 0;
+                foreach (var page in schemas.Pages)
                 {
-                    CreatePageDocType(schemas.Pages[index], pagesFolder, index);
+                    CreatePageDocType(page, pagesFolder, sortOrder);
+                    sortOrder++;
                 }
 
                 foreach (var componentProperty in _componentProperties.DistinctBy(p => p.Alias))
@@ -106,12 +108,6 @@ namespace Umbraco10.Migrator.DocumentTypes
         private void AddBaseProperties(ContentType newPageDocumentType, int sortOrder)
         {
             newPageDocumentType.AddPropertyGroup("pageContent", "Page Content");
-            newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, _dataTypes.First(d => d.Name == BlockListName))
-            {
-                Name = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstUpperInvariant(),
-                Alias = _umbracoMigrationConfiguration.ContentPropertyAlias.ToFirstLowerInvariant()
-            }, "pageContent");
-
             if (newPageDocumentType.AllowedAsRoot)
             {
                 _root = newPageDocumentType;
@@ -206,7 +202,7 @@ namespace Umbraco10.Migrator.DocumentTypes
                     return createContainerAttempt.Result.Entity;
                 }
 
-                _logger.LogError(containerSaved.Exception, "Something went wrong when saving folder " + folderName);
+                _logger.LogError(containerSaved.Exception, $"Something went wrong when saving folder {folderName}");
             }
 
             var existingContainer = _contentTypeService.GetContainers(PagesFolderName, 1).FirstOrDefault();
