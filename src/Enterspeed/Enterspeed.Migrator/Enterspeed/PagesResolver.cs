@@ -90,13 +90,16 @@ namespace Enterspeed.Migrator.Enterspeed
             return null;
         }
 
-        public PageData GetPageData(DeliveryResponse deliveryResponse)
+        private PageData GetPageData(DeliveryResponse deliveryResponse)
         {
             var route = deliveryResponse.Route;
             var routeSerialized = JsonSerializer.SerializeToElement(route);
 
-            var pageEntityType = new PageData();
-            pageEntityType.MetaSchema = GetMetaData(deliveryResponse);
+            var pageEntityType = new PageData
+            {
+                MetaSchema = GetMetaData(deliveryResponse)
+            };
+            
             MapPageData(pageEntityType, routeSerialized);
 
             return pageEntityType;

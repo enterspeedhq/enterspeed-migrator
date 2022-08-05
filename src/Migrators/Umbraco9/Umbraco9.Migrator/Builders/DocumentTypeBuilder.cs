@@ -27,7 +27,7 @@ namespace Umbraco9.Migrator.Builders
         private readonly List<ContentTypeSort> _contentTypes;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
-        private ContentType _root;
+        private int _rootDocumentTypeId;
         const string PagesContainerName = "Migrated Page Types";
         const string ElementsContainerName = "Migrated Elements";
         private const string BlockListName = "BlockList.Custom";
@@ -69,8 +69,9 @@ namespace Umbraco9.Migrator.Builders
                     sortOrder++;
                 }
 
-                _root.AllowedContentTypes = _contentTypes;
-                _contentTypeService.Save(_root);
+                var rootContent = _contentTypeService.Get(_rootDocumentTypeId);
+                rootContent.AllowedContentTypes = _contentTypes;
+                _contentTypeService.Save(rootContent);
             }
             catch (Exception e)
             {
@@ -104,7 +105,7 @@ namespace Umbraco9.Migrator.Builders
 
                 if (newPageDocumentType.AllowedAsRoot)
                 {
-                    _root = newPageDocumentType;
+                    _rootDocumentTypeId = newPageDocumentType.Id;
                 }
                 else
                 {

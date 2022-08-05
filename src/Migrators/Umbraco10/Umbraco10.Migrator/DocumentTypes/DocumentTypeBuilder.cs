@@ -32,9 +32,9 @@ namespace Umbraco10.Migrator.DocumentTypes
         private readonly List<ContentTypeSort> _contentTypes;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
-        private readonly List<Enterspeed.Migrator.ValueTypes.EnterspeedPropertyType> _componentProperties;
+        private readonly List<EnterspeedPropertyType> _componentProperties;
         private readonly IEnumerable<string> _contentTypeAliasList;
-        private ContentType _root;
+        private int _rootDocumentTypeId;
         private const string PagesFolderName = "Migrated Page Types";
         private const string ComponentsFolderName = "Migrated Components";
         private const string BlockListName = "BlockList.Custom";
@@ -83,8 +83,7 @@ namespace Umbraco10.Migrator.DocumentTypes
                     _componentBuilderHandler.BuildComponent(componentProperty, componentsFolder.Id);
                 }
 
-                _root.AllowedContentTypes = _contentTypes;
-                _contentTypeService.Save(_root);
+                AssignAllowedDocumentTypesToRoot();
             }
             catch (Exception e)
             {
@@ -93,32 +92,53 @@ namespace Umbraco10.Migrator.DocumentTypes
             }
         }
 
+        private void AssignAllowedDocumentTypesToRoot()
+        {
+            var rootDocumentType = _contentTypeService.Get(_rootDocumentTypeId);
+            if (rootDocumentType != null)
+            {
+                rootDocumentType.AllowedContentTypes = _contentTypes;
+                _contentTypeService.Save(rootDocumentType);
+            }
+            else
+            {
+                _logger.LogError("Could not find root document type when assigned allowed content types");
+            }
+        }
+
         private void CreatePageDocType(Schema page, IEntity pagesFolder, int sortOrder)
         {
             if (!_contentTypeAliasList.Any(c => c.Equals(page.MetaSchema.SourceEntityAlias)))
             {
-                var newPageDocumentType = CreateNewPageDocType(page, pagesFolder);
+                // Build new doc type
+                var newPageDocumentType = BuildNewPageDocType(page, pagesFolder);
+
+                // Add base properties
                 AddBaseProperties(newPageDocumentType, sortOrder);
+
+                // Add the rest of the properties
                 AddProperties(page, newPageDocumentType);
 
+                // Save the new document type
                 _contentTypeService.Save(newPageDocumentType);
+
+                if (newPageDocumentType.AllowedAsRoot)
+                {
+                    _rootDocumentTypeId = newPageDocumentType.Id;
+                }
             }
         }
 
         private void AddBaseProperties(ContentType newPageDocumentType, int sortOrder)
         {
             newPageDocumentType.AddPropertyGroup("pageContent", "Page Content");
-            if (newPageDocumentType.AllowedAsRoot)
-            {
-                _root = newPageDocumentType;
-            }
-            else
+            if (!newPageDocumentType.AllowedAsRoot)
             {
                 _contentTypes.Add(new ContentTypeSort(newPageDocumentType.Id, sortOrder));
             }
         }
 
-        private ContentType CreateNewPageDocType(Schema page, IEntity pagesFolder)
+        private ContentType BuildNewPageDocType(Schema page, IEntity pagesFolder)
         {
             var newPageDocumentType = new ContentType(_shortStringHelper, pagesFolder.Id)
             {
