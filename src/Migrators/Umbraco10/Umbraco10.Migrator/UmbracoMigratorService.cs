@@ -33,11 +33,13 @@ namespace Umbraco10.Migrator
         {
             try
             {
+                // Migration engine mapping
                 var navigation = await _apiService.GetNavigationAsync();
                 var rootLevelResponse = await _apiService.GetPageResponsesAsync(navigation);
                 var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse).Where(p => p.MetaSchema != null).ToList();
                 var pageSchemas = _schemaBuilder.BuildPageSchemas(pages);
 
+                // Umbraco specific data
                 _documentTypeBuilder.BuildDocTypes(pageSchemas);
             }
             catch (Exception e)

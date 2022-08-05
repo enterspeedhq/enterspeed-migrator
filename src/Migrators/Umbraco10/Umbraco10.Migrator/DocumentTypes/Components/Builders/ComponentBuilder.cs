@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Enterspeed.Migrator.Constants;
 using Enterspeed.Migrator.ValueTypes;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
@@ -10,10 +11,9 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 {
     public abstract class ComponentBuilder : IComponentBuilder
     {
-        private List<EnterspeedPropertyType> _componentProperties;
         private readonly IShortStringHelper _shortStringHelper;
         private const string PropertyGroupAlias = "componentData";
-        private const string PropertyGroupName = "componentData";
+        private const string PropertyGroupName = "Component Data";
         private readonly IContentTypeService _contentTypeService;
         private readonly IDataTypeService _dataTypeService;
         private ContentType _componentDocType;
@@ -35,12 +35,10 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         {
             _componentDocType = new ContentType(_shortStringHelper, parentFolderId)
             {
-                Alias = componentProperty.Alias.ToFirstLowerInvariant(),
-                Name = componentProperty.Name.ToFirstUpperInvariant(),
+                Alias = componentProperties.FirstOrDefault(p => p.Alias == EnterspeedPropertyConstants.AliasOf.Alias).Value.ToString().ToFirstLowerInvariant(),
+                Name = componentProperties.FirstOrDefault(p => p.Alias == EnterspeedPropertyConstants.AliasOf.Name).Value.ToString(),
                 IsElement = true
             };
-
-            _componentProperties = componentProperties;
 
             return this;
         }
@@ -51,14 +49,14 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
             return contentTypes.Any(c => c.Equals(componentProperty.Alias));
         }
 
-        protected void AddProperty(string alias, int dataTypeId)
+        protected void AddProperty(string alias, string name, int dataTypeId)
         {
-            var property = _componentProperties.FirstOrDefault(p => p.Alias == alias);
 
             _componentDocType.AddPropertyType(
                 new PropertyType(_shortStringHelper, _dataTypeService.GetDataType(dataTypeId))
                 {
-                    Alias = property.Alias, Name = property.Name
+                    Alias = alias,
+                    Name = name
                 }, PropertyGroupAlias, PropertyGroupName);
         }
 

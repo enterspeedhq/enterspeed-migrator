@@ -1,4 +1,5 @@
-﻿using Enterspeed.Migrator.Settings;
+﻿using Enterspeed.Migrator.Constants;
+using Enterspeed.Migrator.Settings;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -26,15 +27,9 @@ namespace Enterspeed.Migrator.ValueTypes
         public object Value { get; set; }
         public List<EnterspeedPropertyType> ChildProperties { get; set; }
 
-        public bool IsComponent(EnterspeedConfiguration enterspeedConfiguration)
+        public bool IsComponent()
         {
-            var childPropertyAlias = ChildProperties.Select(p => p.Alias);
-            foreach (var property in childPropertyAlias)
-            {
-                return enterspeedConfiguration.ComponentPropertyTypeKeys.Any(c => c.Equals(property));
-            }
-
-            return false;
+            return ChildProperties.Any(p => p.Alias == EnterspeedPropertyConstants.IsComponentAlias);
         }
     }
 }

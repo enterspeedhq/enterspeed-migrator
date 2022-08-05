@@ -23,7 +23,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 
         public override void Build()
         {
-            AddProperty("value", Constants.DataTypes.Textarea);
+            AddProperty("embed", "Embed", Constants.DataTypes.Textarea);
             Save();
         }
     }

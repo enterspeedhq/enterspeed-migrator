@@ -21,7 +21,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 
         public override void Build()
         {
-            AddProperty("value", Constants.DataTypes.Textbox);
+            AddProperty("headline", "Headline", Constants.DataTypes.Textbox);
             Save();
         }
     }

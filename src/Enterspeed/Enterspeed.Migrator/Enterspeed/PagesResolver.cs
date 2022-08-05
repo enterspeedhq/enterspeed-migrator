@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Enterspeed.Delivery.Sdk.Api.Models;
+using Enterspeed.Migrator.Constants;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Models.Response;
@@ -99,7 +100,7 @@ namespace Enterspeed.Migrator.Enterspeed
             {
                 MetaSchema = GetMetaData(deliveryResponse)
             };
-            
+
             MapPageData(pageEntityType, routeSerialized);
 
             return pageEntityType;
@@ -119,15 +120,6 @@ namespace Enterspeed.Migrator.Enterspeed
         private void MapPageData(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p.Contains(jsonProperty.Name));
-            if (isComponent)
-            {
-                parentEnterspeedProperty.ChildProperties.Add(new EnterspeedPropertyType
-                {
-                    Name = "isComponent",
-                    Alias = "isComponent",
-                    Value = true
-                });
-            }
 
             switch (jsonProperty.Value.ValueKind)
             {
@@ -163,7 +155,8 @@ namespace Enterspeed.Migrator.Enterspeed
                 {
                     currentProperty.ChildProperties.Add(new EnterspeedPropertyType
                     {
-                        Name = "isComponent",
+                        Name = EnterspeedPropertyConstants.IsComponentName,
+                        Alias = EnterspeedPropertyConstants.IsComponentAlias,
                         Value = true
                     });
                 }
@@ -197,7 +190,8 @@ namespace Enterspeed.Migrator.Enterspeed
                     {
                         currentProperty.ChildProperties.Add(new EnterspeedPropertyType
                         {
-                            Name = "isComponent",
+                            Name = EnterspeedPropertyConstants.IsComponentName,
+                            Alias = EnterspeedPropertyConstants.IsComponentAlias,
                             Value = true
                         });
                     }

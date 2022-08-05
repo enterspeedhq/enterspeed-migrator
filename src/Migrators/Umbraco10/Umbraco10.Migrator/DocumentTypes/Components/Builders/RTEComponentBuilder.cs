@@ -21,7 +21,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 
         public override void Build()
         {
-            AddProperty("value", Constants.DataTypes.RichtextEditor);
+            AddProperty("rte", "RTE", Constants.DataTypes.RichtextEditor);
             Save();
         }
     }

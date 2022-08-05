@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Enterspeed.Migrator.Models;
-using Enterspeed.Migrator.Settings;
 using Enterspeed.Migrator.ValueTypes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -27,14 +26,12 @@ namespace Umbraco10.Migrator.DocumentTypes
         private readonly IDataTypeService _dataTypeService;
         private readonly IConfigurationEditorJsonSerializer _configurationEditorJsonSerializer;
         private readonly IEnumerable<IDataType> _dataTypes;
-        private readonly EnterspeedConfiguration _enterspeedConfiguration;
         private readonly IComponentBuilderHandler _componentBuilderHandler;
         private readonly List<ContentTypeSort> _contentTypes;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
         private readonly List<EnterspeedPropertyType> _componentProperties;
         private readonly IEnumerable<string> _contentTypeAliasList;
-        private int _rootDocumentTypeId;
         private const string PagesFolderName = "Migrated Page Types";
         private const string ComponentsFolderName = "Migrated Components";
         private const string BlockListName = "BlockList.Custom";
@@ -46,7 +43,6 @@ namespace Umbraco10.Migrator.DocumentTypes
             BlockListPropertyEditor blockListPropertyEditor,
             IConfigurationEditorJsonSerializer configurationEditorJsonSerializer,
             IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration,
-            IOptions<EnterspeedConfiguration> enterspeedConfiguration,
             IComponentBuilderHandler componentBuilderHandler)
         {
             _logger = logger;
@@ -58,7 +54,6 @@ namespace Umbraco10.Migrator.DocumentTypes
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
             _dataTypes = _dataTypeService.GetAll();
             _contentTypes = new List<ContentTypeSort>();
-            _enterspeedConfiguration = enterspeedConfiguration?.Value;
             _componentBuilderHandler = componentBuilderHandler;
             _contentTypeAliasList = _contentTypeService.GetAllContentTypeAliases();
             _componentProperties = new List<EnterspeedPropertyType>();
@@ -82,27 +77,11 @@ namespace Umbraco10.Migrator.DocumentTypes
                 {
                     _componentBuilderHandler.BuildComponent(componentProperty, componentsFolder.Id);
                 }
-
-                AssignAllowedDocumentTypesToRoot();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Something went wrong when building schemas");
                 throw;
-            }
-        }
-
-        private void AssignAllowedDocumentTypesToRoot()
-        {
-            var rootDocumentType = _contentTypeService.Get(_rootDocumentTypeId);
-            if (rootDocumentType != null)
-            {
-                rootDocumentType.AllowedContentTypes = _contentTypes;
-                _contentTypeService.Save(rootDocumentType);
-            }
-            else
-            {
-                _logger.LogError("Could not find root document type when assigned allowed content types");
             }
         }
 
@@ -121,11 +100,6 @@ namespace Umbraco10.Migrator.DocumentTypes
 
                 // Save the new document type
                 _contentTypeService.Save(newPageDocumentType);
-
-                if (newPageDocumentType.AllowedAsRoot)
-                {
-                    _rootDocumentTypeId = newPageDocumentType.Id;
-                }
             }
         }
 
@@ -157,7 +131,7 @@ namespace Umbraco10.Migrator.DocumentTypes
             {
                 foreach (var property in schema.Properties)
                 {
-                    if (property.IsComponent(_enterspeedConfiguration))
+                    if (property.IsComponent())
                     {
                         // TODO: See if we can do this in a better way
                         _componentProperties.Add(property);
@@ -225,7 +199,7 @@ namespace Umbraco10.Migrator.DocumentTypes
                 _logger.LogError(containerSaved.Exception, $"Something went wrong when saving folder {folderName}");
             }
 
-            var existingContainer = _contentTypeService.GetContainers(PagesFolderName, 1).FirstOrDefault();
+            var existingContainer = _contentTypeService.GetContainers(folderName, 1).FirstOrDefault();
             return existingContainer;
         }
 
