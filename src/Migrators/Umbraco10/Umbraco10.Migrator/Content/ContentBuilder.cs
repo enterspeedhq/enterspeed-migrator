@@ -40,13 +40,29 @@ namespace Umbraco10.Migrator.Content
 
                 foreach (var property in pageEntityType.Properties)
                 {
-                    contentToCreate.Properties[property.Alias].SetValue(property.Value);
+                    if (contentToCreate.Properties.FirstOrDefault(p => p.Alias == property.Alias) != null)
+                    {
+                        switch (property.Type)
+                        {
+
+                            case System.Text.Json.JsonValueKind.True:
+                            case System.Text.Json.JsonValueKind.False:
+                                var value = bool.Parse(property.Value.ToString());
+                                contentToCreate.Properties[property.Alias].SetValue(value);
+                                break;
+                            case System.Text.Json.JsonValueKind.Null:
+                                break;
+                            default:
+                                contentToCreate.Properties[property.Alias].SetValue(property.Value);
+                                break;
+                        }
+                    }
                 }
 
-                var blockList = PopulateBlockList(pageEntityType);
-                var blockListSerialized = JsonConvert.SerializeObject(blockList);
+                //var blockList = PopulateBlockList(pageEntityType);
+                //var blockListSerialized = JsonConvert.SerializeObject(blockList);
 
-                contentToCreate.SetValue(_umbracoMigrationConfiguration.ContentPropertyAlias, blockListSerialized);
+                //contentToCreate.SetValue(_umbracoMigrationConfiguration.ContentPropertyAlias, blockListSerialized);
                 _contentService.Save(contentToCreate);
 
                 if (pageEntityType.Children != null && pageEntityType.Children.Any())

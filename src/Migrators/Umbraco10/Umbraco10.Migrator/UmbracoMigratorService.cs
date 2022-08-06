@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Microsoft.Extensions.Logging;
+using Umbraco10.Migrator.Content;
 using Umbraco10.Migrator.DocumentTypes;
 
 namespace Umbraco10.Migrator
@@ -14,19 +15,22 @@ namespace Umbraco10.Migrator
         private readonly IApiService _apiService;
         private readonly ILogger<UmbracoMigratorService> _logger;
         private readonly ISchemaBuilder _schemaBuilder;
+        private readonly IContentBuilder _contentBuilder;
 
         public UmbracoMigratorService(
             ILogger<UmbracoMigratorService> logger,
             IPagesResolver pagesResolver,
             IApiService apiService,
             ISchemaBuilder schemaBuilder,
-            IDocumentTypeBuilder documentTypeBuilder)
+            IDocumentTypeBuilder documentTypeBuilder,
+            IContentBuilder contentBuilder)
         {
             _logger = logger;
             _pagesResolver = pagesResolver;
             _apiService = apiService;
             _schemaBuilder = schemaBuilder;
             _documentTypeBuilder = documentTypeBuilder;
+            _contentBuilder = contentBuilder;
         }
 
         public async Task ImportDocumentTypesAsync()
@@ -65,6 +69,7 @@ namespace Umbraco10.Migrator
                 var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse).Where(p => p.MetaSchema != null).ToList();
 
                 // Build content based on pages
+                _contentBuilder.BuildContentPages(pages);
 
             }
             catch (Exception e)
