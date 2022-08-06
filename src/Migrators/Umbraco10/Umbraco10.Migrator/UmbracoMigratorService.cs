@@ -33,13 +33,17 @@ namespace Umbraco10.Migrator
         {
             try
             {
-                // Migration engine mapping
+                // Enterspeed responses
                 var navigation = await _apiService.GetNavigationAsync();
                 var rootLevelResponse = await _apiService.GetPageResponsesAsync(navigation);
+
+                // All pages with all data
                 var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse).Where(p => p.MetaSchema != null).ToList();
+
+                // Mapped out data structures in schemas based on the pages
                 var pageSchemas = _schemaBuilder.BuildPageSchemas(pages);
 
-                // Umbraco specific data
+                // Build document types based on schemas
                 _documentTypeBuilder.BuildDocTypes(pageSchemas);
             }
             catch (Exception e)
@@ -51,6 +55,23 @@ namespace Umbraco10.Migrator
 
         public async Task ImportDataAsync()
         {
+            try
+            {
+                // Enterspeed responses
+                var navigation = await _apiService.GetNavigationAsync();
+                var rootLevelResponse = await _apiService.GetPageResponsesAsync(navigation);
+
+                // All pages with all data
+                var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse).Where(p => p.MetaSchema != null).ToList();
+
+                // Build content based on pages
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "something went wrong when building document types");
+                throw;
+            }
         }
     }
 }
