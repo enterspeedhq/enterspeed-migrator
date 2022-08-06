@@ -32,7 +32,7 @@ namespace Enterspeed.Migrator.Enterspeed
             return JsonSerializer.Deserialize<EnterspeedResponse>(json);
         }
 
-        public async Task<DeliveryApiResponse> GetByUrlsAsync(string url)
+        public async Task<DeliveryApiResponse> GetByUrlAsync(string url)
         {
             return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) => { s.WithUrl(url); });
         }
@@ -53,7 +53,7 @@ namespace Enterspeed.Migrator.Enterspeed
 
             var pageResponse = new PageResponse
             {
-                DeliveryApiResponse = await GetByUrlsAsync(url)
+                DeliveryApiResponse = await GetByUrlAsync(url)
             };
 
             var children = await MapResponseAsync(enterspeedResponse.Views.Navigation?.Children);
@@ -74,7 +74,7 @@ namespace Enterspeed.Migrator.Enterspeed
                     url = child?.View?.Self?.View?.Url?.Replace(pageUrl, "");
                 }
 
-                var response = await GetByUrlsAsync(url);
+                var response = await GetByUrlAsync(url);
                 if (response.Response == null) continue;
 
                 var pageResponse = new PageResponse

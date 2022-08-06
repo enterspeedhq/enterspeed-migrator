@@ -10,17 +10,21 @@ namespace Enterspeed.Migrator.Enterspeed
         public Schemas BuildPageSchemas(List<PageData> pageData)
         {
             var schemas = new Schemas();
-            var pages = new List<Schema>();
+            BuildPageSchemas(pageData, schemas);
+            return schemas;
+        }
 
+        public void BuildPageSchemas(List<PageData> pageData, Schemas schemas)
+        {
             foreach (var data in pageData)
             {
                 var alias = data.MetaSchema.SourceEntityAlias;
-                var page = pages.FirstOrDefault(p => p.MetaSchema.SourceEntityAlias == alias);
+                var page = schemas.Pages.FirstOrDefault(p => p.MetaSchema.SourceEntityAlias == alias);
                 var properties = data.Properties.Where(p => !string.IsNullOrEmpty(p.Value.ToString())).DistinctBy(p => p.Alias);
 
                 if (page == null)
                 {
-                    pages.Add(new Schema
+                    schemas.Pages.Add(new Schema
                     {
                         MetaSchema = data.MetaSchema,
                         Properties = properties.ToList()
@@ -37,10 +41,12 @@ namespace Enterspeed.Migrator.Enterspeed
                         }
                     }
                 }
-            }
 
-            schemas.Pages.AddRange(pages);
-            return schemas;
+                if (data.Children != null && data.Children.Any())
+                {
+                    BuildPageSchemas(data.Children, schemas);
+                }
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Enterspeed.Migrator.Enterspeed.Contracts
     public interface IApiService
     {
         Task<EnterspeedResponse> GetNavigationAsync();
-        Task<DeliveryApiResponse> GetByUrlsAsync(string url);
+        Task<DeliveryApiResponse> GetByUrlAsync(string url);
 
         /// <summary>
         /// Iterates trough all the pages and maps to a delivery api deliveryApiResponse object.

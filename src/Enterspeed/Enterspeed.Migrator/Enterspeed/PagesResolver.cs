@@ -67,20 +67,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 {
                     if (deliveryResponse.DeliveryApiResponse.Response != null)
                     {
-                        var pageEntityType = GetPageData(deliveryResponse.DeliveryApiResponse?.Response);
-                        pageEntityTypes.Add(pageEntityType);
-
-                        if (deliveryResponse.Children.Any())
-                        {
-                            foreach (var responseChild in deliveryResponse.Children)
-                            {
-                                var childEntityTypes = ResolveFromRoot(responseChild);
-                                if (childEntityTypes != null)
-                                {
-                                    page.Children.AddRange(childEntityTypes);
-                                }
-                            }
-                        }
+                        page.Children.AddRange(ResolveFromRoot(deliveryResponse));
                     }
                 }
 
