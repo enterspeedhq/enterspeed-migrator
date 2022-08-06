@@ -19,22 +19,17 @@ namespace Umbraco10.Migrator.DocumentTypes.Components
             _logger = logger;
         }
 
-        public void BuildComponent(EnterspeedPropertyType componentProperty, int parentId)
+        public void BuildComponent(string alias, int parentId)
         {
-            var name = componentProperty.ChildProperties.FirstOrDefault(p => p.Name == "name")?.Value.ToString();
-            var alias = componentProperty.ChildProperties.FirstOrDefault(p => p.Name == "alias")?.Value.ToString();
-
-            if (string.IsNullOrEmpty(alias)) return;
-
             var componentBuilder = _componentBuilders.FirstOrDefault(p => p.CanBuild(alias));
             if (componentBuilder != null)
             {
-                if (componentBuilder.ComponentExists(componentProperty)) return;
-                componentBuilder.Populate(componentProperty, componentProperty.ChildProperties, parentId).Build();
+                if (componentBuilder.ComponentExists(alias)) return;
+                componentBuilder.Populate(parentId).Build();
             }
             else
             {
-                _logger.LogError("No component property converter found for " + name);
+                _logger.LogError("No component property converter found for " + alias);
             }
         }
     }

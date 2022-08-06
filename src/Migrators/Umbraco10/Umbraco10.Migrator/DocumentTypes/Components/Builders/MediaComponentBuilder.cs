@@ -11,6 +11,8 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         public MediaComponentBuilder(IContentTypeService contentTypeService, IShortStringHelper shortStringHelper, IDataTypeService dataTypeService) : base(
             contentTypeService, shortStringHelper, dataTypeService)
         {
+            Alias = "media";
+            Name = "Media";
         }
 
         public override bool CanBuild(string propertyAlias)

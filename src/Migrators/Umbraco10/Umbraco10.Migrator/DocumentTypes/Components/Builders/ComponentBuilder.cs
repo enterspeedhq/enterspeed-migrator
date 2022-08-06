@@ -1,11 +1,7 @@
-using System.Collections.Generic;
 using System.Linq;
-using Enterspeed.Migrator.Constants;
-using Enterspeed.Migrator.ValueTypes;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
-using Umbraco.Extensions;
 
 namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 {
@@ -16,6 +12,9 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         private const string PropertyGroupName = "Component Data";
         private readonly IContentTypeService _contentTypeService;
         private readonly IDataTypeService _dataTypeService;
+        protected string Name;
+        protected string Alias;
+
         private ContentType _componentDocType;
 
         protected ComponentBuilder(IContentTypeService contentTypeService,
@@ -31,22 +30,22 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 
         public abstract void Build();
 
-        public IComponentBuilder Populate(EnterspeedPropertyType componentProperty, List<EnterspeedPropertyType> componentProperties, int parentFolderId)
+        public IComponentBuilder Populate(int parentFolderId)
         {
             _componentDocType = new ContentType(_shortStringHelper, parentFolderId)
             {
-                Alias = componentProperties.FirstOrDefault(p => p.Alias == EnterspeedPropertyConstants.AliasOf.Alias).Value.ToString().ToFirstLowerInvariant(),
-                Name = componentProperties.FirstOrDefault(p => p.Alias == EnterspeedPropertyConstants.AliasOf.Name).Value.ToString(),
+                Alias = Alias,
+                Name = Name,
                 IsElement = true
             };
 
             return this;
         }
 
-        public bool ComponentExists(EnterspeedPropertyType componentProperty)
+        public bool ComponentExists(string alias)
         {
             var contentTypes = _contentTypeService.GetAllContentTypeAliases();
-            return contentTypes.Any(c => c.Equals(componentProperty.Alias));
+            return contentTypes.Any(c => c.Equals(alias));
         }
 
         protected void AddProperty(string alias, string name, int dataTypeId)

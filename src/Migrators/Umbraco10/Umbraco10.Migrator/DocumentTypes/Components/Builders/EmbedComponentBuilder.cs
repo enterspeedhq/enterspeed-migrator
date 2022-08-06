@@ -14,6 +14,8 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
             IDataTypeService dataTypeService)
             : base(contentTypeService, shortStringHelper, dataTypeService)
         {
+            Alias = "embed";
+            Name = "Embed";
         }
 
         public override bool CanBuild(string propertyAlias)

@@ -11,6 +11,8 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         public QuoteComponentBuilder(IContentTypeService contentTypeService, IShortStringHelper shortStringHelper, IDataTypeService dataTypeService)
             : base(contentTypeService, shortStringHelper, dataTypeService)
         {
+            Alias = "quote";
+            Name = "Quote";
         }
 
         public override bool CanBuild(string propertyAlias)

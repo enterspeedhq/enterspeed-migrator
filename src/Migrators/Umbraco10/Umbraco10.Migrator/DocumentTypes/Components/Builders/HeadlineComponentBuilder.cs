@@ -12,6 +12,8 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         public HeadlineComponentBuilder(IContentTypeService contentTypeService, IShortStringHelper shortStringHelper, IDataTypeService dataTypeService) : base(
             contentTypeService, shortStringHelper, dataTypeService)
         {
+            Alias = "headline";
+            Name = "Headline";
         }
 
         public override bool CanBuild(string propertyAlias)

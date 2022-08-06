@@ -7,7 +7,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
     {
         bool CanBuild(string propertyAlias);
         void Build();
-        IComponentBuilder Populate(EnterspeedPropertyType componentProperty, List<EnterspeedPropertyType> componentProperties, int parentFolderId);
-        bool ComponentExists(EnterspeedPropertyType componentProperty);
+        IComponentBuilder Populate(int parentFolderId);
+        bool ComponentExists(string alias);
     }
 }

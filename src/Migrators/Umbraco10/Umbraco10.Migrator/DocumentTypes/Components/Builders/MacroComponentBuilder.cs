@@ -12,6 +12,8 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         public MacroComponentBuilder(IContentTypeService contentTypeService, IShortStringHelper shortStringHelper, IDataTypeService dataTypeService) : base(
             contentTypeService, shortStringHelper, dataTypeService)
         {
+            Alias = "macro";
+            Name = "Macro";
         }
 
         public override bool CanBuild(string propertyAlias)

@@ -88,41 +88,53 @@ namespace Enterspeed.Migrator.Enterspeed
                 MetaSchema = GetMetaData(deliveryResponse)
             };
 
-            MapPageData(pageEntityType, routeSerialized);
+            MapData(pageEntityType, routeSerialized);
 
             return pageEntityType;
         }
 
-        private void MapPageData(PageData pageData, JsonElement route, EnterspeedPropertyType parentEnterspeedProperty = null)
+        private void MapData(PageData pageData, JsonElement route, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             if (route.ValueKind != JsonValueKind.Null)
             {
+                var routeObject = route.EnumerateObject();
+                var alias = routeObject.GetEnumerator().FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias);
+                var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p == alias.Value.ToString());
+
+                if (parentEnterspeedProperty != null && isComponent)
+                {
+                    parentEnterspeedProperty.ChildProperties.Add(new EnterspeedPropertyType
+                    {
+                        Name = EnterspeedPropertyConstants.IsComponentName,
+                        Alias = EnterspeedPropertyConstants.IsComponentAlias,
+                        Value = true
+                    });
+                }
+
                 foreach (var jsonProperty in route.EnumerateObject())
                 {
-                    MapPageData(pageData, jsonProperty, parentEnterspeedProperty);
+                    MapData(pageData, jsonProperty, parentEnterspeedProperty);
                 }
             }
         }
 
-        private void MapPageData(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
+        private void MapData(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
-            var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p.Contains(jsonProperty.Name));
-
             switch (jsonProperty.Value.ValueKind)
             {
                 case JsonValueKind.Object:
-                    CreateObjectType(pageData, jsonProperty, isComponent, parentEnterspeedProperty);
+                    CreateObjectType(pageData, jsonProperty, parentEnterspeedProperty);
                     break;
                 case JsonValueKind.Array:
-                    CreateArrayType(pageData, jsonProperty, isComponent, parentEnterspeedProperty);
+                    CreateArrayType(pageData, jsonProperty, parentEnterspeedProperty);
                     break;
                 default:
-                    CreateSimpleType(pageData, jsonProperty, isComponent, parentEnterspeedProperty);
+                    CreateSimpleType(pageData, jsonProperty, parentEnterspeedProperty);
                     break;
             }
         }
 
-        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, bool isComponent, EnterspeedPropertyType parentEnterspeedProperty = null)
+        private void CreateArrayType(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             if (jsonProperty.Value.ValueKind == JsonValueKind.Array && jsonProperty.Value.GetArrayLength() > 0)
             {
@@ -135,58 +147,33 @@ namespace Enterspeed.Migrator.Enterspeed
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    MapPageData(pageData, element, currentProperty);
-                }
-
-                if (isComponent)
-                {
-                    currentProperty.ChildProperties.Add(new EnterspeedPropertyType
-                    {
-                        Name = EnterspeedPropertyConstants.IsComponentName,
-                        Alias = EnterspeedPropertyConstants.IsComponentAlias,
-                        Value = true
-                    });
+                    MapData(pageData, element, currentProperty);
                 }
 
                 pageData.Properties.Add(currentProperty);
             }
         }
 
-        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, bool isComponent, EnterspeedPropertyType parentEnterspeedProperty = null)
+        private void CreateObjectType(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             // If is a complex type 
             if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
             {
-                var listOfProperties = jsonProperty.Value.EnumerateObject();
-                if (listOfProperties.Any())
+                var elmenent = jsonProperty.Value;
+                var currentProperty = new EnterspeedPropertyType(jsonProperty);
+
+                if (parentEnterspeedProperty != null)
                 {
-                    var currentProperty = new EnterspeedPropertyType(jsonProperty);
-                    if (parentEnterspeedProperty != null)
-                    {
-                        parentEnterspeedProperty.ChildProperties.Add(currentProperty);
-                    }
-
-                    foreach (var childProperty in listOfProperties)
-                    {
-                        MapPageData(pageData, childProperty, currentProperty);
-                    }
-
-                    pageData.Properties.Add(currentProperty);
-
-                    if (isComponent)
-                    {
-                        currentProperty.ChildProperties.Add(new EnterspeedPropertyType
-                        {
-                            Name = EnterspeedPropertyConstants.IsComponentName,
-                            Alias = EnterspeedPropertyConstants.IsComponentAlias,
-                            Value = true
-                        });
-                    }
+                    parentEnterspeedProperty.ChildProperties.Add(currentProperty);
                 }
+
+                MapData(pageData, elmenent, currentProperty);
+
+                pageData.Properties.Add(currentProperty);
             }
         }
 
-        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, bool isComponent, EnterspeedPropertyType parentEnterspeedProperty = null)
+        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             var property = new EnterspeedPropertyType(jsonProperty);
             if (parentEnterspeedProperty != null)

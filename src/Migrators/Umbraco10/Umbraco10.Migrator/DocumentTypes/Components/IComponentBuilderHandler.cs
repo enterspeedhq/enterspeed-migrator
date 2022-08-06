@@ -4,6 +4,6 @@ namespace Umbraco10.Migrator.DocumentTypes.Components
 {
     public interface IComponentBuilderHandler
     {
-        void BuildComponent(EnterspeedPropertyType componentProperty, int parentId);
+        void BuildComponent(string alias, int parentId);
     }
 }

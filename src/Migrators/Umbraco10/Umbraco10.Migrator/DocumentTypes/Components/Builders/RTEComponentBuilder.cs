@@ -12,6 +12,8 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         public RTEComponentBuilder(IContentTypeService contentTypeService, IShortStringHelper shortStringHelper, IDataTypeService dataTypeService)
             : base(contentTypeService, shortStringHelper, dataTypeService)
         {
+            Alias = "rte";
+            Name = "RTE";
         }
 
         public override bool CanBuild(string propertyAlias)
