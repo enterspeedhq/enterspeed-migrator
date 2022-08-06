@@ -107,7 +107,6 @@ namespace Umbraco10.Migrator.DocumentTypes
 
         private void AddBaseProperties(ContentType newPageDocumentType, int sortOrder)
         {
-            newPageDocumentType.AddPropertyGroup("pageContent", "Page Content");
             if (!newPageDocumentType.AllowedAsRoot)
             {
                 _contentTypes.Add(new ContentTypeSort(newPageDocumentType.Id, sortOrder));
@@ -142,8 +141,7 @@ namespace Umbraco10.Migrator.DocumentTypes
         {
             IDataType dataType = null;
 
-            var jsonElement = (JsonElement)enterspeedProperty.Value;
-            switch (jsonElement.ValueKind)
+            switch (enterspeedProperty.Type)
             {
                 case JsonValueKind.Undefined:
                     _logger.LogError("Property type is undefined");

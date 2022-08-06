@@ -13,7 +13,7 @@ namespace Enterspeed.Migrator.ValueTypes
             Value = jsonProperty.Value;
             Alias = jsonProperty.Name;
             Name = jsonProperty.Name;
-            Type = jsonProperty.Value.ValueKind.ToString();
+            Type = jsonProperty.Value.ValueKind;
             ChildProperties = new List<EnterspeedPropertyType>();
         }
 
@@ -23,7 +23,7 @@ namespace Enterspeed.Migrator.ValueTypes
 
         public string Name { get; set; }
         public string Alias { get; set; }
-        public string @Type { get; set; }
+        public JsonValueKind @Type { get; set; }
         public object Value { get; set; }
         public List<EnterspeedPropertyType> ChildProperties { get; set; }
 

@@ -20,7 +20,7 @@ namespace Enterspeed.Migrator.Enterspeed
             {
                 var alias = data.MetaSchema.SourceEntityAlias;
                 var page = schemas.Pages.FirstOrDefault(p => p.MetaSchema.SourceEntityAlias == alias);
-                var properties = data.Properties.Where(p => !string.IsNullOrEmpty(p.Value.ToString()));
+                var properties = data.Properties;
 
                 if (page == null)
                 {
