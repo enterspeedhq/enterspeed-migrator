@@ -147,7 +147,19 @@ namespace Enterspeed.Migrator.Enterspeed
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    MapData(pageData, element, currentProperty);
+                    var objectOfElement = element.EnumerateObject();
+                    var newArrayItem = new EnterspeedPropertyType()
+                    {
+                        Name = "arrayObject",
+                        Alias = "arrayObject",
+                        Type = JsonValueKind.Object,
+                        Value = objectOfElement
+                    };
+
+                    // Add arrayitem directly to array property
+                    currentProperty.ChildProperties.Add(newArrayItem);
+
+                    MapData(pageData, element, newArrayItem);
                 }
 
                 pageData.Properties.Add(currentProperty);

@@ -7,26 +7,26 @@ namespace Enterspeed.Migrator.Enterspeed
 {
     public class SchemaBuilder : ISchemaBuilder
     {
-        public Schemas BuildPageSchemas(List<PageData> pageData)
+        public Schemas BuildPageSchemas(List<PageData> pageDatas)
         {
             var schemas = new Schemas();
-            BuildPageSchemas(pageData, schemas);
+            BuildPageSchemas(pageDatas, schemas);
             return schemas;
         }
 
-        public void BuildPageSchemas(List<PageData> pageData, Schemas schemas)
+        public void BuildPageSchemas(List<PageData> pageDatas, Schemas schemas)
         {
-            foreach (var data in pageData)
+            foreach (var pageData in pageDatas)
             {
-                var alias = data.MetaSchema.SourceEntityAlias;
+                var alias = pageData.MetaSchema.SourceEntityAlias;
                 var page = schemas.Pages.FirstOrDefault(p => p.MetaSchema.SourceEntityAlias == alias);
-                var properties = data.Properties;
+                var properties = pageData.Properties;
 
                 if (page == null)
                 {
                     schemas.Pages.Add(new Schema
                     {
-                        MetaSchema = data.MetaSchema,
+                        MetaSchema = pageData.MetaSchema,
                         Properties = properties.ToList()
                     });
                 }
@@ -34,7 +34,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 {
                     foreach (var property in properties)
                     {
-                        var existingProperty = data.Properties.FirstOrDefault(p => p.Alias == property.Alias);
+                        var existingProperty = pageData.Properties.FirstOrDefault(p => p.Alias == property.Alias);
                         if (existingProperty == null)
                         {
                             page.Properties.Add(property);
@@ -42,9 +42,9 @@ namespace Enterspeed.Migrator.Enterspeed
                     }
                 }
 
-                if (data.Children != null && data.Children.Any())
+                if (pageData.Children != null && pageData.Children.Any())
                 {
-                    BuildPageSchemas(data.Children, schemas);
+                    BuildPageSchemas(pageData.Children, schemas);
                 }
             }
         }

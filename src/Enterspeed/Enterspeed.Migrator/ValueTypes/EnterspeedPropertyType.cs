@@ -19,6 +19,7 @@ namespace Enterspeed.Migrator.ValueTypes
 
         public EnterspeedPropertyType()
         {
+            ChildProperties = new List<EnterspeedPropertyType>();
         }
 
         public string Name { get; set; }

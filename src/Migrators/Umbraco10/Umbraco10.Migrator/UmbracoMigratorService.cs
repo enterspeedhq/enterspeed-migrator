@@ -42,7 +42,7 @@ namespace Umbraco10.Migrator
                 var rootLevelResponse = await _apiService.GetPageResponsesAsync(navigation);
 
                 // All pages with all data
-                var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse).Where(p => p.MetaSchema != null).ToList();
+                var pages = _pagesResolver.ResolveFromRoot(rootLevelResponse).ToList();
 
                 // Mapped out data structures in schemas based on the pages
                 var pageSchemas = _schemaBuilder.BuildPageSchemas(pages);
