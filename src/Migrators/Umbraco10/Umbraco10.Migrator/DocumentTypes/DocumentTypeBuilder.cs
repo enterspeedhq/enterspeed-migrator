@@ -15,6 +15,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 using Umbraco10.Migrator.DocumentTypes.Components;
+using Umbraco10.Migrator.Extensions;
 using Umbraco10.Migrator.Settings;
 
 namespace Umbraco10.Migrator.DocumentTypes
@@ -28,11 +29,11 @@ namespace Umbraco10.Migrator.DocumentTypes
         private readonly IConfigurationEditorJsonSerializer _configurationEditorJsonSerializer;
         private readonly IEnumerable<IDataType> _dataTypes;
         private readonly IComponentBuilderHandler _componentBuilderHandler;
-        private readonly List<ContentTypeSort> _contentTypes;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
         private readonly IEnumerable<string> _contentTypeAliasList;
         private const string PagesFolderName = "Migrated Page Types";
+        private const string CompositionsFolderName = "Compositions";
         private const string ComponentsFolderName = "Migrated Components";
         private const string BlockListName = "BlockList.Custom";
         private readonly EnterspeedConfiguration _enterspeedConfiguration;
@@ -55,7 +56,6 @@ namespace Umbraco10.Migrator.DocumentTypes
             _configurationEditorJsonSerializer = configurationEditorJsonSerializer;
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
             _dataTypes = _dataTypeService.GetAll();
-            _contentTypes = new List<ContentTypeSort>();
             _componentBuilderHandler = componentBuilderHandler;
             _contentTypeAliasList = _contentTypeService.GetAllContentTypeAliases();
             _enterspeedConfiguration = enterspeedConfiguration?.Value;
@@ -67,12 +67,11 @@ namespace Umbraco10.Migrator.DocumentTypes
             {
                 var pagesFolder = GetOrCreateFolder(PagesFolderName);
                 var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
+                var compositionsFolder = GetOrCreateFolder(CompositionsFolderName);
 
-                var sortOrder = 0;
                 foreach (var page in schemas.Pages)
                 {
-                    CreatePageDocType(page, pagesFolder, sortOrder);
-                    sortOrder++;
+                    CreatePageDocType(page, pagesFolder, compositionsFolder);
                 }
 
                 foreach (var componentAlias in _enterspeedConfiguration.ComponentPropertyTypeKeys)
@@ -87,38 +86,28 @@ namespace Umbraco10.Migrator.DocumentTypes
             }
         }
 
-        private void CreatePageDocType(Schema page, IEntity pagesFolder, int sortOrder)
+        private void CreatePageDocType(Schema page, IEntity pagesFolder, IEntity compositionsFolder)
         {
             if (!_contentTypeAliasList.Any(c => c.Equals(page.MetaSchema.SourceEntityAlias)))
             {
                 // Build new doc type
                 var newPageDocumentType = BuildNewPageDocType(page, pagesFolder);
 
-                // Add base properties
-                AddBaseProperties(newPageDocumentType, sortOrder);
-
                 // Add the rest of the properties
-                AddProperties(page, newPageDocumentType);
+                AddProperties(page, newPageDocumentType, compositionsFolder);
 
                 // Save the new document type
                 _contentTypeService.Save(newPageDocumentType);
             }
         }
 
-        private void AddBaseProperties(ContentType newPageDocumentType, int sortOrder)
-        {
-            if (!newPageDocumentType.AllowedAsRoot)
-            {
-                _contentTypes.Add(new ContentTypeSort(newPageDocumentType.Id, sortOrder));
-            }
-        }
 
         private ContentType BuildNewPageDocType(Schema page, IEntity pagesFolder)
         {
             var newPageDocumentType = new ContentType(_shortStringHelper, pagesFolder.Id)
             {
                 Alias = page.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
-                Name = page.MetaSchema.SourceEntityName.ToFirstUpperInvariant(),
+                Name = page.MetaSchema.SourceEntityName.ToUmbracoName(),
                 AllowedAsRoot = string.Equals(page.MetaSchema.SourceEntityAlias, _umbracoMigrationConfiguration.RootDocType,
                     StringComparison.InvariantCultureIgnoreCase)
             };
@@ -126,18 +115,63 @@ namespace Umbraco10.Migrator.DocumentTypes
             return newPageDocumentType;
         }
 
-        private void AddProperties(Schema schema, IContentTypeBase pageDocumentType)
+        private IContentType CreateComposition(IEntity compositionsFolder, EnterspeedPropertyType enterspeedProperty)
+        {
+            var composition = new ContentType(_shortStringHelper, compositionsFolder.Id)
+            {
+                Alias = enterspeedProperty.Alias,
+                Name = enterspeedProperty.Name.ToFirstUpper(),
+                IsElement = true
+            };
+
+            return composition;
+        }
+
+        private void AddProperties(Schema schema, ContentType pageDocumentType, IEntity compositionsFolder)
         {
             if (_dataTypes != null && _dataTypes.Any())
             {
-                foreach (var property in schema.Properties)
+                foreach (var enterspeedProperty in schema.Properties)
                 {
-                    AddProperties(property, pageDocumentType);
+                    var isComposition = _umbracoMigrationConfiguration.CompositionKeys.Any(p => p == enterspeedProperty.Alias);
+                    if (isComposition)
+                    {
+                        HandleComposition(pageDocumentType, compositionsFolder, enterspeedProperty);
+                    }
+
+                    AddProperties(enterspeedProperty, pageDocumentType);
                 }
             }
         }
 
-        private void AddProperties(EnterspeedPropertyType enterspeedProperty, IContentTypeBase pageDocumentType)
+        private void HandleComposition(ContentType pageDocumentType, IEntity compositionsFolder, EnterspeedPropertyType enterspeedProperty)
+        {
+            var compositionExists = pageDocumentType.ContentTypeCompositionExists(enterspeedProperty.Alias);
+            if (!compositionExists)
+            {
+                // Check if already exists
+                var composition = _contentTypeService.Get(enterspeedProperty.Alias);
+                if (composition == null)
+                {
+                    composition = CreateComposition(compositionsFolder, enterspeedProperty);
+
+                    // Check if any properties on composition
+                    if (!enterspeedProperty.ChildProperties.Any()) return;
+
+                    // Add properties to composition
+                    foreach (var childProperty in enterspeedProperty.ChildProperties)
+                    {
+                        AddProperties(childProperty, composition, true);
+                    }
+
+                    _contentTypeService.Save(composition);
+                }
+
+                pageDocumentType.AddContentType(composition);
+            }
+        }
+
+        private void AddProperties(EnterspeedPropertyType enterspeedProperty, IContentTypeBase documentType, bool isComposition = false)
         {
             IDataType dataType = null;
 
@@ -167,13 +201,28 @@ namespace Umbraco10.Migrator.DocumentTypes
                     break;
             }
 
+
             if (dataType != null)
             {
-                pageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
+                if (isComposition)
                 {
-                    Name = enterspeedProperty.Name.ToFirstUpperInvariant(),
-                    Alias = enterspeedProperty.Alias.ToFirstLowerInvariant(),
-                }, "content", "Page content");
+                    documentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
+                    {
+                        Name = enterspeedProperty.Name.ToUmbracoName(),
+                        Alias = enterspeedProperty.Alias.ToFirstLowerInvariant(),
+                    }, documentType.Alias + "Content", documentType.Name.ToUmbracoName(new List<string>
+                    {
+                        "Content"
+                    }));
+                }
+                else
+                {
+                    documentType.AddPropertyType(new PropertyType(_shortStringHelper, dataType)
+                    {
+                        Name = enterspeedProperty.Name.ToUmbracoName(),
+                        Alias = enterspeedProperty.Alias.ToFirstLowerInvariant(),
+                    }, "content", "Page content");
+                }
             }
         }
 
