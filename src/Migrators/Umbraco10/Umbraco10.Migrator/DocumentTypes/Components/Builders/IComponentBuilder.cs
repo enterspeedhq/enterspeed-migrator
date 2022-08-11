@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using Enterspeed.Migrator.ValueTypes;
-
 namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 {
     public interface IComponentBuilder

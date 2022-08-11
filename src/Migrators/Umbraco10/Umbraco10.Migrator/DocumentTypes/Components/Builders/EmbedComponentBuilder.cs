@@ -16,7 +16,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         {
             Alias = "embed";
             Name = "Embed";
-        }
+        }2
 
         public override bool CanBuild(string propertyAlias)
         {

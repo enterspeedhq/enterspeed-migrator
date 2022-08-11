@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Enterspeed.Delivery.Sdk.Api.Models;
-using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.Models.Response;
 
 namespace Enterspeed.Migrator.Enterspeed.Contracts
