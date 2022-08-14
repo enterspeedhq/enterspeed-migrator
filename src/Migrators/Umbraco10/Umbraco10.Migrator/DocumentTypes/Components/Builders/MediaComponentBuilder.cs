@@ -31,7 +31,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         public override object MapData(EnterspeedPropertyType enterspeedProperty)
         {
             var data = new Dictionary<string, object>();
-            var media = GetValue(enterspeedProperty, "value");
+            var media = GetValue(enterspeedProperty, "value").ToString();
             data.Add("media", media);
 
             return data;

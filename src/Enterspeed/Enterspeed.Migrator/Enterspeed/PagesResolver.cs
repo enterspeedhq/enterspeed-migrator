@@ -162,7 +162,11 @@ namespace Enterspeed.Migrator.Enterspeed
                     MapData(pageData, element, newArrayItem);
                 }
 
-                pageData.Properties.Add(currentProperty);
+                // Ensure that we do not add nested properties to the root level of the properties for the page.
+                if (parentEnterspeedProperty == null)
+                {
+                    pageData.Properties.Add(currentProperty);
+                }
             }
         }
 

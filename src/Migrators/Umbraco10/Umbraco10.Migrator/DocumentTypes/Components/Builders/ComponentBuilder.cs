@@ -63,10 +63,10 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
                 }, PropertyGroupAlias, PropertyGroupName);
         }
 
-        public object GetValue(EnterspeedPropertyType property, string valueProperty)
+        public object GetValue(EnterspeedPropertyType property, string alias)
         {
-            var value = property.ChildProperties.FirstOrDefault(p => p.Value?.ToString() == valueProperty);
-            return value;
+            var value = property.ChildProperties.FirstOrDefault(p => p.Alias?.ToString() == alias);
+            return value?.Value;
         }
 
         protected void Save()

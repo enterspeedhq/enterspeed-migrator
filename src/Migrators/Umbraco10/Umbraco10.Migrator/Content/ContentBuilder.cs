@@ -11,7 +11,6 @@ using Newtonsoft.Json;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Extensions;
 using Umbraco10.Migrator.DataTypes;
 using Umbraco10.Migrator.DocumentTypes.Components.Builders;
 using Umbraco10.Migrator.Settings;
@@ -21,7 +20,6 @@ namespace Umbraco10.Migrator.Content
     public class ContentBuilder : IContentBuilder
     {
         private readonly IContentService _contentService;
-        private readonly IContentTypeService _contentTypeService;
         private readonly IEnumerable<IContentType> _contentTypes;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
         private readonly ILogger<ContentBuilder> _logger;
@@ -33,7 +31,6 @@ namespace Umbraco10.Migrator.Content
             ILogger<ContentBuilder> logger,
             IEnumerable<IComponentBuilder> componentBuilders)
         {
-            _contentTypeService = contentTypeService;
             _contentService = contentService;
             _logger = logger;
             _componentBuilders = componentBuilders;
@@ -53,7 +50,10 @@ namespace Umbraco10.Migrator.Content
 
                 var contentToCreate = _contentService.Create(pageEntityType.MetaSchema.ContentName, isRoot ? -1 : parent.Id, contentType);
 
-                CreateProperties(pageEntityType.Properties, contentToCreate);
+                var components = new List<EnterspeedPropertyType>();
+                CreateProperties(pageEntityType.Properties, contentToCreate, components);
+
+                PopulateBlockList(components, contentToCreate);
 
                 _contentService.Save(contentToCreate);
 
@@ -64,7 +64,7 @@ namespace Umbraco10.Migrator.Content
             }
         }
 
-        public void CreateProperties(List<EnterspeedPropertyType> properties, IContent contentToCreate, bool isTraversing = false)
+        public void CreateProperties(List<EnterspeedPropertyType> properties, IContent contentToCreate, List<EnterspeedPropertyType> components, bool isTraversing = false)
         {
             foreach (var property in properties)
             {
@@ -77,12 +77,13 @@ namespace Umbraco10.Migrator.Content
                 // A component has been found, which will be resolved, values assigned to properties and added to list property that is set up in umbraco
                 if (property.IsComponent())
                 {
-                    PopulateBlockList(property, contentToCreate);
+                    components.Add(property);
+                    continue;
                 }
 
                 if (property.ChildProperties.Any())
                 {
-                    CreateProperties(property.ChildProperties, contentToCreate, true);
+                    CreateProperties(property.ChildProperties, contentToCreate, components, true);
                 }
             }
         }
@@ -107,38 +108,42 @@ namespace Umbraco10.Migrator.Content
             }
         }
 
-        private void PopulateBlockList(EnterspeedPropertyType enterspeedPropertyType, IContent contentToCreate)
+        private void PopulateBlockList(List<EnterspeedPropertyType> components, IContent contentToCreate)
         {
             // Prepare block list data structure
             var blockListData = new List<Dictionary<string, object>>();
             var dictionaryUdi = new List<Dictionary<string, string>>();
-            var componentAlias = enterspeedPropertyType.ChildProperties.FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias).Value.ToString();
 
-            if (string.IsNullOrEmpty(componentAlias))
+            foreach (var component in components)
             {
-                _logger.LogError("Component alias was not found for " + System.Text.Json.JsonSerializer.Serialize(enterspeedPropertyType));
-                return;
-            }
+                var componentAlias = component.ChildProperties.FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias).Value.ToString();
 
-            // Build component
-            var componentBuilder = _componentBuilders.FirstOrDefault(p => p.CanBuild(componentAlias));
-            if (componentBuilder != null)
-            {
-                var dataToAdd = (Dictionary<string, object>)componentBuilder.MapData(enterspeedPropertyType);
+                if (string.IsNullOrEmpty(componentAlias))
+                {
+                    _logger.LogError("Component alias was not found for " + System.Text.Json.JsonSerializer.Serialize(component));
+                    return;
+                }
 
-                var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
-                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias,
-                    componentAlias,
-                    StringComparison.InvariantCultureIgnoreCase));
+                // Build component
+                var componentBuilder = _componentBuilders.FirstOrDefault(p => p.CanBuild(componentAlias));
+                if (componentBuilder != null)
+                {
+                    var dataToAdd = (Dictionary<string, object>)componentBuilder.MapData(component);
 
-                dataToAdd.Add("udi", contentUdi);
-                dataToAdd.Add("contentTypeKey", contentType.Key.ToString());
-                blockListData.Add(dataToAdd);
+                    var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
+                    var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias,
+                        componentAlias,
+                        StringComparison.InvariantCultureIgnoreCase));
 
-                dictionaryUdi.Add(new Dictionary<string, string>
+                    dataToAdd.Add("udi", contentUdi);
+                    dataToAdd.Add("contentTypeKey", contentType.Key.ToString());
+                    blockListData.Add(dataToAdd);
+
+                    dictionaryUdi.Add(new Dictionary<string, string>
                     {
                         { "contentUdi", contentUdi },
                     });
+                }
             }
 
             var blockList = new Blocklist

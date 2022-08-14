@@ -32,7 +32,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         public override object MapData(EnterspeedPropertyType enterspeedProperty)
         {
             var data = new Dictionary<string, object>();
-            var macro = GetValue(enterspeedProperty, "value");
+            var macro = GetValue(enterspeedProperty, "value").ToString();
             data.Add("macro", macro);
 
             return data;
