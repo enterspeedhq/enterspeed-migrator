@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.Linq;
+using Enterspeed.Migrator.Constants;
+using Enterspeed.Migrator.ValueTypes;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -29,6 +32,7 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         public abstract bool CanBuild(string propertyAlias);
 
         public abstract void Build();
+        public abstract object MapData(EnterspeedPropertyType enterspeedProperty);
 
         public IComponentBuilder Populate(int parentFolderId)
         {
@@ -57,6 +61,12 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
                     Alias = alias,
                     Name = name
                 }, PropertyGroupAlias, PropertyGroupName);
+        }
+
+        public object GetValue(EnterspeedPropertyType property, string valueProperty)
+        {
+            var value = property.ChildProperties.FirstOrDefault(p => p.Value?.ToString() == valueProperty);
+            return value;
         }
 
         protected void Save()

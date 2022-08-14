@@ -1,3 +1,5 @@
+using Enterspeed.Migrator.ValueTypes;
+using System.Collections.Generic;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -25,6 +27,15 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         {
             AddProperty("rte", "RTE", Constants.DataTypes.RichtextEditor);
             Save();
+        }
+
+        public override object MapData(EnterspeedPropertyType enterspeedProperty)
+        {
+            var data = new Dictionary<string, object>();
+            var rte = GetValue(enterspeedProperty, "value");
+            data.Add("rte", rte);
+
+            return data;
         }
     }
 }

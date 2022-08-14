@@ -9,6 +9,7 @@
         {
             public const string Alias = "alias";
             public const string Name = "name";
+            public const string Value = "value";
         }
     }
 }

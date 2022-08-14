@@ -27,7 +27,7 @@ namespace Umbraco10.Migrator.DocumentTypes
         private readonly IShortStringHelper _shortStringHelper;
         private readonly IDataTypeService _dataTypeService;
         private readonly IConfigurationEditorJsonSerializer _configurationEditorJsonSerializer;
-        private readonly IEnumerable<IDataType> _dataTypes;
+        private readonly List<IDataType> _dataTypes;
         private readonly IComponentBuilderHandler _componentBuilderHandler;
         private readonly BlockListPropertyEditor _blockListPropertyEditor;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
@@ -55,7 +55,7 @@ namespace Umbraco10.Migrator.DocumentTypes
             _blockListPropertyEditor = blockListPropertyEditor;
             _configurationEditorJsonSerializer = configurationEditorJsonSerializer;
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
-            _dataTypes = _dataTypeService.GetAll();
+            _dataTypes = _dataTypeService.GetAll().ToList();
             _componentBuilderHandler = componentBuilderHandler;
             _contentTypeAliasList = _contentTypeService.GetAllContentTypeAliases();
             _enterspeedConfiguration = enterspeedConfiguration?.Value;
@@ -68,6 +68,9 @@ namespace Umbraco10.Migrator.DocumentTypes
                 var pagesFolder = GetOrCreateFolder(PagesFolderName);
                 var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
                 var compositionsFolder = GetOrCreateFolder(CompositionsFolderName);
+
+                // TODO: Assumption. This needs to be handled in a different way
+                CreateBlockListDataType();
 
                 foreach (var page in schemas.Pages)
                 {
@@ -86,6 +89,33 @@ namespace Umbraco10.Migrator.DocumentTypes
             }
         }
 
+        private void CreateBlockListDataType()
+        {
+            // Create data type
+            var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer)
+            {
+                Name = BlockListName
+            };
+
+            // Create element types
+            var elementTypes = _contentTypeService.GetAll().Where(c => c.IsElement).Select(block =>
+                new BlockListConfiguration.BlockConfiguration()
+                {
+                    ContentElementTypeKey = block.Key,
+                    Label = block.Name
+                }).ToArray();
+
+            // Configure datatype
+            dataType.Configuration = new BlockListConfiguration()
+            {
+                Blocks = elementTypes
+            };
+
+            // Save
+            _dataTypeService.Save(dataType);
+            _dataTypes.Add(dataType);
+        }
+
         private void CreatePageDocType(Schema page, IEntity pagesFolder, IEntity compositionsFolder)
         {
             if (!_contentTypeAliasList.Any(c => c.Equals(page.MetaSchema.SourceEntityAlias)))
@@ -95,6 +125,14 @@ namespace Umbraco10.Migrator.DocumentTypes
 
                 // Add the rest of the properties
                 AddProperties(page, newPageDocumentType, compositionsFolder);
+
+                // TODO: Ensure that this is handled in another way. This is an assumption!
+                newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper,
+                    _dataTypes.FirstOrDefault(d => d.Name == BlockListName))
+                {
+                    Name = _umbracoMigrationConfiguration.ContentPropertyAlias.ToUmbracoName(),
+                    Alias = _umbracoMigrationConfiguration.ContentPropertyAlias
+                }, "content");
 
                 // Save the new document type
                 _contentTypeService.Save(newPageDocumentType);

@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using Enterspeed.Migrator.Constants;
 using Enterspeed.Migrator.Models;
 using Enterspeed.Migrator.ValueTypes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Extensions;
 using Umbraco10.Migrator.DataTypes;
+using Umbraco10.Migrator.DocumentTypes.Components.Builders;
 using Umbraco10.Migrator.Settings;
 
 namespace Umbraco10.Migrator.Content
@@ -14,14 +21,22 @@ namespace Umbraco10.Migrator.Content
     public class ContentBuilder : IContentBuilder
     {
         private readonly IContentService _contentService;
+        private readonly IContentTypeService _contentTypeService;
         private readonly IEnumerable<IContentType> _contentTypes;
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
+        private readonly ILogger<ContentBuilder> _logger;
+        private readonly IEnumerable<IComponentBuilder> _componentBuilders;
 
         public ContentBuilder(IContentTypeService contentTypeService,
             IContentService contentService,
-            IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration)
+            IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration,
+            ILogger<ContentBuilder> logger,
+            IEnumerable<IComponentBuilder> componentBuilders)
         {
+            _contentTypeService = contentTypeService;
             _contentService = contentService;
+            _logger = logger;
+            _componentBuilders = componentBuilders;
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
             _contentTypes = contentTypeService.GetAll();
         }
@@ -62,6 +77,7 @@ namespace Umbraco10.Migrator.Content
                 // A component has been found, which will be resolved, values assigned to properties and added to list property that is set up in umbraco
                 if (property.IsComponent())
                 {
+                    PopulateBlockList(property, contentToCreate);
                 }
 
                 if (property.ChildProperties.Any())
@@ -77,12 +93,12 @@ namespace Umbraco10.Migrator.Content
             {
                 switch (property.Type)
                 {
-                    case System.Text.Json.JsonValueKind.True:
-                    case System.Text.Json.JsonValueKind.False:
+                    case JsonValueKind.True:
+                    case JsonValueKind.False:
                         var value = bool.Parse(property.Value.ToString());
                         contentToCreate.Properties[property.Alias].SetValue(value);
                         break;
-                    case System.Text.Json.JsonValueKind.Null:
+                    case JsonValueKind.Null:
                         break;
                     default:
                         contentToCreate.Properties[property.Alias].SetValue(property.Value);
@@ -91,42 +107,51 @@ namespace Umbraco10.Migrator.Content
             }
         }
 
-        private Blocklist PopulateBlockList(PageData pageData)
+        private void PopulateBlockList(EnterspeedPropertyType enterspeedPropertyType, IContent contentToCreate)
         {
+            // Prepare block list data structure
             var blockListData = new List<Dictionary<string, object>>();
             var dictionaryUdi = new List<Dictionary<string, string>>();
+            var componentAlias = enterspeedPropertyType.ChildProperties.FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias).Value.ToString();
 
-            //foreach (var element in pageData.Components)
-            //{
-            //    if (element.Properties == null || element.MetaSchema == null) continue;
+            if (string.IsNullOrEmpty(componentAlias))
+            {
+                _logger.LogError("Component alias was not found for " + System.Text.Json.JsonSerializer.Serialize(enterspeedPropertyType));
+                return;
+            }
 
-            //    var dataToAdd = new Dictionary<string, object>();
-            //    foreach (var property in element.Properties)
-            //    {
-            //        dataToAdd.Add(property.Alias.ToFirstLowerInvariant(), property.Value);
-            //    }
+            // Build component
+            var componentBuilder = _componentBuilders.FirstOrDefault(p => p.CanBuild(componentAlias));
+            if (componentBuilder != null)
+            {
+                var dataToAdd = (Dictionary<string, object>)componentBuilder.MapData(enterspeedPropertyType);
 
-            //    var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
-            //    var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias,
-            //        element.MetaSchema.SourceEntityAlias,
-            //        StringComparison.InvariantCultureIgnoreCase));
+                var contentUdi = new GuidUdi("element", Guid.NewGuid()).ToString();
+                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias,
+                    componentAlias,
+                    StringComparison.InvariantCultureIgnoreCase));
 
-            //    dataToAdd.Add("udi", contentUdi);
-            //    dataToAdd.Add("contentTypeKey", contentType.Key.ToString());
-            //    blockListData.Add(dataToAdd);
+                dataToAdd.Add("udi", contentUdi);
+                dataToAdd.Add("contentTypeKey", contentType.Key.ToString());
+                blockListData.Add(dataToAdd);
 
-            //    dictionaryUdi.Add(new Dictionary<string, string>
-            //    {
-            //        { "contentUdi", contentUdi },
-            //    });
-            //}
+                dictionaryUdi.Add(new Dictionary<string, string>
+                    {
+                        { "contentUdi", contentUdi },
+                    });
+            }
 
-            return new Blocklist
+            var blockList = new Blocklist
             {
                 layout = new BlockListUdi(dictionaryUdi),
                 contentData = blockListData,
                 settingsData = new List<Dictionary<string, string>>()
             };
+
+            var blockListSerialized = JsonConvert.SerializeObject(blockList);
+
+            contentToCreate.SetValue(_umbracoMigrationConfiguration.ContentPropertyAlias, blockListSerialized);
+            _contentService.Save(contentToCreate);
         }
     }
 }

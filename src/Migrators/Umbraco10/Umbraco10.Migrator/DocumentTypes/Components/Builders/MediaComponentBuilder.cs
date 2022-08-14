@@ -1,3 +1,5 @@
+using Enterspeed.Migrator.ValueTypes;
+using System.Collections.Generic;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -24,6 +26,15 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         {
             AddProperty("media", "Media", Constants.DataTypes.Textarea);
             Save();
+        }
+
+        public override object MapData(EnterspeedPropertyType enterspeedProperty)
+        {
+            var data = new Dictionary<string, object>();
+            var media = GetValue(enterspeedProperty, "value");
+            data.Add("media", media);
+
+            return data;
         }
     }
 }

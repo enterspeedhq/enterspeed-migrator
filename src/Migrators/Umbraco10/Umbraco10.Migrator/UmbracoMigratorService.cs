@@ -74,7 +74,7 @@ namespace Umbraco10.Migrator
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "something went wrong when building document types");
+                _logger.LogError(e, "something went wrong when seeding data");
                 throw;
             }
         }

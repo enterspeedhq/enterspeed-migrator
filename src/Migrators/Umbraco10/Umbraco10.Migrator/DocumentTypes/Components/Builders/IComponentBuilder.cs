@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Enterspeed.Migrator.ValueTypes;
+
 namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 {
     public interface IComponentBuilder
@@ -6,5 +9,6 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
         void Build();
         IComponentBuilder Populate(int parentFolderId);
         bool ComponentExists(string alias);
+        object MapData(EnterspeedPropertyType enterspeedProperty);
     }
 }
