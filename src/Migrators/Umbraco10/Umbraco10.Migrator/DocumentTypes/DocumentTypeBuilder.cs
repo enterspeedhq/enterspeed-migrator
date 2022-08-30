@@ -84,9 +84,6 @@ namespace Umbraco10.Migrator.DocumentTypes
                 {
                     CreatePageDocType(page, pagesFolder, compositionsFolder);
                 }
-
-
-
             }
             catch (Exception e)
             {
@@ -134,7 +131,7 @@ namespace Umbraco10.Migrator.DocumentTypes
 
                 // TODO: Ensure that this is handled in another way. This is an assumption!
                 newPageDocumentType.AddPropertyType(new PropertyType(_shortStringHelper,
-                    _dataTypes.FirstOrDefault(d => d.Name == BlockListName))
+                    _dataTypes.Find(d => d.Name == BlockListName))
                 {
                     Name = _umbracoMigrationConfiguration.ContentPropertyAlias.ToUmbracoName(),
                     Alias = _umbracoMigrationConfiguration.ContentPropertyAlias
@@ -144,7 +141,6 @@ namespace Umbraco10.Migrator.DocumentTypes
                 _contentTypeService.Save(newPageDocumentType);
             }
         }
-
 
         private ContentType BuildNewPageDocType(Schema page, IEntity pagesFolder)
         {
@@ -173,7 +169,7 @@ namespace Umbraco10.Migrator.DocumentTypes
 
         private void AddProperties(Schema schema, ContentType pageDocumentType, IEntity compositionsFolder)
         {
-            if (_dataTypes != null && _dataTypes.Any())
+            if (_dataTypes?.Any() == true)
             {
                 foreach (var enterspeedProperty in schema.Properties)
                 {
@@ -231,20 +227,19 @@ namespace Umbraco10.Migrator.DocumentTypes
                     // Check if we are a component or simple type of array
                     break;
                 case JsonValueKind.String:
-                    dataType = _dataTypes.FirstOrDefault(d => d.Name?.ToLower() == "textstring");
+                    dataType = _dataTypes.Find(d => d.Name?.ToLower() == "textstring");
                     break;
                 case JsonValueKind.Number:
-                    dataType = _dataTypes.FirstOrDefault(d => d.Name?.ToLower() == "number");
+                    dataType = _dataTypes.Find(d => d.Name?.ToLower() == "number");
                     break;
                 case JsonValueKind.True:
                 case JsonValueKind.False:
-                    dataType = _dataTypes.FirstOrDefault(d => d.Name?.ToLower() == "true/false");
+                    dataType = _dataTypes.Find(d => d.Name?.ToLower() == "true/false");
                     break;
                 case JsonValueKind.Null:
                     _logger.LogError("Property type is null");
                     break;
             }
-
 
             if (dataType != null)
             {
@@ -286,31 +281,6 @@ namespace Umbraco10.Migrator.DocumentTypes
 
             var existingContainer = _contentTypeService.GetContainers(folderName, 1).FirstOrDefault();
             return existingContainer;
-        }
-
-        private void AddComponentsToBlockList()
-        {
-            var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer)
-            {
-                Name = BlockListName
-            };
-
-            _dataTypeService.Save(dataType);
-
-            var blockListType = _dataTypeService.GetDataType(BlockListName);
-            var elementTypes = _contentTypeService.GetAll().Where(c => c.IsElement);
-
-            blockListType.Configuration = new BlockListConfiguration()
-            {
-                Blocks = elementTypes.Select(block =>
-                    new BlockListConfiguration.BlockConfiguration()
-                    {
-                        ContentElementTypeKey = block.Key,
-                        Label = block.Name
-                    }).ToArray()
-            };
-
-            _dataTypeService.Save(blockListType);
         }
     }
 }

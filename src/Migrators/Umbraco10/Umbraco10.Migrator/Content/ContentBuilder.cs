@@ -57,7 +57,7 @@ namespace Umbraco10.Migrator.Content
 
                 _contentService.Save(contentToCreate);
 
-                if (pageEntityType.Children != null && pageEntityType.Children.Any())
+                if (pageEntityType.Children?.Any() == true)
                 {
                     BuildContentPages(pageEntityType.Children, contentToCreate);
                 }
@@ -88,9 +88,9 @@ namespace Umbraco10.Migrator.Content
             }
         }
 
-        public void AddValueToProperty(EnterspeedPropertyType property, IContent contentToCreate)
+        public static void AddValueToProperty(EnterspeedPropertyType property, IContent contentToCreate)
         {
-            if (contentToCreate.Properties.FirstOrDefault(p => p.Alias == property.Alias) != null)
+            if (contentToCreate.Properties.Any(p => p.Alias == property.Alias))
             {
                 switch (property.Type)
                 {
@@ -116,11 +116,11 @@ namespace Umbraco10.Migrator.Content
 
             foreach (var component in components)
             {
-                var componentAlias = component.ChildProperties.FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias).Value.ToString();
+                var componentAlias = component.ChildProperties.Find(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias).Value.ToString();
 
                 if (string.IsNullOrEmpty(componentAlias))
                 {
-                    _logger.LogError("Component alias was not found for " + System.Text.Json.JsonSerializer.Serialize(component));
+                    _logger.LogError("Component alias was not found for ", System.Text.Json.JsonSerializer.Serialize(component));
                     return;
                 }
 

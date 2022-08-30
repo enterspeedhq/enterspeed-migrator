@@ -189,7 +189,7 @@ namespace Enterspeed.Migrator.Enterspeed
             }
         }
 
-        private void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
+        private static void CreateSimpleType(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             var property = new EnterspeedPropertyType(jsonProperty);
             if (parentEnterspeedProperty != null)

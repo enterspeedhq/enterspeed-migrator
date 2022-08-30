@@ -11,7 +11,6 @@ using Enterspeed.Migrator.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-
 namespace Enterspeed.Migrator
 {
     public static class IoC

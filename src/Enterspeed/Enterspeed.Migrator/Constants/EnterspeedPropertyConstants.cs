@@ -1,6 +1,6 @@
 ﻿namespace Enterspeed.Migrator.Constants
 {
-    public class EnterspeedPropertyConstants
+    public static class EnterspeedPropertyConstants
     {
         public const string IsComponentName = "Is Component";
         public const string IsComponentAlias = "isComponent";

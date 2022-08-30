@@ -70,7 +70,6 @@ namespace Umbraco10.Migrator
 
                 // Build content based on pages
                 _contentBuilder.BuildContentPages(pages);
-
             }
             catch (Exception e)
             {

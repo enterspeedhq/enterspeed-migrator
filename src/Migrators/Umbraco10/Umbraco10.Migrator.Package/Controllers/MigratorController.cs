@@ -12,17 +12,17 @@ namespace Umbraco10.Migrator.Package.Controllers
             _migratorService = migratorService;
         }
 
-        [HttpPost]  
+        [HttpPost]
         public async Task<IActionResult> ImportDocumentTypes()
         {
-            await _migratorService.ImportDocumentTypesAsync();  
+            await _migratorService.ImportDocumentTypesAsync();
             return Ok("");
         }
 
         [HttpPost]
         public async Task<IActionResult> ImportData()
         {
-             await _migratorService.ImportDataAsync();
+            await _migratorService.ImportDataAsync();
             return Ok("");
         }
     }

@@ -9,7 +9,7 @@ namespace Umbraco10.Migrator.Extensions
         public static string ToUmbracoName(this string name, List<string> additionalWords = null)
         {
             var stringToReturn = string.Concat(name.ToFirstUpper().Select(x => char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
-            if (additionalWords != null && additionalWords.Any())
+            if (additionalWords?.Any() == true)
             {
                 foreach (var word in additionalWords)
                 {

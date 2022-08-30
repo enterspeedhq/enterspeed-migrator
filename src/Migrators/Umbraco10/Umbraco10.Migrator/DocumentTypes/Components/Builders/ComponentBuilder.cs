@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Linq;
-using Enterspeed.Migrator.Constants;
 using Enterspeed.Migrator.ValueTypes;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
@@ -54,7 +52,6 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
 
         protected void AddProperty(string alias, string name, int dataTypeId)
         {
-
             _componentDocType.AddPropertyType(
                 new PropertyType(_shortStringHelper, _dataTypeService.GetDataType(dataTypeId))
                 {
@@ -63,9 +60,9 @@ namespace Umbraco10.Migrator.DocumentTypes.Components.Builders
                 }, PropertyGroupAlias, PropertyGroupName);
         }
 
-        public object GetValue(EnterspeedPropertyType property, string alias)
+        public static object GetValue(EnterspeedPropertyType property, string alias)
         {
-            var value = property.ChildProperties.FirstOrDefault(p => p.Alias?.ToString() == alias);
+            var value = property.ChildProperties.Find(p => p.Alias?.ToString() == alias);
             return value?.Value;
         }
 

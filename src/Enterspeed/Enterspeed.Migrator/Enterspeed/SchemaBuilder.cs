@@ -19,7 +19,7 @@ namespace Enterspeed.Migrator.Enterspeed
             foreach (var pageData in pageDatas)
             {
                 var alias = pageData.MetaSchema.SourceEntityAlias;
-                var page = schemas.Pages.FirstOrDefault(p => p.MetaSchema.SourceEntityAlias == alias);
+                var page = schemas.Pages.Find(p => p.MetaSchema.SourceEntityAlias == alias);
                 var properties = pageData.Properties;
 
                 if (page == null)
@@ -34,7 +34,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 {
                     foreach (var property in properties)
                     {
-                        var existingProperty = pageData.Properties.FirstOrDefault(p => p.Alias == property.Alias);
+                        var existingProperty = pageData.Properties.Find(p => p.Alias == property.Alias);
                         if (existingProperty == null)
                         {
                             page.Properties.Add(property);
@@ -42,7 +42,7 @@ namespace Enterspeed.Migrator.Enterspeed
                     }
                 }
 
-                if (pageData.Children != null && pageData.Children.Any())
+                if (pageData.Children?.Any() == true)
                 {
                     BuildPageSchemas(pageData.Children, schemas);
                 }

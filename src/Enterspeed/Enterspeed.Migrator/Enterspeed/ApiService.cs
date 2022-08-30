@@ -30,7 +30,7 @@ namespace Enterspeed.Migrator.Enterspeed
         public async Task<EnterspeedResponse> GetNavigationAsync()
         {
             var data = await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey,
-                (s) => { s.WithHandle(_enterspeedConfiguration.NavigationHandle); });
+                (s) => s.WithHandle(_enterspeedConfiguration.NavigationHandle));
 
             var json = JsonSerializer.Serialize(data.Response);
             return JsonSerializer.Deserialize<EnterspeedResponse>(json);
@@ -38,8 +38,8 @@ namespace Enterspeed.Migrator.Enterspeed
 
         public async Task<DeliveryApiResponse> GetByUrlAsync(string url)
         {
-            _logger.LogInformation("Calling page url = " + url);
-            return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) => { s.WithUrl(url); });
+            _logger.LogInformation("Calling page url = ", url);
+            return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) => s.WithUrl(url));
         }
 
         public async Task<PageResponse> GetPageResponsesAsync(EnterspeedResponse enterspeedResponse)

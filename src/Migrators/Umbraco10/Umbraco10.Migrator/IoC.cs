@@ -17,7 +17,7 @@ namespace Umbraco10.Migrator
             serviceCollection.AddTransient<IDocumentTypeBuilder, DocumentTypeBuilder>();
             serviceCollection.Configure<UmbracoMigrationConfiguration>(setting =>
                 configuration.GetSection(UmbracoMigrationConfiguration.ConfigurationKey).Bind(setting));
-            
+
             serviceCollection.AddTransient<IComponentBuilderHandler, ComponentBuilderHandler>();
             serviceCollection.AddTransient<IComponentBuilder, EmbedComponentBuilder>();
             serviceCollection.AddTransient<IComponentBuilder, HeadlineComponentBuilder>();
