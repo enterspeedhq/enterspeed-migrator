@@ -7,6 +7,7 @@ using Enterspeed.Delivery.Sdk.Api.Services;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models.Response;
 using Enterspeed.Migrator.Settings;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Enterspeed.Migrator.Enterspeed
@@ -15,12 +16,15 @@ namespace Enterspeed.Migrator.Enterspeed
     {
         private readonly IEnterspeedDeliveryService _enterspeedDeliveryService;
         private readonly EnterspeedConfiguration _enterspeedConfiguration;
+        private readonly ILogger<ApiService> _logger;
 
         public ApiService(IEnterspeedDeliveryService enterspeedDeliveryService,
-            IOptions<EnterspeedConfiguration> enterspeedConfiguration)
+            IOptions<EnterspeedConfiguration> enterspeedConfiguration,
+            ILogger<ApiService> logger)
         {
             _enterspeedDeliveryService = enterspeedDeliveryService;
             _enterspeedConfiguration = enterspeedConfiguration?.Value;
+            _logger = logger;
         }
 
         public async Task<EnterspeedResponse> GetNavigationAsync()
@@ -34,6 +38,7 @@ namespace Enterspeed.Migrator.Enterspeed
 
         public async Task<DeliveryApiResponse> GetByUrlAsync(string url)
         {
+            _logger.LogInformation("Calling page url = " + url);
             return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) => { s.WithUrl(url); });
         }
 

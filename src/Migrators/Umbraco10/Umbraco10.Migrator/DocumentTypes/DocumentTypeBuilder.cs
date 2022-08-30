@@ -69,18 +69,24 @@ namespace Umbraco10.Migrator.DocumentTypes
                 var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
                 var compositionsFolder = GetOrCreateFolder(CompositionsFolderName);
 
-                // TODO: Assumption. This needs to be handled in a different way
+                // Build components
+                foreach (var componentAlias in _enterspeedConfiguration.ComponentPropertyTypeKeys)
+                {
+                    _componentBuilderHandler.BuildComponent(componentAlias, componentsFolder.Id);
+                }
+
+                // TODO: Assumption. This needs to be handled in a different way.
+                // Create block list data type, and add config with all element types
                 CreateBlockListDataType();
 
+                // Create pages
                 foreach (var page in schemas.Pages)
                 {
                     CreatePageDocType(page, pagesFolder, compositionsFolder);
                 }
 
-                foreach (var componentAlias in _enterspeedConfiguration.ComponentPropertyTypeKeys)
-                {
-                    _componentBuilderHandler.BuildComponent(componentAlias, componentsFolder.Id);
-                }
+
+
             }
             catch (Exception e)
             {
