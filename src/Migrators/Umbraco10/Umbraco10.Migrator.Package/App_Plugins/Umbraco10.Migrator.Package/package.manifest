@@ -1,0 +1,7 @@
+﻿{
+        "javascript": [
+                "/App_Plugins/Umbraco10.Migrator.Package/Dashboard/dashboard.controller.js",
+                "/App_Plugins/Umbraco10.Migrator.Package/Dashboard/migrator.resource.js"
+        ],
+        "css": []
+}
