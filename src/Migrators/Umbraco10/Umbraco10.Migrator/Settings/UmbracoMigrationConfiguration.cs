@@ -4,6 +4,7 @@
     {
         public static string ConfigurationKey => "UmbracoMigrationConfiguration";
         public string RootDocType { get; set; }
+        public string[] CompositionKeys { get; set; }
         public string ContentPropertyAlias { get; set; }
     }
 }

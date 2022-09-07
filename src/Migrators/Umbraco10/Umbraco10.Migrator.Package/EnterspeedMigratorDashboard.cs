@@ -19,7 +19,7 @@ namespace Umbraco10.Migrator.Package
             {
                 var rules = new IAccessRule[]
                 {
-                    new AccessRule {Type = AccessRuleType.Grant, Value = Constants.Security.AdminGroupAlias}
+                    new AccessRule { Type = AccessRuleType.Grant, Value = Constants.Security.AdminGroupAlias }
                 };
                 return rules;
             }

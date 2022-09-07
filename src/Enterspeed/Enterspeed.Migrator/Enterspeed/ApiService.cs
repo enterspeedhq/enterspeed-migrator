@@ -7,6 +7,7 @@ using Enterspeed.Delivery.Sdk.Api.Services;
 using Enterspeed.Migrator.Enterspeed.Contracts;
 using Enterspeed.Migrator.Models.Response;
 using Enterspeed.Migrator.Settings;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Enterspeed.Migrator.Enterspeed
@@ -15,45 +16,37 @@ namespace Enterspeed.Migrator.Enterspeed
     {
         private readonly IEnterspeedDeliveryService _enterspeedDeliveryService;
         private readonly EnterspeedConfiguration _enterspeedConfiguration;
+        private readonly ILogger<ApiService> _logger;
 
         public ApiService(IEnterspeedDeliveryService enterspeedDeliveryService,
-            IOptions<EnterspeedConfiguration> enterspeedConfiguration)
+            IOptions<EnterspeedConfiguration> enterspeedConfiguration,
+            ILogger<ApiService> logger)
         {
             _enterspeedDeliveryService = enterspeedDeliveryService;
             _enterspeedConfiguration = enterspeedConfiguration?.Value;
+            _logger = logger;
         }
 
         public async Task<EnterspeedResponse> GetNavigationAsync()
         {
             var data = await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey,
-                (s) => { s.WithHandle(_enterspeedConfiguration.NavigationHandle); });
+                (s) => s.WithHandle(_enterspeedConfiguration.NavigationHandle));
 
             var json = JsonSerializer.Serialize(data.Response);
             return JsonSerializer.Deserialize<EnterspeedResponse>(json);
         }
 
-        public async Task<DeliveryApiResponse> GetByUrlsAsync(string url)
+        public async Task<DeliveryApiResponse> GetByUrlAsync(string url)
         {
-            return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) => { s.WithUrl(url); });
+            _logger.LogInformation("Calling page url = ", url);
+            return await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey, (s) => s.WithUrl(url));
         }
 
-        /// <summary>
-        /// Iterates trough all the pages and maps to a delivery api deliveryApiResponse object.
-        /// </summary>
-        /// <param name="urls"></param>
-        /// <returns>List of DeliveryApiResponse</returns>
         public async Task<PageResponse> GetPageResponsesAsync(EnterspeedResponse enterspeedResponse)
         {
-            var url = string.Empty;
-
-            foreach (var pageUrl in _enterspeedConfiguration.PageUrls)
-            {
-                url = enterspeedResponse.Views.Navigation.Self.View.Url.Replace(pageUrl, "");
-            }
-
             var pageResponse = new PageResponse
             {
-                DeliveryApiResponse = await GetByUrlsAsync(url)
+                DeliveryApiResponse = await GetByUrlAsync(enterspeedResponse?.Views?.Navigation?.Self?.View?.Url)
             };
 
             var children = await MapResponseAsync(enterspeedResponse.Views.Navigation?.Children);
@@ -67,14 +60,9 @@ namespace Enterspeed.Migrator.Enterspeed
             var pageResponses = new List<PageResponse>();
             foreach (var child in children)
             {
-                var url = string.Empty;
+                var response = await GetByUrlAsync(child?.View?.Self?.View?.Url);
+                if (response.Response == null) continue;
 
-                foreach (var pageUrl in _enterspeedConfiguration.PageUrls)
-                {
-                    url = child?.View?.Self?.View?.Url?.Replace(pageUrl, "");
-                }
-
-                var response = await GetByUrlsAsync(url);
                 var pageResponse = new PageResponse
                 {
                     DeliveryApiResponse = response

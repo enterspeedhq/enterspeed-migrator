@@ -7,22 +7,26 @@ namespace Enterspeed.Migrator.Enterspeed
 {
     public class SchemaBuilder : ISchemaBuilder
     {
-        public Schemas BuildPageSchemas(List<PageData> pageData)
+        public Schemas BuildPageSchemas(List<PageData> pageDatas)
         {
             var schemas = new Schemas();
-            var pages = new List<Schema>();
+            BuildPageSchemas(pageDatas, schemas);
+            return schemas;
+        }
 
-            foreach (var data in pageData)
+        public void BuildPageSchemas(List<PageData> pageDatas, Schemas schemas)
+        {
+            foreach (var pageData in pageDatas)
             {
-                var alias = data.MetaSchema.SourceEntityAlias;
-                var page = pages.FirstOrDefault(p => p.MetaSchema.SourceEntityAlias == alias);
-                var properties = data.Properties.DistinctBy(p => p.Alias);
+                var alias = pageData.MetaSchema.SourceEntityAlias;
+                var page = schemas.Pages.Find(p => p.MetaSchema.SourceEntityAlias == alias);
+                var properties = pageData.Properties;
 
                 if (page == null)
                 {
-                    pages.Add(new Schema
+                    schemas.Pages.Add(new Schema
                     {
-                        MetaSchema = data.MetaSchema,
+                        MetaSchema = pageData.MetaSchema,
                         Properties = properties.ToList()
                     });
                 }
@@ -30,21 +34,19 @@ namespace Enterspeed.Migrator.Enterspeed
                 {
                     foreach (var property in properties)
                     {
-                        var existingProperty = data.Properties.FirstOrDefault(p => p.Alias == property.Alias);
+                        var existingProperty = pageData.Properties.Find(p => p.Alias == property.Alias);
                         if (existingProperty == null)
                         {
                             page.Properties.Add(property);
                         }
                     }
                 }
+
+                if (pageData.Children?.Any() == true)
+                {
+                    BuildPageSchemas(pageData.Children, schemas);
+                }
             }
-
-            schemas.Pages.AddRange(pages);
-            return schemas;
-        }
-
-        public void BuildComponents()
-        {
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Umbraco10.Migrator.DataTypes
 
         public BlockListUdi(List<Dictionary<string, string>> items)
         {
-            this.contentUdi = items;
+            contentUdi = items;
         }
     }
 }

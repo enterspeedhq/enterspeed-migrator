@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Umbraco.Cms.Web.BackOffice.Controllers;
-using Umbraco10.Migrator.Builders.Contracts;
 
 namespace Umbraco10.Migrator.Package.Controllers
 {
@@ -16,14 +15,14 @@ namespace Umbraco10.Migrator.Package.Controllers
         [HttpPost]
         public async Task<IActionResult> ImportDocumentTypes()
         {
-            await _migratorService.ImportDocumentTypesAsync();  
+            await _migratorService.ImportDocumentTypesAsync();
             return Ok("");
         }
 
         [HttpPost]
         public async Task<IActionResult> ImportData()
         {
-             await _migratorService.ImportDataAsync();
+            await _migratorService.ImportDataAsync();
             return Ok("");
         }
     }
