@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <ContentTargetFolders>.</ContentTargetFolders>
+        <Product>Umbraco9.Migrator.Package</Product>
+        <PackageId>Umbraco9.Migrator.Package</PackageId>
+        <Title>Umbraco9.Migrator.Package</Title>
+        <Description>...</Description>
+        <Product>...</Product>
+        <PackageTags>umbraco plugin package</PackageTags>
+        <RootNamespace>Umbraco9.Migrator.Package</RootNamespace>
+        <TargetFrameworks>net6.0</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Umbraco.Cms.Web.Website" Version="9.5.0" />
+        <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="9.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="App_Plugins\Umbraco9.Migrator.Package\**\*.*">
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        </Content>
+        <None Include="build\**\*.*">
+            <Pack>True</Pack>
+            <PackagePath>buildTransitive</PackagePath>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Umbraco9.Migrator\Umbraco9.Migrator.csproj" />
+    </ItemGroup>
+</Project>

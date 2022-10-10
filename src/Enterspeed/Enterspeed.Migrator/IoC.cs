@@ -11,7 +11,6 @@ using Enterspeed.Migrator.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-
 namespace Enterspeed.Migrator
 {
     public static class IoC
@@ -19,20 +18,16 @@ namespace Enterspeed.Migrator
         public static void RegisterEnterspeedServices(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection.AddTransient<IApiService, ApiService>();
-            serviceCollection.AddTransient<ISchemaImporter, SchemaImporter>();
-            serviceCollection.AddTransient<ISourceImporter, SourceImporter>();
+            serviceCollection.AddTransient<ISchemaBuilder, SchemaBuilder>();
             serviceCollection.AddTransient<IEnterspeedDeliveryService, EnterspeedDeliveryService>();
             serviceCollection.AddTransient<IEnterspeedConfigurationProvider, InMemoryConfigurationProvider>();
-            serviceCollection.AddTransient<IElementsResolver, ElementsResolver>();
-            serviceCollection.AddTransient<IPropertyResolver, PropertyResolver>();
             serviceCollection.AddTransient<IPagesResolver, PagesResolver>();
             serviceCollection.AddTransient<EnterspeedDeliveryConnection>();
             serviceCollection.AddSingleton(new EnterspeedDeliveryConfiguration());
             serviceCollection.AddTransient<IJsonSerializer, SystemTextJsonSerializer>();
             serviceCollection.AddOptions();
 
-            serviceCollection.Configure<EnterspeedConfiguration>(setting =>
-                configuration.GetSection(EnterspeedConfiguration.ConfigurationKey).Bind(setting));
+            serviceCollection.Configure<EnterspeedConfiguration>(setting => configuration.GetSection(EnterspeedConfiguration.ConfigurationKey).Bind(setting));
         }
     }
 }
