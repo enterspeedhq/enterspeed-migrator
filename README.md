@@ -3,7 +3,7 @@
 ## Concept
 The migration tools consist of 3 things. A source CMS, Enterspeed, and a target CMS that we are migrating data to. Enterspeed gives us the flexibility to form the data structure to our specific needs and essentially decouples the data architecture from the source CMS. 
 
-We have been working on some concepts utilizing this flexibility to make a migration from an old version of a CMS to a new version. Due to the data being decoupled, there is an added bonus of being able to migrate from one system to another, since we have control over the delivery structure and output from Enterspeed.
+We have been working on some concepts utilizing this flexibility to make a migration from an old version of a CMS to a new version. Due to the data being decoupled, there is a bonus of being able to migrate from one system to another, since we have control over the delivery structure and output from Enterspeed.
 
 ### Purpose
 This is a framework for rapid data migration between systems. It is a time-consuming and expensive process to upgrade your old system to the newest version. We provide you with tools to get started migrating your data fast, instead of upgrading your old system. 
@@ -32,7 +32,7 @@ To get started with Enterspeed you should start reading the __[getting started](
 #### Migrator
 The migrator is software that should be considered as the layer between the output of Enterspeed and the target CMS.
 
-## Migrator
+## Digging a bit deeper
 The migrator solution consists of two layers. The __`Enterspeed.Migrator`__ layer is the generic layer that calls the Enterspeed API and turns the response into usable structured data in .NET objects. 
 This response is then used by the CMS-specific converter. In this example, we are showing the __`Umbraco10.Migrator`__ project. This layer interprets the objects we receive from the generic layer and converts them into Umbraco-specific types and saves them in the target CMS system. 
 
@@ -49,7 +49,7 @@ It contains 2 public methods.
 - `GetPageResponsesAsync`
 
 `GetNavigationAsync` calls a [handle](https://docs.enterspeed.com/key-concepts/schemas) that you have set up. This handle returns a list of routable urls in a tree structure. 
-This response has to conform to a specific format. You can get the example schema setup for the handle __[here](https://docs.enterspeed.com/key-concepts/schemas)__. 
+This response has to conform to a specific format. You can get the example schema setup for the handle __[here](//assets/schemas/)__. 
 
 `GetPageResponsesAsync` Returns a list of responses. It calls all the URLs from the navigation data, and converts them into PageResponse objects, which wraps the delivery api response type, and also allows for page responses to contain children. Thereby keeping a 1-to-1 relation to the page structure that we are getting from Enterspeed.
 
@@ -100,11 +100,11 @@ So now we have a clean set of data, with all its unique schemas that we can work
 
 ### CMS-specific data converter
 We have built an Umbraco 10 specific converter, that converts the output of the generic migrator to Umbraco data. 
-The  __[DocumentTypeBuilder](https://github.com/enterspeedhq/enterspeed-migrator/blob/feature/documentation/src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/DocumentTypeBuilder.cs)__ receives the schemas from the generic migrator and interprets the different schemas and saves them as document types, elements, and compositions in Umbraco. Properties are all interpreted and added to before mentioned types of data in Umbraco. 
+The  __[DocumentTypeBuilder](//src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/DocumentTypeBuilder.cs)__ receives the schemas from the generic migrator and interprets the different schemas and saves them as document types, elements, and compositions in Umbraco. Properties are all interpreted and added to before mentioned types of data in Umbraco. 
 
 The simple types are managed through a switch statement, that converts these to the equivalent in Umbraco. 
 For the complex types, we have set up a component builder handler, that requires you to create your builders. This is for scenarios where you want to convert for example grid components to element types used in a blocklist or nested content. 
-There are quite a few samples __[here](https://github.com/enterspeedhq/enterspeed-migrator/tree/feature/documentation/src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/Components/Builders)__.
+There are quite a few samples __[here](//src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/Components/Builders/)__.
 
 You define an alias in the component builder and when the converter hits an alias with that specific value, your custom component builder will get executed.
 
@@ -112,7 +112,7 @@ You define an alias in the component builder and when the converter hits an alia
 ## Getting started moving data into Umbraco 10
 You need to pull down the source code and reference your Umbraco 10 project to the `Umbraco10.Migrator.Package` project. This should give you the required references to get started. Still pretty early, so no official package has been created for this project. 
 
-### App settings
+#### App settings
 For the migrator to work, we need to specify a few settings in the target CMS (in this case Umbraco 10). 
 These are all values that are used for the CMS-specific converter to interpret the data. The data is set in the app-settings.json file.
 
@@ -142,14 +142,8 @@ These are all values that are used for the CMS-specific converter to interpret t
 }
 ```
 
-#### Navigaiton handle
-The `NavigationHandle` is very important. You need to create a handle in Enterspeed, that returns all routable views, that you would like to migrate into Umbraco 10. This handle has to conform to some specific requirements for this to work. You can get a sample of the schema setup for the handle __[here](https://docs.enterspeed.com/key-concepts/schemas)__. 
-
-#### Appsettings
-All alias values are property names that are a part of the page responses from Enterspeed. We are telling the converter when there is a match for `basePage`, take all the properties of this object, and map it into a composition type. 
-
+All alias values are property names that are a part of the page responses from Enterspeed. We are for example telling the converter when there is a match for `basePage`, take all the properties of this object, and map it into a composition type. 
 The fact that a property of this alias exists in the page response, also tells the converter that this page should have the `basePage` composition assigned. All properties in the base page object will be added to the base page composition. 
-
 Below is an example of a page response. This should connect the dots.
 
 ```json 
@@ -178,16 +172,17 @@ Below is an example of a page response. This should connect the dots.
     "views": {}
 }
 ```
+#### Navigaiton handle
+The `NavigationHandle` is very important. You need to create a handle in Enterspeed, that returns all routable views, that you would like to migrate into Umbraco 10. This handle has to conform to some specific requirements for this to work. You can get a sample of the schema setup for the handle __[here](//assets/schemas/)__.
 
 #### Schema requirements
 Some meta-data is required for this to work. As you can see in the example, we have the `migrationPageMetaData` as we defined earlier. This contains 3 properties: `sourceEntityAlias`, `sourceEntityName` and `contentName`. These 3 properties are required for the migration engine to work. It's used to create the unique schema types and later on Document Types for Umbraco. 
 
-This means that you would have to create a [Partial schemas](https://docs.enterspeed.com/key-concepts/schemas) in Enterspeed and reference the metadata in all routed responses. 
-
+This means that you would have to create a [Partial schema](https://docs.enterspeed.com/key-concepts/partial-schemas) in Enterspeed and reference the metadata in all routed responses. You can see an example of the meta-data schema __[here](//assets/schemas/)__.
 You can call the meta-data object what you want, as long as you reference it correctly in appsettings and add the required properties. 
 
 #### Working with complex data
-Imagine that you have json objects of complex data, that you would like to store in your target cms (this case Umbraco). You would need to tell the cms specific converter what to do with it. This is done by adding the alias to ComponentPropertyTypeKeys in appsettings. Furthermore, you would need to create your ComponentBuilder for this. This example has been used to move a grid editor called Quote, from Umbraco 7 and moved it to an element type in Umbraco, to be used in a block list editor.
+Imagine that you have json objects of complex data, that you would like to store in your target cms (this case Umbraco). You would need to tell the cms specific converter what to do with it. This is done by adding the alias to ComponentPropertyTypeKeys in appsettings. Furthermore, you would need to create your ComponentBuilder for this. This example has been used to move a grid editor called Quote, from Umbraco 7 and moved it to an element type in Umbraco 10, to be used in a block list editor.
 
 ```cs
 public class QuoteComponentBuilder : ComponentBuilder
