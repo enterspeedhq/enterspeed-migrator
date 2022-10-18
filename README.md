@@ -228,6 +228,6 @@ Importing consists of 2 steps
 
 Navigate to settings -> Enterspeed data migrator (as shown in the picture)
 Press `Import document` types and wait for all document types to be imported.
-When this process is done, you can execute `Import` content`
+When this process is done, you can execute `Import` content.
 
 ![migrator-solution](/assets/images/import-document-types.png)
