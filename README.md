@@ -172,7 +172,7 @@ Below is an example of a page response. This should connect the dots.
     "views": {}
 }
 ```
-#### Navigaiton handle
+#### Navigation handle
 The `NavigationHandle` is very important. You need to create a handle in Enterspeed, that returns all routable views, that you would like to migrate into Umbraco 10. This handle has to conform to some specific requirements for this to work. You can get a sample of the schema setup for the handle __[here](//assets/schemas/)__.
 
 #### Schema requirements
@@ -217,3 +217,17 @@ public class QuoteComponentBuilder : ComponentBuilder
     }
 }
 ```
+
+#### Data importer
+When importing data, you are getting page data objects in the same structure as your navigation structure. Page data objects contain meta-data. The sourceEntityAlias value will match up against your page document type, that's why the converter knows how to save the data in Umbraco. The page data objects also contain all properties + their values, these will also match up against their corresponding properties in Umbraco based on the alias, and save them accordingly. 
+
+#### Starting an import
+Importing consists of 2 steps 
+- Importing document type 
+- Importing data
+
+Navigate to settings -> Enterspeed data migrator (as shown in the picture)
+Press `Import document` types and wait for all document types to be imported.
+When this process is done, you can execute `Import` content`
+
+![migrator-solution](/assets/images/import-document-types.png)
