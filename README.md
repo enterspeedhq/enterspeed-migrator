@@ -1,9 +1,9 @@
 # Enterspeed migrator
 
 ## Concept
-The migration tools consist of 3 things. A source CMS, Enterspeed, and a target CMS that we are migrating data to. Enterspeed gives us the flexibility to form the data structure to our specific needs and essentially decouples the data architecture from the source CMS. 
+The migration tools consist of 4 things. A source CMS, Enterspeed, migration engine, and a target CMS that we are migrating data to. Enterspeed gives us the flexibility to form the data structure to our specific needs and essentially decouples the data architecture from the source CMS. 
 
-We have been working on some concepts utilizing this flexibility to make a migration from an old version of a CMS to a new version. Due to the data being decoupled, there is a bonus of being able to migrate from one system to another, since we have control over the delivery structure and output from Enterspeed.
+We have been working on some concepts utilising this flexibility to make a migration from an old version of a CMS to a new version. Due to the data being decoupled, there is a bonus of being able to migrate from one system to another, since we have control over the delivery structure and output from Enterspeed.
 
 ### Purpose
 This is a framework for rapid data migration between systems. It is a time-consuming and expensive process to upgrade your old system to the newest version. We provide you with tools to get started migrating your data fast, instead of upgrading your old system. 
@@ -13,7 +13,7 @@ The migration tool consists of multiple parts. We will dive deeper into these he
 
 #### Source CMS
 The source CMS is the system that you want to push your data to Enterspeed from. 
-You will need a way to ingest data into Enterspeed from your source system. Luckily this is already made easy for you, with some great documentation on the ingest API. We also have some premade __[connectors](https://docs.enterspeed.com/integrations)__, so you can get started immediately.
+You will need a way to ingest data into Enterspeed from your source system. Luckily this is already made easy for you, with some great documentation on the Ingest API. We also have some premade __[connectors](https://docs.enterspeed.com/integrations)__, so you can get started immediately.
 
 When you have set a connection up between your source CMS and Enterspeed, you can start ingesting data into Enterspeed.
 
@@ -119,7 +119,7 @@ These are all values that are used for the CMS-specific converter to interpret t
 ```json 
 {
   "EnterspeedConfiguration": {
-    "ApiKey": "", // key for the delivery endpoint
+    "ApiKey": "", // key for the Delivery API endpoint
     "NavigationHandle": "navigation-en-us", // navigation handle route
     "MigrationPageMetaData": "migrationPageMetaData", // alias of the property that contains meta data for the specific page
     "ComponentPropertyTypeKeys": [ // alias of the component types that you have build component builders for
