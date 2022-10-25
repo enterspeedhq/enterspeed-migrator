@@ -88,6 +88,8 @@ We also have the property types defined here as well. This setup allows multiple
 
 The `SchemaBuilder` converts all page data into a set of unique objects. The schemas are the sum of all the data and types that were received in the earlier steps. It has figured out how many property types Schema xx should have, their names as well as their value types. A schema is best compared to a document type in Umbraco.
 
+Schema builder and the schema class should not be confused with a schema in Enterspeed. (naming for this might be changed in a later version to avoid confusion)
+
 ```cs title="Schema"
 public class Schema
 {
