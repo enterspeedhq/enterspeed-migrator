@@ -18,16 +18,11 @@ You will need a way to ingest data into Enterspeed from your source system. Luck
 When you have set a connection up between your source CMS and Enterspeed, you can start ingesting data into Enterspeed.
 
 #### Enterspeed
-The data now exists as [source entities](https://docs.enterspeed.com/key-concepts/schemas) in Enterspeed and can be formed and modeled easily with data mapping in Enterspeed schemas. The schemas define the api endpoint and data structure for your data. This is where the decoupling is happening, since you are specifying the new structure of your data through schema mappings, and generating views based on the mappings. 
+The data now exists as source entities in Enterspeed and can be formed and modeled easily with data mapping in Enterspeed schemas. The schemas define the api endpoint and data structure for your data. This is where the decoupling is happening, since you are specifying the new structure of your data through schema mappings, and generating views based on the mappings. 
 
-It is important to understand that we are not seeing the output of the source entities, but generating a [view](https://docs.enterspeed.com/key-concepts/schemas) that is based on the schema mapping. The source entities are the raw data, the schemas are where we define how we want the output, and [views](https://docs.enterspeed.com/key-concepts/schemas) are the output itself. 
+It is important to understand that we are not seeing the output of the source entities, but generating a view that is based on the schema mapping. The source entities are the raw data, the schemas are where we define how we want the output, and views are the output itself. 
 
 To get started with Enterspeed you should start reading the __[getting started](https://docs.enterspeed.com/getting-started)__ guide, as well as reading about the key concepts of Enterspeed. 
-
-[Schemas](https://docs.enterspeed.com/key-concepts/schemas)
-[Partial schemas](https://docs.enterspeed.com/key-concepts/schemas)
-[Views](https://docs.enterspeed.com/key-concepts/schemas)
-[Data sources](https://docs.enterspeed.com/key-concepts/schemas)
 
 #### Migrator
 The migrator is software that should be considered as the layer between the output of Enterspeed and the target CMS.
@@ -48,7 +43,7 @@ It contains 2 public methods.
 - `GetNavigationAsyc`
 - `GetPageResponsesAsync`
 
-`GetNavigationAsync` calls a [handle](https://docs.enterspeed.com/key-concepts/schemas) that you have set up. This handle returns a list of routable urls in a tree structure. 
+`GetNavigationAsync` calls a handle that you have set up. This handle returns a list of routable urls in a tree structure. 
 This response has to conform to a specific format. You can get the example schema setup for the handle __[here](//assets/schemas/)__. 
 
 `GetPageResponsesAsync` Returns a list of responses. It calls all the URLs from the navigation data, and converts them into PageResponse objects, which wraps the delivery api response type, and also allows for page responses to contain children. Thereby keeping a 1-to-1 relation to the page structure that we are getting from Enterspeed.
@@ -102,11 +97,11 @@ So now we have a clean set of data, with all its unique schemas that we can work
 
 ### CMS-specific data converter
 We have built an Umbraco 10 specific converter, that converts the output of the generic migrator to Umbraco data. 
-The  __[DocumentTypeBuilder](//src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/DocumentTypeBuilder.cs)__ receives the schemas from the generic migrator and interprets the different schemas and saves them as document types, elements, and compositions in Umbraco. Properties are all interpreted and added to before mentioned types of data in Umbraco. 
+The  __[DocumentTypeBuilder](/src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/DocumentTypeBuilder.cs)__ receives the schemas from the generic migrator and interprets the different schemas and saves them as document types, elements, and compositions in Umbraco. Properties are all interpreted and added to before mentioned types of data in Umbraco. 
 
 The simple types are managed through a switch statement, that converts these to the equivalent in Umbraco. 
 For the complex types, we have set up a component builder handler, that requires you to create your builders. This is for scenarios where you want to convert for example grid components to element types used in a blocklist or nested content. 
-There are quite a few samples __[here](//src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/Components/Builders/)__.
+There are quite a few samples __[here](/src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/Components/Builders/)__.
 
 You define an alias in the component builder and when the converter hits an alias with that specific value, your custom component builder will get executed.
 
@@ -175,12 +170,12 @@ Below is an example of a page response. This should connect the dots.
 }
 ```
 #### Navigation handle
-The `NavigationHandle` is very important. You need to create a handle in Enterspeed, that returns all routable views, that you would like to migrate into Umbraco 10. This handle has to conform to some specific requirements for this to work. You can get a sample of the schema setup for the handle __[here](//assets/schemas/)__.
+The `NavigationHandle` is very important. You need to create a handle in Enterspeed, that returns all routable views, that you would like to migrate into Umbraco 10. This handle has to conform to some specific requirements for this to work. You can get a sample of the schema setup for the handle __[here](/assets/schemas/)__.
 
 #### Schema requirements
 Some meta-data is required for this to work. As you can see in the example, we have the `migrationPageMetaData` as we defined earlier. This contains 3 properties: `sourceEntityAlias`, `sourceEntityName` and `contentName`. These 3 properties are required for the migration engine to work. It's used to create the unique schema types and later on Document Types for Umbraco. 
 
-This means that you would have to create a [Partial schema](https://docs.enterspeed.com/key-concepts/partial-schemas) in Enterspeed and reference the metadata in all routed responses. You can see an example of the meta-data schema __[here](//assets/schemas/)__.
+This means that you would have to create a Partial schema in Enterspeed and reference the metadata in all routed responses. 
 You can call the meta-data object what you want, as long as you reference it correctly in appsettings and add the required properties. 
 
 #### Working with complex data
