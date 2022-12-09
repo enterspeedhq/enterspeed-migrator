@@ -220,7 +220,7 @@ First of let´s show an example of a schema for a routeable page. As you can see
 
 ```
 
-##### Partial schema example with meta-data
+##### Partial schema example of migrationPageMetaData
 ```json
 {
 	"properties": {
