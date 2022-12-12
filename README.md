@@ -178,6 +178,80 @@ Some meta-data is required for this to work. As you can see in the example, we h
 This means that you would have to create a Partial schema in Enterspeed and reference the metadata in all routed responses. 
 You can call the meta-data object what you want, as long as you reference it correctly in appsettings and add the required properties. 
 
+
+##### Page schema and migrationPageMetaData 
+First of let´s show an example of a schema for a routeable page. As you can see the schema is referencing the before-mentioned migrationPageMetaData partial. 
+
+##### Page schema
+```json
+{
+	"triggers": {
+		"demoCMS": [
+			"contentPage"
+		]
+	},
+	"route": {
+		"url": "{url}"
+	},
+	"properties": {
+		"type": "{type}",
+		"pageTitle": "{p.pageTitle}",
+		"sections": {
+			"type": "array",
+			"input": "{p.bodyText.sections}",
+			"items": {
+				"type": "partial",
+				"input": "{item}",
+				"alias": "section"
+			}
+		},
+		"basePage": {
+			"type": "partial",
+			"input": "{root}",
+			"alias": "basePage"
+		},
+		"migrationPageMetaData": {
+			"type": "partial",
+			"input": "{root}",
+			"alias": "migrationPageMetaData"
+		}
+	}
+}
+
+```
+
+##### Partial schema example of migrationPageMetaData
+```json
+{
+	"properties": {
+		"sourceEntityAlias": "{item.type}",
+		"sourceEntityName": "{item.type}",
+		"contentName": {
+			"type": "string",
+			"value": {
+				"$exp": "{item.p.metaData.name}"
+			}
+		},
+		"culture": "{item.p.metaData.culture}",
+		"createDate": "{item.p.metaData.createDate}",
+		"updateDate": "{item.p.metaData.updateDate}",
+		"parentId": "{item.originParentId}",
+		"url": "{item.url}",
+		"contentPath": {
+			"type": "array",
+			"input": "{item.p.metaData.nodePath}",
+			"var": "path",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": "{path}"
+				}
+			}
+		}
+	}
+}
+```
+
 #### Working with complex data
 Imagine that you have json objects of complex data, that you would like to store in your target cms (this case Umbraco). You would need to tell the cms specific converter what to do with it. This is done by adding the alias to ComponentPropertyTypeKeys in appsettings. Furthermore, you would need to create your ComponentBuilder for this. This example has been used to move a grid editor called Quote, from Umbraco 7 and moved it to an element type in Umbraco 10, to be used in a block list editor.
 
