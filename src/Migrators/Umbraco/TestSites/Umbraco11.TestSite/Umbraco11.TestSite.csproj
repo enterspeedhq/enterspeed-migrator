@@ -4,6 +4,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="App_Plugins\Umbraco.Migrator.Package\Dashboard\dashboard.controller.js" />
+    <None Include="App_Plugins\Umbraco.Migrator.Package\Dashboard\dashboard.html" />
+    <None Include="App_Plugins\Umbraco.Migrator.Package\Dashboard\lang\en.xml" />
+    <None Include="App_Plugins\Umbraco.Migrator.Package\Dashboard\migrator.resource.js" />
+    <None Include="App_Plugins\Umbraco.Migrator.Package\package.manifest" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Umbraco.Cms" Version="11.2.0" />

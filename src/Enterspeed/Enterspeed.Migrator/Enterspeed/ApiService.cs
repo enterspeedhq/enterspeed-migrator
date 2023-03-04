@@ -27,10 +27,10 @@ namespace Enterspeed.Migrator.Enterspeed
             _logger = logger;
         }
 
-        public async Task<EnterspeedResponse> GetNavigationAsync()
+        public async Task<EnterspeedResponse> GetNavigationAsync(string enterspeedHandle = null)
         {
             var data = await _enterspeedDeliveryService.Fetch(_enterspeedConfiguration.ApiKey,
-                (s) => s.WithHandle(_enterspeedConfiguration.NavigationHandle));
+                (s) => s.WithHandle(!string.IsNullOrEmpty(enterspeedHandle) ? enterspeedHandle : _enterspeedConfiguration.NavigationHandle));
 
             var json = JsonSerializer.Serialize(data.Response);
             return JsonSerializer.Deserialize<EnterspeedResponse>(json);

@@ -1,0 +1,21 @@
+﻿<div ng-controller="DashboardMigratorController as vm">
+    <umb-box>
+        <umb-box-header title="Import Document Types"></umb-box-header>
+        <umb-box-content>
+            <a ng-click="vm.importDocumentTypes()">Import</a>
+        </umb-box-content>
+    </umb-box>
+
+    <umb-box>
+        <umb-box-header title="Import Content"></umb-box-header>
+        <umb-box-content>
+            <label>Insert id of the node that you want to import data under (optional)</label>
+            <input type="number" ng-model="vm.sectionId" />
+
+            <label>Insert Enterspeed handle that returns desired data(optional)</label>
+            <input type="text" ng-model="vm.enterspeedHandle" />
+
+            <a ng-click="vm.importData()">Import</a>
+        </umb-box-content>
+    </umb-box>
+</div>

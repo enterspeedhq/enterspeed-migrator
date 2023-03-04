@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Enterspeed.Delivery.Sdk" Version="1.0.0" />
+        <PackageReference Include="Enterspeed.Delivery.Sdk" Version="0.2.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />

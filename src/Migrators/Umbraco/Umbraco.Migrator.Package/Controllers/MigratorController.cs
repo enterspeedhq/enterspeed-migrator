@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
+using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Web.BackOffice.Controllers;
 
 namespace Umbraco.Migrator.Package.Controllers
@@ -21,10 +23,19 @@ namespace Umbraco.Migrator.Package.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ImportData()
+        public async Task<IActionResult> ImportData(ImportDataRequest importDataRequest)
         {
-            await _migratorService.ImportDataAsync();
+            await _migratorService.ImportDataAsync(importDataRequest.EnterspeedHandle, importDataRequest.SectionId);
             return Ok("");
+        }
+
+        public class ImportDataRequest
+        {
+            [JsonProperty("enterspeedHandle")]
+            public string EnterspeedHandle { get; set; }
+
+            [JsonProperty("sectionId")]
+            public int? SectionId { get; set; }
         }
     }
 }

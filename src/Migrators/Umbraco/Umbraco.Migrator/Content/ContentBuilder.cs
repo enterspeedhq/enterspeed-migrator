@@ -10,7 +10,9 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Persistence.Querying;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Infrastructure.Persistence;
 using Umbraco.Migrator.DataTypes;
 using Umbraco.Migrator.DocumentTypes.Components.Builders;
 using Umbraco.Migrator.Settings;
@@ -24,18 +26,57 @@ namespace Umbraco.Migrator.Content
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
         private readonly ILogger<ContentBuilder> _logger;
         private readonly IEnumerable<IComponentBuilder> _componentBuilders;
+        private readonly ISqlContext _sqlContext;
 
         public ContentBuilder(IContentTypeService contentTypeService,
             IContentService contentService,
             IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration,
             ILogger<ContentBuilder> logger,
-            IEnumerable<IComponentBuilder> componentBuilders)
+            IEnumerable<IComponentBuilder> componentBuilders,
+            ISqlContext sqlContext)
         {
             _contentService = contentService;
             _logger = logger;
             _componentBuilders = componentBuilders;
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
             _contentTypes = contentTypeService.GetAll();
+            _sqlContext = sqlContext;
+        }
+
+        // We used this when we insert data beneath a specific node. 
+        public void BuildContentPagesInSection(List<PageData> pageEntityTypes, IContent sectionNode)
+        {
+            foreach (var pageEntityType in pageEntityTypes)
+            {
+
+                if (pageEntityType.MetaSchema.SourceEntityAlias.Equals("Nyhed"))
+                {
+                    pageEntityType.MetaSchema.SourceEntityAlias = "newsPostPage";
+                }
+                else if (pageEntityType.MetaSchema.SourceEntityAlias.Equals("Nyheder"))
+                {
+                    pageEntityType.MetaSchema.SourceEntityAlias = "newsPage";
+                }
+
+                var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, pageEntityType.MetaSchema.SourceEntityAlias, StringComparison.InvariantCultureIgnoreCase));
+
+                IQuery<IContent> filter = _sqlContext.Query<IContent>().Where(x => x.Name.Equals(pageEntityType.MetaSchema.ContentName));
+                var existingItem = _contentService.GetPagedDescendants(sectionNode.Id, 1, 1, out long count, filter).FirstOrDefault();
+
+                var contentToCreate = existingItem != null ? existingItem : _contentService.Create(pageEntityType.MetaSchema.ContentName, sectionNode.Id, contentType);
+                var components = new List<EnterspeedPropertyType>();
+
+                AddValueToProperties(pageEntityType.Properties, contentToCreate, components);
+
+                //PopulateBlockList(components, contentToCreate);
+                _contentService.Save(contentToCreate);
+
+
+                if (pageEntityType.Children?.Any() == true)
+                {
+                    BuildContentPages(pageEntityType.Children, contentToCreate);
+                }
+            }
         }
 
         public void BuildContentPages(List<PageData> pageEntityTypes, IContent parent = null)
@@ -51,7 +92,7 @@ namespace Umbraco.Migrator.Content
                 var contentToCreate = _contentService.Create(pageEntityType.MetaSchema.ContentName, isRoot ? -1 : parent.Id, contentType);
 
                 var components = new List<EnterspeedPropertyType>();
-                CreateProperties(pageEntityType.Properties, contentToCreate, components);
+                AddValueToProperties(pageEntityType.Properties, contentToCreate, components);
 
                 PopulateBlockList(components, contentToCreate);
 
@@ -64,7 +105,7 @@ namespace Umbraco.Migrator.Content
             }
         }
 
-        public void CreateProperties(List<EnterspeedPropertyType> properties, IContent contentToCreate, List<EnterspeedPropertyType> components, bool isTraversing = false)
+        public void AddValueToProperties(List<EnterspeedPropertyType> properties, IContent contentToCreate, List<EnterspeedPropertyType> components, bool isTraversing = false)
         {
             foreach (var property in properties)
             {
@@ -83,7 +124,7 @@ namespace Umbraco.Migrator.Content
 
                 if (property.ChildProperties.Any())
                 {
-                    CreateProperties(property.ChildProperties, contentToCreate, components, true);
+                    AddValueToProperties(property.ChildProperties, contentToCreate, components, true);
                 }
             }
         }
@@ -94,12 +135,23 @@ namespace Umbraco.Migrator.Content
             {
                 switch (property.Type)
                 {
+
                     case JsonValueKind.True:
                     case JsonValueKind.False:
                         var value = bool.Parse(property.Value.ToString());
                         contentToCreate.Properties[property.Alias].SetValue(value);
                         break;
                     case JsonValueKind.Null:
+                        break;
+                    case JsonValueKind.String:
+                        if (DateTime.TryParse(property.Value.ToString(), out var date))
+                        {
+                            contentToCreate.Properties[property.Alias].SetValue(date);
+                        }
+                        else
+                        {
+                            contentToCreate.Properties[property.Alias].SetValue(property.Value);
+                        }
                         break;
                     default:
                         contentToCreate.Properties[property.Alias].SetValue(property.Value);
