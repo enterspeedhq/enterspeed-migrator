@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco10.TestSite", "Migra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco.Migrator.Package", "Migrators\Umbraco\Umbraco.Migrator.Package\Umbraco.Migrator.Package.csproj", "{AD1FB0D1-D57A-4504-9FEC-3D2D2337C830}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco11.TestSite", "Migrators\Umbraco\TestSites\Umbraco11.TestSite\Umbraco11.TestSite.csproj", "{D0415255-DC37-432C-B7EB-856E7A76DEE9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{AD1FB0D1-D57A-4504-9FEC-3D2D2337C830}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD1FB0D1-D57A-4504-9FEC-3D2D2337C830}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD1FB0D1-D57A-4504-9FEC-3D2D2337C830}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0415255-DC37-432C-B7EB-856E7A76DEE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0415255-DC37-432C-B7EB-856E7A76DEE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0415255-DC37-432C-B7EB-856E7A76DEE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0415255-DC37-432C-B7EB-856E7A76DEE9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,6 +58,7 @@ Global
 		{FDE1485E-83E4-4F6D-AF28-1FCAE4127205} = {62FA3D31-F42F-48AC-B786-2741232C5E87}
 		{4FB01BA0-400E-4247-BEBA-04D0D8AC91E8} = {A35C69F8-C5B4-4689-A10F-892041DAF8CB}
 		{AD1FB0D1-D57A-4504-9FEC-3D2D2337C830} = {8D064D52-AD5D-47C0-8359-260453DF1454}
+		{D0415255-DC37-432C-B7EB-856E7A76DEE9} = {A35C69F8-C5B4-4689-A10F-892041DAF8CB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {762D8133-E3CA-4676-A26B-75A8CF4C330E}

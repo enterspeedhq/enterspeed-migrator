@@ -1,19 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="System.Text.Json" Version="6.0.4" />
-      <PackageReference Include="Umbraco.Cms.Core" Version="10.0.1" />
-      <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0-rc4" />
-    </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="10.4.0" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="10.4.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.4.0" />
 
-    <ItemGroup>
-      <ProjectReference Include="..\Umbraco.Migrator\Umbraco.Migrator.csproj" />
-    </ItemGroup>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="11.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="11.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Umbraco.Migrator\Umbraco.Migrator.csproj" />
+	</ItemGroup>
 
 </Project>
