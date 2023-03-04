@@ -66,3 +66,6 @@ msbuild.wrn
 # Visual Studio 2015
 .vs/
 **/node_modules
+src/Migrators/Umbraco/TestSites/Umbraco11.TestSite/data/
+src/Migrators/Umbraco/TestSites/Umbraco10.TestSite/appsettings.json
+src/Migrators/Umbraco/TestSites/Umbraco11.TestSite/appsettings.json
