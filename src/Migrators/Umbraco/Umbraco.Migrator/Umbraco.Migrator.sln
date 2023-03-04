@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1703.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco.Migrator", "Umbraco.Migrator.csproj", "{E2F6D574-2321-49D8-AC47-DB1427CF068C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E2F6D574-2321-49D8-AC47-DB1427CF068C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2F6D574-2321-49D8-AC47-DB1427CF068C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2F6D574-2321-49D8-AC47-DB1427CF068C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2F6D574-2321-49D8-AC47-DB1427CF068C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F9CAA3F-2FBD-435B-9698-EC07BB9137D0}
+	EndGlobalSection
+EndGlobal

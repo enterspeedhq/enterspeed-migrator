@@ -107,7 +107,7 @@ You define an alias in the component builder and when the converter hits an alia
 
 
 ## Getting started moving data into Umbraco 10
-You need to pull down the source code and reference your Umbraco 10 project to the `Umbraco10.Migrator.Package` project. This should give you the required references to get started. Still pretty early, so no official package has been created for this project. 
+You need to pull down the source code and reference your Umbraco 10 project to the `Umbraco.Migrator.Package` project. This should give you the required references to get started. Still pretty early, so no official package has been created for this project. 
 
 #### App settings
 For the migrator to work, we need to specify a few settings in the target CMS (in this case Umbraco 10). 
