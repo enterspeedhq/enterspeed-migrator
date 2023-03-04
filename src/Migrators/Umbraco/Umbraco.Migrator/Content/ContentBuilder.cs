@@ -11,11 +11,15 @@ using Newtonsoft.Json;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Persistence.Querying;
+using Umbraco.Cms.Core.PublishedCache;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Web;
 using Umbraco.Cms.Infrastructure.Persistence;
 using Umbraco.Migrator.DataTypes;
 using Umbraco.Migrator.DocumentTypes.Components.Builders;
 using Umbraco.Migrator.Settings;
+using static Umbraco.Cms.Core.Collections.TopoGraph;
+using static Umbraco.Cms.Core.Constants.Conventions;
 
 namespace Umbraco.Migrator.Content
 {
@@ -27,13 +31,16 @@ namespace Umbraco.Migrator.Content
         private readonly ILogger<ContentBuilder> _logger;
         private readonly IEnumerable<IComponentBuilder> _componentBuilders;
         private readonly ISqlContext _sqlContext;
+        private readonly IUmbracoContextFactory _context;
+
 
         public ContentBuilder(IContentTypeService contentTypeService,
             IContentService contentService,
             IOptions<UmbracoMigrationConfiguration> umbracoMigrationConfiguration,
             ILogger<ContentBuilder> logger,
             IEnumerable<IComponentBuilder> componentBuilders,
-            ISqlContext sqlContext)
+            ISqlContext sqlContext,
+            IUmbracoContextFactory context)
         {
             _contentService = contentService;
             _logger = logger;
@@ -41,6 +48,7 @@ namespace Umbraco.Migrator.Content
             _umbracoMigrationConfiguration = umbracoMigrationConfiguration?.Value;
             _contentTypes = contentTypeService.GetAll();
             _sqlContext = sqlContext;
+            _context = context;
         }
 
         // We used this when we insert data beneath a specific node. 
@@ -48,6 +56,7 @@ namespace Umbraco.Migrator.Content
         {
             foreach (var pageEntityType in pageEntityTypes)
             {
+                // TODO: This is client specific 
 
                 if (pageEntityType.MetaSchema.SourceEntityAlias.Equals("Nyhed"))
                 {
@@ -59,22 +68,26 @@ namespace Umbraco.Migrator.Content
                 }
 
                 var contentType = _contentTypes.FirstOrDefault(c => string.Equals(c.Alias, pageEntityType.MetaSchema.SourceEntityAlias, StringComparison.InvariantCultureIgnoreCase));
-
-                IQuery<IContent> filter = _sqlContext.Query<IContent>().Where(x => x.Name.Equals(pageEntityType.MetaSchema.ContentName));
-                var existingItem = _contentService.GetPagedDescendants(sectionNode.Id, 1, 1, out long count, filter).FirstOrDefault();
-
-                var contentToCreate = existingItem != null ? existingItem : _contentService.Create(pageEntityType.MetaSchema.ContentName, sectionNode.Id, contentType);
-                var components = new List<EnterspeedPropertyType>();
-
-                AddValueToProperties(pageEntityType.Properties, contentToCreate, components);
-
-                //PopulateBlockList(components, contentToCreate);
-                _contentService.Save(contentToCreate);
-
-
-                if (pageEntityType.Children?.Any() == true)
+                using (var cref = _context.EnsureUmbracoContext())
                 {
-                    BuildContentPages(pageEntityType.Children, contentToCreate);
+                    var content = cref.UmbracoContext.Content.GetById(sectionNode.Id);
+
+                    // TODO: Refactor this. We shouldnt be dependended on IPublishedContent to find children. Somehow contentservice does not return the item. 
+                    var existingItem = content.Children.FirstOrDefault(n => n.Name == pageEntityType.MetaSchema.ContentName);
+
+                    var contentToCreate = existingItem != null ? _contentService.GetById(existingItem.Id) : _contentService.Create(pageEntityType.MetaSchema.ContentName, sectionNode.Id, contentType);
+                    var components = new List<EnterspeedPropertyType>();
+
+                    AddValueToProperties(pageEntityType.Properties, contentToCreate, components);
+
+                    //PopulateBlockList(components, contentToCreate);
+                    _contentService.Save(contentToCreate);
+
+
+                    if (pageEntityType.Children?.Any() == true)
+                    {
+                        BuildContentPages(pageEntityType.Children, contentToCreate);
+                    }
                 }
             }
         }
@@ -135,7 +148,6 @@ namespace Umbraco.Migrator.Content
             {
                 switch (property.Type)
                 {
-
                     case JsonValueKind.True:
                     case JsonValueKind.False:
                         var value = bool.Parse(property.Value.ToString());
@@ -144,13 +156,39 @@ namespace Umbraco.Migrator.Content
                     case JsonValueKind.Null:
                         break;
                     case JsonValueKind.String:
-                        if (DateTime.TryParse(property.Value.ToString(), out var date))
+                        // Refactor this! 
+                        if (property.Name == "shortcut" && !string.IsNullOrEmpty(property.Value.ToString()))
+                        {
+                            var link = new List<Link>
+                            {
+                                // Link
+                                new Link
+                                {
+                                    Target = "_self",
+                                    Name = property.Value.ToString(),
+                                    Url = property.Value.ToString(),
+                                    Type = LinkType.Content
+                                }
+                            };
+                            var links = JsonConvert.SerializeObject(link);
+                            contentToCreate.Properties[property.Alias].SetValue(links);
+                        }
+                        else if (DateTime.TryParse(property.Value.ToString(), out var date))
                         {
                             contentToCreate.Properties[property.Alias].SetValue(date);
                         }
                         else
                         {
                             contentToCreate.Properties[property.Alias].SetValue(property.Value);
+                        }
+                        break;
+                    case JsonValueKind.Number:
+                        if (int.TryParse(property.Value.ToString(), out int intValue))
+                        {
+                            if (intValue > 0)
+                            {
+                                contentToCreate.Properties[property.Alias].SetValue(intValue);
+                            }
                         }
                         break;
                     default:
