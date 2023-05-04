@@ -147,19 +147,23 @@ namespace Enterspeed.Migrator.Enterspeed
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    var objectOfElement = element.EnumerateObject();
-                    var newArrayItem = new EnterspeedPropertyType()
+                    // TODO Do support other types than object, like array of string or numbers
+                    if (element.ValueKind == JsonValueKind.Object)
                     {
-                        Name = "arrayObject",
-                        Alias = "arrayObject",
-                        Type = JsonValueKind.Object,
-                        Value = objectOfElement
-                    };
+                        var objectOfElement = element.EnumerateObject();
+                        var newArrayItem = new EnterspeedPropertyType()
+                        {
+                            Name = "arrayObject",
+                            Alias = "arrayObject",
+                            Type = JsonValueKind.Object,
+                            Value = objectOfElement
+                        };
 
-                    // Add arrayitem directly to array property
-                    currentProperty.ChildProperties.Add(newArrayItem);
+                        // Add arrayitem directly to array property
+                        currentProperty.ChildProperties.Add(newArrayItem);
 
-                    MapData(pageData, element, newArrayItem);
+                        MapData(pageData, element, newArrayItem);
+                    }
                 }
 
                 // Ensure that we do not add nested properties to the root level of the properties for the page.
