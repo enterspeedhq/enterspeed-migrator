@@ -105,18 +105,23 @@ namespace Enterspeed.Migrator.Enterspeed
             if (element.ValueKind != JsonValueKind.Null)
             {
                 var elementObject = element.EnumerateObject();
+
+                // We match up against the appsettngs configuration to check if we hit a component. If match is true, a property is assigned to the object. This property is called "isComponent".
+                // This will be used to conditionally resolve componented builders at a later stage. Note we are ONLY looking for properties directly on the object. No traversing is happening 
+                // here, this is why the property called Alias on the component should be present directly as a property on the object.
+                // Example of a json element that is returned from Enterspeed (the element parameter in this method)
+                // JsonElement
+                // componentObject {
+                // Alias = "rteCompont", // This is the value assinged in the below logic
+                // RteContent = "Lots of content",
+                // Image = Complex json object
+                //}
                 var alias = elementObject.GetEnumerator().FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias);
-              
-                var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p == alias.Value.ToString());
+                var isComponent = IsComponent(alias);
 
                 if (parentEnterspeedProperty != null && isComponent)
                 {
-                    parentEnterspeedProperty.ChildProperties.Add(new EnterspeedPropertyType
-                    {
-                        Name = EnterspeedPropertyConstants.IsComponentName,
-                        Alias = EnterspeedPropertyConstants.IsComponentAlias,
-                        Value = true
-                    });
+                    MarkObjectAsComponent(parentEnterspeedProperty);
                 }
 
                 foreach (var jsonProperty in element.EnumerateObject())
@@ -124,6 +129,21 @@ namespace Enterspeed.Migrator.Enterspeed
                     MapData(pageData, jsonProperty, parentEnterspeedProperty);
                 }
             }
+        }
+
+        private static void MarkObjectAsComponent(EnterspeedPropertyType parentEnterspeedProperty)
+        {
+            parentEnterspeedProperty.ChildProperties.Add(new EnterspeedPropertyType
+            {
+                Name = EnterspeedPropertyConstants.IsComponentName,
+                Alias = EnterspeedPropertyConstants.IsComponentAlias,
+                Value = true
+            });
+        }
+
+        private bool IsComponent(JsonProperty alias)
+        {
+            return _configuration.ComponentPropertyTypeKeys.Any(p => p == alias.Value.ToString());
         }
 
         private void MapData(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
@@ -155,7 +175,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    if(element.ValueKind == JsonValueKind.Object)
+                    if (element.ValueKind == JsonValueKind.Object)
                     {
                         var objectOfElement = element.EnumerateObject();
                         var newArrayItem = new EnterspeedPropertyType()
