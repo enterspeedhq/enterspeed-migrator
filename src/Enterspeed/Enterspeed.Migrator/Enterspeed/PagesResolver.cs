@@ -93,12 +93,20 @@ namespace Enterspeed.Migrator.Enterspeed
             return pageEntityType;
         }
 
+        /// <summary>
+        /// An element can be multiple things. 
+        /// It is essentially a "chunk" of a json response.
+        /// </summary>
+        /// <param name="pageData"></param>
+        /// <param name="element">A "chunk" of a json response. It can be a full page response, or individual parts of the response, after traversing has happened</param>
+        /// <param name="parentEnterspeedProperty"></param>
         private void MapData(PageData pageData, JsonElement element, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
             if (element.ValueKind != JsonValueKind.Null)
             {
                 var elementObject = element.EnumerateObject();
                 var alias = elementObject.GetEnumerator().FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias);
+              
                 var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p == alias.Value.ToString());
 
                 if (parentEnterspeedProperty != null && isComponent)
