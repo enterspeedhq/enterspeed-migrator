@@ -112,7 +112,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 // Example of a json element that is returned from Enterspeed (the element parameter in this method)
                 // JsonElement
                 // componentObject {
-                // Alias = "rteComponent", // This is the value assinged in the below logic
+                // Alias = "rteComponent", // This is the value assigned in the below logic
                 // RteContent = "Lots of content",
                 // Image = Complex json object
                 //}
@@ -216,7 +216,7 @@ namespace Enterspeed.Migrator.Enterspeed
                                 Value = element.GetInt32()
                             };
 
-                            // Add arrayitem directly to array property
+                            // Add arrayItem directly to array property
                             currentProperty.ChildProperties.Add(numberItem);
                             break;
                         case JsonValueKind.True:
@@ -244,10 +244,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 var elmenent = jsonProperty.Value;
                 var currentProperty = new EnterspeedPropertyType(jsonProperty);
 
-                if (parentEnterspeedProperty != null)
-                {
-                    parentEnterspeedProperty.ChildProperties.Add(currentProperty);
-                }
+                parentEnterspeedProperty?.ChildProperties.Add(currentProperty);
 
                 MapData(pageData, elmenent, currentProperty);
 
