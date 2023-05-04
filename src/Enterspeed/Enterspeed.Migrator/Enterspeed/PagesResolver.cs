@@ -93,29 +93,57 @@ namespace Enterspeed.Migrator.Enterspeed
             return pageEntityType;
         }
 
-        private void MapData(PageData pageData, JsonElement route, EnterspeedPropertyType parentEnterspeedProperty = null)
+        /// <summary>
+        /// An element can be multiple things. 
+        /// It is essentially a "chunk" of a json response.
+        /// </summary>
+        /// <param name="pageData"></param>
+        /// <param name="element">A "chunk" of a json response. It can be a full page response, or individual parts of the response, after traversing has happened</param>
+        /// <param name="parentEnterspeedProperty"></param>
+        private void MapData(PageData pageData, JsonElement element, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
-            if (route.ValueKind != JsonValueKind.Null)
+            if (element.ValueKind != JsonValueKind.Null)
             {
-                var routeObject = route.EnumerateObject();
-                var alias = routeObject.GetEnumerator().FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias);
-                var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p == alias.Value.ToString());
+                var elementObject = element.EnumerateObject();
+
+                // We match up against the appsettings configuration to check if we hit a component. If match is true, a property is assigned to the object. This property is called "isComponent".
+                // This will be used to conditionally resolve component builders at a later stage. Note we are ONLY looking for properties directly on the object. No traversing is happening 
+                // here, this is why the property called Alias on the component should be present directly as a property on the object.
+                // Example of a json element that is returned from Enterspeed (the element parameter in this method)
+                // JsonElement
+                // componentObject {
+                // Alias = "rteComponent", // This is the value assigned in the below logic
+                // RteContent = "Lots of content",
+                // Image = Complex json object
+                //}
+                var alias = elementObject.GetEnumerator().FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias);
+                var isComponent = IsComponent(alias);
 
                 if (parentEnterspeedProperty != null && isComponent)
                 {
-                    parentEnterspeedProperty.ChildProperties.Add(new EnterspeedPropertyType
-                    {
-                        Name = EnterspeedPropertyConstants.IsComponentName,
-                        Alias = EnterspeedPropertyConstants.IsComponentAlias,
-                        Value = true
-                    });
+                    MarkObjectAsComponent(parentEnterspeedProperty);
                 }
 
-                foreach (var jsonProperty in route.EnumerateObject())
+                foreach (var jsonProperty in element.EnumerateObject())
                 {
                     MapData(pageData, jsonProperty, parentEnterspeedProperty);
                 }
             }
+        }
+
+        private static void MarkObjectAsComponent(EnterspeedPropertyType parentEnterspeedProperty)
+        {
+            parentEnterspeedProperty.ChildProperties.Add(new EnterspeedPropertyType
+            {
+                Name = EnterspeedPropertyConstants.IsComponentName,
+                Alias = EnterspeedPropertyConstants.IsComponentAlias,
+                Value = true
+            });
+        }
+
+        private bool IsComponent(JsonProperty alias)
+        {
+            return _configuration.ComponentPropertyTypeKeys.Any(p => p == alias.Value.ToString());
         }
 
         private void MapData(PageData pageData, JsonProperty jsonProperty, EnterspeedPropertyType parentEnterspeedProperty = null)
@@ -147,22 +175,56 @@ namespace Enterspeed.Migrator.Enterspeed
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    // TODO Do support other types than object, like array of string or numbers
-                    if (element.ValueKind == JsonValueKind.Object)
+                    switch (element.ValueKind)
                     {
-                        var objectOfElement = element.EnumerateObject();
-                        var newArrayItem = new EnterspeedPropertyType()
-                        {
-                            Name = "arrayObject",
-                            Alias = "arrayObject",
-                            Type = JsonValueKind.Object,
-                            Value = objectOfElement
-                        };
+                        case JsonValueKind.Undefined:
+                            break;
+                        case JsonValueKind.Object:
+                            var objectOfElement = element.EnumerateObject();
+                            var newArrayItem = new EnterspeedPropertyType()
+                            {
+                                Name = "arrayObject",
+                                Alias = "arrayObject",
+                                Type = JsonValueKind.Object,
+                                Value = objectOfElement
+                            };
 
-                        // Add arrayitem directly to array property
-                        currentProperty.ChildProperties.Add(newArrayItem);
+                            // Add arrayitem directly to array property
+                            currentProperty.ChildProperties.Add(newArrayItem);
+                            MapData(pageData, element, newArrayItem);
+                            break;
+                        case JsonValueKind.Array:
+                            break;
+                        case JsonValueKind.String:
+                            var stringItem = new EnterspeedPropertyType()
+                            {
+                                Name = "string",
+                                Alias = "string",
+                                Type = JsonValueKind.String,
+                                Value = element.GetString()
+                            };
 
-                        MapData(pageData, element, newArrayItem);
+                            // Add arrayitem directly to array property
+                            currentProperty.ChildProperties.Add(stringItem);
+                            break;
+                        case JsonValueKind.Number:
+                            var numberItem = new EnterspeedPropertyType()
+                            {
+                                Name = "string",
+                                Alias = "string",
+                                Type = JsonValueKind.String,
+                                Value = element.GetInt32()
+                            };
+
+                            // Add arrayItem directly to array property
+                            currentProperty.ChildProperties.Add(numberItem);
+                            break;
+                        case JsonValueKind.True:
+                            break;
+                        case JsonValueKind.False:
+                            break;
+                        case JsonValueKind.Null:
+                            break;
                     }
                 }
 
@@ -182,10 +244,7 @@ namespace Enterspeed.Migrator.Enterspeed
                 var elmenent = jsonProperty.Value;
                 var currentProperty = new EnterspeedPropertyType(jsonProperty);
 
-                if (parentEnterspeedProperty != null)
-                {
-                    parentEnterspeedProperty.ChildProperties.Add(currentProperty);
-                }
+                parentEnterspeedProperty?.ChildProperties.Add(currentProperty);
 
                 MapData(pageData, elmenent, currentProperty);
 
