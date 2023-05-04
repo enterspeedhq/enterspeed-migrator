@@ -1,5 +1,0 @@
-﻿{
-  "library": "../Umbraco10.Migrator.Package",
-  "pluginFolder": "Umbraco10.Migrator.Package",
-  "site": "../TestSites/Umbraco10.TestSite"
-}

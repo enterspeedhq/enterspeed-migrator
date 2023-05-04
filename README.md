@@ -29,7 +29,7 @@ The migrator is software that should be considered as the layer between the outp
 
 ## Digging a bit deeper
 The migrator solution consists of two layers. The __`Enterspeed.Migrator`__ layer is the generic layer that calls the Enterspeed API and turns the response into usable structured data in .NET objects. 
-This response is then used by the CMS-specific converter. In this example, we are showing the __`Umbraco10.Migrator`__ project. This layer interprets the objects we receive from the generic layer and converts them into Umbraco-specific types and saves them in the target CMS system. 
+This response is then used by the CMS-specific converter. In this example, we are showing the __`Umbraco.Migrator`__ project. This layer interprets the objects we receive from the generic layer and converts them into Umbraco-specific types and saves them in the target CMS system. 
 
 ![migrator-solution](/assets/images/migrator-solution_cmeg05yrn.png)
 
@@ -44,7 +44,7 @@ It contains 2 public methods.
 - `GetPageResponsesAsync`
 
 `GetNavigationAsync` calls a handle that you have set up. This handle returns a list of routable urls in a tree structure. 
-This response has to conform to a specific format. You can get the example schema setup for the handle __[here](//assets/schemas/)__. 
+This response has to conform to a specific format. You can get the example schema setup for the handle __[here](/assets/schemas/)__. 
 
 `GetPageResponsesAsync` Returns a list of responses. It calls all the URLs from the navigation data, and converts them into PageResponse objects, which wraps the delivery api response type, and also allows for page responses to contain children. Thereby keeping a 1-to-1 relation to the page structure that we are getting from Enterspeed.
 
@@ -97,17 +97,17 @@ So now we have a clean set of data, with all its unique schemas that we can work
 
 ### CMS-specific data converter
 We have built an Umbraco 10 specific converter, that converts the output of the generic migrator to Umbraco data. 
-The  __[DocumentTypeBuilder](/src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/DocumentTypeBuilder.cs)__ receives the schemas from the generic migrator and interprets the different schemas and saves them as document types, elements, and compositions in Umbraco. Properties are all interpreted and added to before mentioned types of data in Umbraco. 
+The  __[DocumentTypeBuilder](/src/Migrators/Umbraco/Umbraco.Migrator/DocumentTypes/DocumentTypeBuilder.cs)__ receives the schemas from the generic migrator and interprets the different schemas and saves them as document types, elements, and compositions in Umbraco. Properties are all interpreted and added to before mentioned types of data in Umbraco. 
 
 The simple types are managed through a switch statement, that converts these to the equivalent in Umbraco. 
 For the complex types, we have set up a component builder handler, that requires you to create your builders. This is for scenarios where you want to convert for example grid components to element types used in a blocklist or nested content. 
-There are quite a few samples __[here](/src/Migrators/Umbraco10/Umbraco10.Migrator/DocumentTypes/Components/Builders/)__.
+There are quite a few samples __[here](/src/Migrators/Umbraco/Umbraco.Migrator/DocumentTypes/Components/Builders/)__.
 
 You define an alias in the component builder and when the converter hits an alias with that specific value, your custom component builder will get executed.
 
 
-## Getting started moving data into Umbraco 10
-You need to pull down the source code and reference your Umbraco 10 project to the `Umbraco10.Migrator.Package` project. This should give you the required references to get started. Still pretty early, so no official package has been created for this project. 
+## Getting started moving data into Umbraco 10+
+You need to pull down the source code and reference your Umbraco project to the `Umbraco.Migrator.Package` project. This should give you the required references to get started. Still pretty early, so no official package has been created for this project. 
 
 #### App settings
 For the migrator to work, we need to specify a few settings in the target CMS (in this case Umbraco 10). 

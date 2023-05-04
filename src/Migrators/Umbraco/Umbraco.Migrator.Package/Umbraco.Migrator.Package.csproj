@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>Enterspeed.Migrator.UmbracoCms</PackageId>
+        <Authors>Enterspeed</Authors>
+        <Product>Enterspeed.Migrator.UmbracoCms</Product>
+        <Description>Enterspeed migration for Umbraco</Description>
+        <PackageProjectUrl>https://github.com/enterspeedhq/enterspeed-migrator</PackageProjectUrl>
+        <PackageIcon>icon.png</PackageIcon>
+        <RepositoryUrl>https://github.com/enterspeedhq/enterspeed-migrator</RepositoryUrl>
+        <PackageTags>Enterspeed, Migration, Umbraco</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Text.Json" Version="7.0.0" />
+    </ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="10.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="11.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Umbraco.Migrator\Umbraco.Migrator.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="icon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+</Project>

@@ -9,15 +9,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Enterspeed", "Enterspeed", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Enterspeed.Migrator", "Enterspeed\Enterspeed.Migrator\Enterspeed.Migrator.csproj", "{6CCFA69E-5504-4AEA-AC18-377189D013B9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Umbraco10", "Umbraco10", "{62FA3D31-F42F-48AC-B786-2741232C5E87}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Umbraco", "Umbraco", "{62FA3D31-F42F-48AC-B786-2741232C5E87}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestSites", "TestSites", "{A35C69F8-C5B4-4689-A10F-892041DAF8CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco10.TestSite", "Migrators\Umbraco10\TestSites\Umbraco10.TestSite\Umbraco10.TestSite.csproj", "{6846697E-7F0C-4F6A-A731-751B129C305C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco10.TestSite", "Migrators\Umbraco\TestSites\Umbraco10.TestSite\Umbraco10.TestSite.csproj", "{6846697E-7F0C-4F6A-A731-751B129C305C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco10.Migrator", "Migrators\Umbraco10\Umbraco10.Migrator\Umbraco10.Migrator.csproj", "{FDE1485E-83E4-4F6D-AF28-1FCAE4127205}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco.Migrator", "Migrators\Umbraco\Umbraco.Migrator\Umbraco.Migrator.csproj", "{FDE1485E-83E4-4F6D-AF28-1FCAE4127205}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco10.Migrator.Package", "Migrators\Umbraco10\Umbraco10.Migrator.Package\Umbraco10.Migrator.Package.csproj", "{E402B117-7965-4AC7-BF9C-E62E08289673}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco.Migrator.Package", "Migrators\Umbraco\Umbraco.Migrator.Package\Umbraco.Migrator.Package.csproj", "{E402B117-7965-4AC7-BF9C-E62E08289673}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
