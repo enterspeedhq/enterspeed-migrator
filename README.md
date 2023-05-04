@@ -44,7 +44,7 @@ It contains 2 public methods.
 - `GetPageResponsesAsync`
 
 `GetNavigationAsync` calls a handle that you have set up. This handle returns a list of routable urls in a tree structure. 
-This response has to conform to a specific format. You can get the example schema setup for the handle __[here](//assets/schemas/)__. 
+This response has to conform to a specific format. You can get the example schema setup for the handle __[here](/assets/schemas/)__. 
 
 `GetPageResponsesAsync` Returns a list of responses. It calls all the URLs from the navigation data, and converts them into PageResponse objects, which wraps the delivery api response type, and also allows for page responses to contain children. Thereby keeping a 1-to-1 relation to the page structure that we are getting from Enterspeed.
 

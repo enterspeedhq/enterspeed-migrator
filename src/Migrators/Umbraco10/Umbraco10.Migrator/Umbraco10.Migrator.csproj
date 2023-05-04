@@ -2,15 +2,23 @@
 
     <PropertyGroup>
         <ImplicitUsings>disable</ImplicitUsings>
-        <TargetFrameworks>net6.0</TargetFrameworks>
+	    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <LangVersion>9.0</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Text.Json" Version="6.0.4" />
-        <PackageReference Include="Umbraco.Cms.Core" Version="10.0.1" />
-        <PackageReference Include="Umbraco.Cms.Infrastructure" Version="10.0.0-rc4" />
+        <PackageReference Include="System.Text.Json" Version="7.0.0" />
     </ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="10.0.0" />
+		<PackageReference Include="Umbraco.Cms.Infrastructure" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="11.0.0" />
+		<PackageReference Include="Umbraco.Cms.Infrastructure" Version="11.0.0" />
+	</ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Enterspeed\Enterspeed.Migrator\Enterspeed.Migrator.csproj" />
