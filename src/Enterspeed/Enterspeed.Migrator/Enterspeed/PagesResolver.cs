@@ -106,13 +106,13 @@ namespace Enterspeed.Migrator.Enterspeed
             {
                 var elementObject = element.EnumerateObject();
 
-                // We match up against the appsettngs configuration to check if we hit a component. If match is true, a property is assigned to the object. This property is called "isComponent".
-                // This will be used to conditionally resolve componented builders at a later stage. Note we are ONLY looking for properties directly on the object. No traversing is happening 
+                // We match up against the appsettings configuration to check if we hit a component. If match is true, a property is assigned to the object. This property is called "isComponent".
+                // This will be used to conditionally resolve component builders at a later stage. Note we are ONLY looking for properties directly on the object. No traversing is happening 
                 // here, this is why the property called Alias on the component should be present directly as a property on the object.
                 // Example of a json element that is returned from Enterspeed (the element parameter in this method)
                 // JsonElement
                 // componentObject {
-                // Alias = "rteCompont", // This is the value assinged in the below logic
+                // Alias = "rteComponent", // This is the value assinged in the below logic
                 // RteContent = "Lots of content",
                 // Image = Complex json object
                 //}
