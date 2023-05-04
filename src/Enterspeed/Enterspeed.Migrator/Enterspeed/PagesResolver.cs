@@ -93,12 +93,12 @@ namespace Enterspeed.Migrator.Enterspeed
             return pageEntityType;
         }
 
-        private void MapData(PageData pageData, JsonElement route, EnterspeedPropertyType parentEnterspeedProperty = null)
+        private void MapData(PageData pageData, JsonElement element, EnterspeedPropertyType parentEnterspeedProperty = null)
         {
-            if (route.ValueKind != JsonValueKind.Null)
+            if (element.ValueKind != JsonValueKind.Null)
             {
-                var routeObject = route.EnumerateObject();
-                var alias = routeObject.GetEnumerator().FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias);
+                var elementObject = element.EnumerateObject();
+                var alias = elementObject.GetEnumerator().FirstOrDefault(p => p.Name == EnterspeedPropertyConstants.AliasOf.Alias);
                 var isComponent = _configuration.ComponentPropertyTypeKeys.Any(p => p == alias.Value.ToString());
 
                 if (parentEnterspeedProperty != null && isComponent)
@@ -111,7 +111,7 @@ namespace Enterspeed.Migrator.Enterspeed
                     });
                 }
 
-                foreach (var jsonProperty in route.EnumerateObject())
+                foreach (var jsonProperty in element.EnumerateObject())
                 {
                     MapData(pageData, jsonProperty, parentEnterspeedProperty);
                 }
@@ -147,19 +147,22 @@ namespace Enterspeed.Migrator.Enterspeed
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    var objectOfElement = element.EnumerateObject();
-                    var newArrayItem = new EnterspeedPropertyType()
+                    if(element.ValueKind == JsonValueKind.Object)
                     {
-                        Name = "arrayObject",
-                        Alias = "arrayObject",
-                        Type = JsonValueKind.Object,
-                        Value = objectOfElement
+                        var objectOfElement = element.EnumerateObject();
+                        var newArrayItem = new EnterspeedPropertyType()
+                        {
+                            Name = "arrayObject",
+                            Alias = "arrayObject",
+                            Type = JsonValueKind.Object,
+                            Value = objectOfElement
+                        };
+
+                        // Add arrayitem directly to array property
+                        currentProperty.ChildProperties.Add(newArrayItem);
+
+                        MapData(pageData, element, newArrayItem);
                     };
-
-                    // Add arrayitem directly to array property
-                    currentProperty.ChildProperties.Add(newArrayItem);
-
-                    MapData(pageData, element, newArrayItem);
                 }
 
                 // Ensure that we do not add nested properties to the root level of the properties for the page.
