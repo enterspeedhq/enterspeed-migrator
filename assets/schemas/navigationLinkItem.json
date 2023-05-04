@@ -1,0 +1,35 @@
+{
+	"triggers": {
+		"demoCMS": [
+			"home",
+			"contentPage",
+			"products",
+			"product",
+			"blog",
+			"blogpost",
+			"people",
+			"person"
+		]
+	},
+	"environments": [],
+	"properties": {
+		"name": {
+			"type": "string",
+			"value": {
+				"$exp": "{properties.metaData.name}"
+			}
+		},
+		"url": {
+			"type": "string",
+			"value": {
+				"$exp": "{url}"
+			}
+		},
+		"lastModified": {
+			"type": "string",
+			"value": {
+				"$exp": "{properties.metaData.updateDate}"
+			}
+		}
+	}
+}

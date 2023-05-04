@@ -13,24 +13,6 @@ namespace Enterspeed.Migrator.Models
 
         [JsonPropertyName("contentName")]
         public string ContentName { get; set; }
-
-        [JsonPropertyName("culture")]
-        public string Culture { get; set; }
-
-        [JsonPropertyName("createDate")]
-        public string CreateDate { get; set; }
-
-        [JsonPropertyName("updateDate")]
-        public string UpdateDate { get; set; }
-
-        [JsonPropertyName("parentId")]
-        public string ParentId { get; set; }
-
-        [JsonPropertyName("url")]
-        public string Url { get; set; }
-
-        [JsonPropertyName("contentPage")]
-        public List<ContentPath> ContentPath { get; set; }
     }
 
     public class ContentPath

@@ -1,0 +1,13 @@
+{
+	// Example partial schema used for page meta data
+	"properties": {
+		"sourceEntityAlias": "{item.type}",
+		"sourceEntityName": "{item.type}",
+		"contentName": {
+			"type": "string",
+			"value": {
+				"$exp": "{item.p.metaData.name}"
+			}
+		}
+	}
+}

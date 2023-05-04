@@ -9,13 +9,5 @@ namespace Enterspeed.Migrator.Enterspeed.Contracts
     public interface IPagesResolver
     {
         List<PageData> ResolveFromRoot(PageResponse pageResponse);
-
-        /// <summary>
-        /// Gets meta data objects for pages
-        /// </summary>
-        /// <param name="pageResponse"></param>
-        /// <returns></returns>
-        /// <exception cref="NullReferenceException"></exception>
-        MetaSchema GetMetaData(DeliveryResponse pageResponse);
     }
 }
