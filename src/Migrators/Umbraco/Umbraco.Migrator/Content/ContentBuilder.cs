@@ -64,7 +64,7 @@ namespace Umbraco.Migrator.Content
             }
         }
 
-        public void CreateProperties(List<EnterspeedPropertyType> properties, IContent contentToCreate, List<EnterspeedPropertyType> components, bool isTraversing = false)
+        public void CreateProperties(List<EnterspeedPropertyType> properties, IContent contentToCreate, List<EnterspeedPropertyType> components)
         {
             foreach (var property in properties)
             {
@@ -77,7 +77,7 @@ namespace Umbraco.Migrator.Content
 
                 if (property.ChildProperties.Any())
                 {
-                    CreateProperties(property.ChildProperties, contentToCreate, components, true);
+                    CreateProperties(property.ChildProperties, contentToCreate, components);
                 }
                 else
                 {
