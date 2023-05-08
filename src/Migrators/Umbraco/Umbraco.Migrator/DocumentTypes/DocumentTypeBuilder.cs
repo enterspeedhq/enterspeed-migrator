@@ -33,8 +33,9 @@ namespace Umbraco.Migrator.DocumentTypes
         private readonly UmbracoMigrationConfiguration _umbracoMigrationConfiguration;
         private readonly IEnumerable<string> _contentTypeAliasList;
         private const string PagesFolderName = "Migrated Page Types";
-        private const string CompositionsFolderName = "Compositions";
+        private const string CompositionsFolderName = "Migrated Compositions";
         private const string ComponentsFolderName = "Migrated Components";
+        private const string DataTypeFolderName = "Migrated Data Types";
         private const string BlockListName = "BlockList.Custom";
         private readonly EnterspeedConfiguration _enterspeedConfiguration;
 
@@ -65,9 +66,10 @@ namespace Umbraco.Migrator.DocumentTypes
         {
             try
             {
-                var pagesFolder = GetOrCreateFolder(PagesFolderName);
-                var componentsFolder = GetOrCreateFolder(ComponentsFolderName);
-                var compositionsFolder = GetOrCreateFolder(CompositionsFolderName);
+                var pagesFolder = GetOrCreateDocumentTypeFolder(PagesFolderName);
+                var componentsFolder = GetOrCreateDocumentTypeFolder(ComponentsFolderName);
+                var compositionsFolder = GetOrCreateDocumentTypeFolder(CompositionsFolderName);
+                var dataTypeFolder = GetOrCreateDataTypeFolder(DataTypeFolderName);
 
                 // Build components
                 foreach (var componentAlias in _enterspeedConfiguration.ComponentPropertyTypeKeys)
@@ -77,7 +79,7 @@ namespace Umbraco.Migrator.DocumentTypes
 
                 // TODO: Assumption. This needs to be handled in a different way.
                 // Create block list data type, and add config with all element types
-                CreateBlockListDataType();
+                CreateBlockListDataType(dataTypeFolder);
 
                 // Create pages
                 foreach (var page in schemas.Pages)
@@ -92,10 +94,10 @@ namespace Umbraco.Migrator.DocumentTypes
             }
         }
 
-        private void CreateBlockListDataType()
+        private void CreateBlockListDataType(IEntity dataTypeFolder)
         {
             // Create data type
-            var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer)
+            var dataType = new DataType(_blockListPropertyEditor, _configurationEditorJsonSerializer, dataTypeFolder.Id)
             {
                 Name = BlockListName
             };
@@ -149,7 +151,8 @@ namespace Umbraco.Migrator.DocumentTypes
                 Alias = page.MetaSchema.SourceEntityAlias.ToFirstLowerInvariant(),
                 Name = page.MetaSchema.SourceEntityName.ToUmbracoName(),
                 AllowedAsRoot = string.Equals(page.MetaSchema.SourceEntityAlias, _umbracoMigrationConfiguration.RootDocType,
-                    StringComparison.InvariantCultureIgnoreCase)
+                    StringComparison.InvariantCultureIgnoreCase),
+                Icon = "icon-item-arrangement"
             };
 
             return newPageDocumentType;
@@ -161,7 +164,8 @@ namespace Umbraco.Migrator.DocumentTypes
             {
                 Alias = enterspeedProperty.Alias,
                 Name = enterspeedProperty.Name.ToFirstUpper(),
-                IsElement = true
+                IsElement = true,
+                Icon = "icon-item-arrangement"
             };
 
             return composition;
@@ -265,7 +269,7 @@ namespace Umbraco.Migrator.DocumentTypes
             }
         }
 
-        private EntityContainer GetOrCreateFolder(string folderName)
+        private EntityContainer GetOrCreateDocumentTypeFolder(string folderName)
         {
             var createContainerAttempt = _contentTypeService.CreateContainer(-1, Guid.NewGuid(), folderName);
             if (createContainerAttempt.Success)
@@ -280,6 +284,24 @@ namespace Umbraco.Migrator.DocumentTypes
             }
 
             var existingContainer = _contentTypeService.GetContainers(folderName, 1).FirstOrDefault();
+            return existingContainer;
+        }
+
+        private EntityContainer GetOrCreateDataTypeFolder(string folderName)
+        {
+            var createContainerAttempt = _dataTypeService.CreateContainer(-1, Guid.NewGuid(), folderName);
+            if (createContainerAttempt.Success)
+            {
+                var containerSaved = _dataTypeService.SaveContainer(createContainerAttempt.Result.Entity);
+                if (containerSaved.Success)
+                {
+                    return createContainerAttempt.Result.Entity;
+                }
+
+                _logger.LogError(containerSaved.Exception, $"Something went wrong when saving folder {folderName}");
+            }
+
+            var existingContainer = _dataTypeService.GetContainers(folderName, 1).FirstOrDefault();
             return existingContainer;
         }
     }
