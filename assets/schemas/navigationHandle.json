@@ -1,45 +1,39 @@
 {
-    // Example handle used for returning all routeable views
+  // Example handle used for returning all routeable views
 
-    "triggers": {
-        "demoCMS": [
-            "home"
-        ]
+  "triggers": {
+    "demoCMS": [
+      "home"
+    ]
+  },
+  "route": {
+    "handles": [
+      "navigation-{properties.metaData.culture}"
+    ]
+  },
+  "properties": {
+    "self": {
+      "type": "reference",
+      "originId": "{originId}",
+      "alias": "navigationLinkItem"
     },
-    "route": {
-        "handles": [
-            {
-                "$exp": "navigation-{properties.metaData.culture}"
-            }
-        ]
-    },
-    "properties": {
-        "self": {
-            "type": "reference",
-            "originId": {
-                "$exp": "{originId}"
-            },
-            "view": "navigationLinkItem"
-        },
-        "children": {
-            "type": "array",
-            "input": {
-                "$lookup": {
-                    "operator": "equals",
-                    "sourceEntityType": "*",
-                    "sourceEntityProperty": "originParentId",
-                    "matchValue": {
-                        "$exp": "{originId}"
-                    }
-                }
-            },
-            "items": {
-                "type": "reference",
-                "gid": {
-                    "$exp": "{item.id}"
-                },
-                "view": "navigationItem"
-            }
+    "children": {
+      "type": "array",
+      "input": {
+        "$lookup": {
+          "operator": "equals",
+          "sourceEntityType": "*",
+          "sourceEntityProperty": "originParentId",
+          "matchValue": {
+            "$exp": "{originId}"
+          }
         }
+      },
+      "items": {
+        "type": "reference",
+        "gid": "{item.id}",
+        "alias": "navigationItem"
+      }
     }
+  }
 }
