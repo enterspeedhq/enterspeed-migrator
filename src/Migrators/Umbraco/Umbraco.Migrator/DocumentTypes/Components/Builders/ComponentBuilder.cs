@@ -38,7 +38,8 @@ namespace Umbraco.Migrator.DocumentTypes.Components.Builders
             {
                 Alias = Alias,
                 Name = Name,
-                IsElement = true
+                IsElement = true,
+                Icon = "icon-item-arrangement"
             };
 
             return this;
