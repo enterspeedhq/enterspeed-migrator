@@ -11,25 +11,9 @@
 			"person"
 		]
 	},
-	"environments": [],
-	"properties": {
-		"name": {
-			"type": "string",
-			"value": {
-				"$exp": "{properties.metaData.name}"
-			}
-		},
-		"url": {
-			"type": "string",
-			"value": {
-				"$exp": "{url}"
-			}
-		},
-		"lastModified": {
-			"type": "string",
-			"value": {
-				"$exp": "{properties.metaData.updateDate}"
-			}
-		}
-	}
+  "properties": {
+    "name": "{properties.metaData.name}",
+    "url": "{url}",
+    "lastModified": "{properties.metaData.updateDate}"
+  }
 }
