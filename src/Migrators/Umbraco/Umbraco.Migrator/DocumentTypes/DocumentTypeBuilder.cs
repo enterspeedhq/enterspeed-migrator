@@ -225,6 +225,13 @@ namespace Umbraco.Migrator.DocumentTypes
                     break;
                 case JsonValueKind.Array:
                     // Check if we are a component or simple type of array
+                    var elementValueKind = GetValueKindOfFirstElementInArray(enterspeedProperty);
+
+                    if (elementValueKind is JsonValueKind.String or JsonValueKind.Number)
+                    {
+                        dataType = _dataTypes.Find(d => d.Name?.ToLower() == "tags");
+                    }
+
                     break;
                 case JsonValueKind.String:
                     dataType = _dataTypes.Find(d => d.Name?.ToLower() == "textstring");
@@ -281,6 +288,19 @@ namespace Umbraco.Migrator.DocumentTypes
 
             var existingContainer = _contentTypeService.GetContainers(folderName, 1).FirstOrDefault();
             return existingContainer;
+        }
+
+        private static JsonValueKind GetValueKindOfFirstElementInArray(EnterspeedPropertyType enterspeedProperty)
+        {
+            var valueKind = JsonValueKind.Undefined;
+            var array = ((JsonElement)enterspeedProperty.Value).EnumerateArray().ToArray();
+
+            if (array.Any())
+            {
+                valueKind = array.First().ValueKind;
+            }
+
+            return valueKind;
         }
     }
 }
