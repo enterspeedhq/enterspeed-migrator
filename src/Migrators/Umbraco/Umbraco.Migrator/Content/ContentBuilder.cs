@@ -64,16 +64,10 @@ namespace Umbraco.Migrator.Content
             }
         }
 
-        public void CreateProperties(List<EnterspeedPropertyType> properties, IContent contentToCreate, List<EnterspeedPropertyType> components, bool isTraversing = false)
+        public void CreateProperties(List<EnterspeedPropertyType> properties, IContent contentToCreate, List<EnterspeedPropertyType> components)
         {
             foreach (var property in properties)
             {
-                // Since we are not traversing and looking for components, we want to add the value to the property found.
-                if (!isTraversing)
-                {
-                    AddValueToProperty(property, contentToCreate);
-                }
-
                 // A component has been found, which will be resolved, values assigned to properties and added to list property that is set up in umbraco
                 if (property.IsComponent())
                 {
@@ -83,7 +77,11 @@ namespace Umbraco.Migrator.Content
 
                 if (property.ChildProperties.Any())
                 {
-                    CreateProperties(property.ChildProperties, contentToCreate, components, true);
+                    CreateProperties(property.ChildProperties, contentToCreate, components);
+                }
+                else
+                {
+                    AddValueToProperty(property, contentToCreate);
                 }
             }
         }

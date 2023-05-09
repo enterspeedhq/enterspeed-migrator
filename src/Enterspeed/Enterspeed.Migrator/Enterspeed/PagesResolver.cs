@@ -175,56 +175,20 @@ namespace Enterspeed.Migrator.Enterspeed
                 var arrayOfElements = jsonProperty.Value.EnumerateArray();
                 foreach (var element in arrayOfElements)
                 {
-                    switch (element.ValueKind)
+                    if (element.ValueKind == JsonValueKind.Object)
                     {
-                        case JsonValueKind.Undefined:
-                            break;
-                        case JsonValueKind.Object:
-                            var objectOfElement = element.EnumerateObject();
-                            var newArrayItem = new EnterspeedPropertyType()
-                            {
-                                Name = "arrayObject",
-                                Alias = "arrayObject",
-                                Type = JsonValueKind.Object,
-                                Value = objectOfElement
-                            };
+                        var objectOfElement = element.EnumerateObject();
+                        var newArrayItem = new EnterspeedPropertyType()
+                        {
+                            Name = "arrayObject",
+                            Alias = "arrayObject",
+                            Type = JsonValueKind.Object,
+                            Value = objectOfElement
+                        };
 
-                            // Add arrayitem directly to array property
-                            currentProperty.ChildProperties.Add(newArrayItem);
-                            MapData(pageData, element, newArrayItem);
-                            break;
-                        case JsonValueKind.Array:
-                            break;
-                        case JsonValueKind.String:
-                            var stringItem = new EnterspeedPropertyType()
-                            {
-                                Name = "string",
-                                Alias = "string",
-                                Type = JsonValueKind.String,
-                                Value = element.GetString()
-                            };
-
-                            // Add arrayitem directly to array property
-                            currentProperty.ChildProperties.Add(stringItem);
-                            break;
-                        case JsonValueKind.Number:
-                            var numberItem = new EnterspeedPropertyType()
-                            {
-                                Name = "string",
-                                Alias = "string",
-                                Type = JsonValueKind.String,
-                                Value = element.GetInt32()
-                            };
-
-                            // Add arrayItem directly to array property
-                            currentProperty.ChildProperties.Add(numberItem);
-                            break;
-                        case JsonValueKind.True:
-                            break;
-                        case JsonValueKind.False:
-                            break;
-                        case JsonValueKind.Null:
-                            break;
+                        // Add arrayitem directly to array property
+                        currentProperty.ChildProperties.Add(newArrayItem);
+                        MapData(pageData, element, newArrayItem);
                     }
                 }
 
